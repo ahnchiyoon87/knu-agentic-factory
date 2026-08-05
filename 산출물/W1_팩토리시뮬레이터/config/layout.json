@@ -1,0 +1,46 @@
+{
+  "_comment": "K-정밀 공장 2D 배치. 설비·로봇 행과 2D 뷰가 모두 이 파일 하나를 출처로 삼는다. 좌표계는 논리 단위(1000 x 600), 렌더 시 화면 크기에 맞춰 스케일된다.",
+
+  "floor": { "width": 1000, "height": 600 },
+
+  "equipment": [
+    { "equipment_id": "EQ-01", "display_name": "CNC 선반 1호기",   "pos_x": 150, "pos_y": 140, "nominal_rpm": 1800 },
+    { "equipment_id": "EQ-02", "display_name": "CNC 선반 2호기",   "pos_x": 400, "pos_y": 140, "nominal_rpm": 2000 },
+    { "equipment_id": "EQ-03", "display_name": "CNC 머시닝센터 1호기", "pos_x": 650, "pos_y": 140, "nominal_rpm": 1800 },
+    { "equipment_id": "EQ-04", "display_name": "CNC 머시닝센터 2호기", "pos_x": 150, "pos_y": 400, "nominal_rpm": 1600 },
+    { "equipment_id": "EQ-05", "display_name": "CNC 밀링 1호기",   "pos_x": 400, "pos_y": 400, "nominal_rpm": 2200 },
+    { "equipment_id": "EQ-06", "display_name": "CNC 밀링 2호기",   "pos_x": 650, "pos_y": 400, "nominal_rpm": 1900 }
+  ],
+
+  "equipment_box": { "width": 150, "height": 100 },
+
+  "robots": [
+    { "robot_id": "AMR-01", "display_name": "정비 AMR",  "home_node": "DOCK" },
+    { "robot_id": "AMR-02", "display_name": "운반 AMR",  "home_node": "WH" }
+  ],
+
+  "_nodes_comment": "AMR 이동 그래프. dispatch_robot(robot_id, target) 의 target 은 이 노드명(설비명 EQ-01~06 포함) 또는 {x,y} 좌표.",
+  "nodes": {
+    "W-END": { "x":  60, "y": 270, "label": "서편 통로" },
+    "J1":    { "x": 150, "y": 270, "label": "교차점 1" },
+    "J2":    { "x": 400, "y": 270, "label": "교차점 2" },
+    "J3":    { "x": 650, "y": 270, "label": "교차점 3" },
+    "J4":    { "x": 880, "y": 270, "label": "교차점 4" },
+    "EQ-01": { "x": 150, "y": 205, "label": "EQ-01 접안" },
+    "EQ-02": { "x": 400, "y": 205, "label": "EQ-02 접안" },
+    "EQ-03": { "x": 650, "y": 205, "label": "EQ-03 접안" },
+    "EQ-04": { "x": 150, "y": 300, "label": "EQ-04 접안" },
+    "EQ-05": { "x": 400, "y": 300, "label": "EQ-05 접안" },
+    "EQ-06": { "x": 650, "y": 300, "label": "EQ-06 접안" },
+    "WH":    { "x": 880, "y": 120, "label": "자재창고" },
+    "DOCK":  { "x": 880, "y": 520, "label": "충전 도크" }
+  },
+
+  "edges": [
+    ["W-END", "J1"], ["J1", "J2"], ["J2", "J3"], ["J3", "J4"],
+    ["J1", "EQ-01"], ["J1", "EQ-04"],
+    ["J2", "EQ-02"], ["J2", "EQ-05"],
+    ["J3", "EQ-03"], ["J3", "EQ-06"],
+    ["J4", "WH"], ["J4", "DOCK"]
+  ]
+}

@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>호서대 교안 전수 조사 — 경남대 8월 특강 재사용 판정 보고서</title>
+<style>
+  :root{
+    --paper:#FFFFFF;
+    --shell:#EDEEF0;
+    --ink:#111317;
+    --ink2:#3D424A;
+    --muted:#71767E;
+    --line:#DCDEE2;
+    --line2:#EDEEF0;
+    --ok:#186B3C;
+    --ok-bg:#E4F2E9;
+    --warn:#9A6206;
+    --warn-bg:#FAEEDA;
+    --no:#A3282B;
+    --no-bg:#F8E4E4;
+    --accent:#1F4E79;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;background:var(--shell);color:var(--ink);
+    font-family:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+    font-size:16px;line-height:1.75;letter-spacing:-.005em;
+  }
+  .page{max-width:940px;margin:0 auto;background:var(--paper);padding:56px 46px 90px;
+        box-shadow:0 0 0 1px var(--line)}
+
+  header{border-bottom:3px solid var(--ink);padding-bottom:22px;margin-bottom:34px}
+  .kicker{font-size:12px;letter-spacing:.18em;font-weight:800;color:var(--accent);margin:0 0 10px}
+  h1{font-size:27px;font-weight:800;line-height:1.35;margin:0 0 12px;letter-spacing:-.02em}
+  .sub{margin:0;color:var(--ink2);font-size:14.5px;line-height:1.7}
+
+  h2{font-size:20px;font-weight:800;margin:46px 0 8px;letter-spacing:-.02em;
+     padding-bottom:8px;border-bottom:2px solid var(--ink)}
+  h3{font-size:16.5px;font-weight:800;margin:30px 0 10px;letter-spacing:-.015em}
+  h4{font-size:14.5px;font-weight:800;margin:22px 0 8px;color:var(--accent)}
+  p{margin:0 0 13px}
+  ul{margin:0 0 14px;padding-left:20px}li{margin-bottom:7px}
+  strong{font-weight:700}
+
+  .lead{font-size:16.5px;color:var(--ink2);margin-bottom:20px}
+
+  /* verdict badges */
+  .b{display:inline-block;font-size:11.5px;font-weight:800;padding:2px 8px;border-radius:3px;
+     letter-spacing:.02em;white-space:nowrap;vertical-align:2px}
+  .b-ok{background:var(--ok-bg);color:var(--ok)}
+  .b-warn{background:var(--warn-bg);color:var(--warn)}
+  .b-no{background:var(--no-bg);color:var(--no)}
+
+  .tw{overflow-x:auto;margin:0 0 18px}
+  table{border-collapse:collapse;width:100%;font-size:14px}
+  caption{caption-side:top;text-align:left;font-size:12.5px;font-weight:700;color:var(--muted);
+          padding-bottom:7px;letter-spacing:.02em}
+  th,td{border-bottom:1px solid var(--line2);padding:9px 11px;text-align:left;vertical-align:top;line-height:1.55}
+  thead th{border-bottom:2px solid var(--ink);font-weight:800;font-size:13px;white-space:nowrap;background:#F7F8F9}
+  tbody tr:last-child td{border-bottom:1px solid var(--line)}
+  td.s{white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:700;color:var(--accent)}
+  td.c{text-align:center;white-space:nowrap}
+  tfoot td{border-top:2px solid var(--ink);font-weight:800;background:#F7F8F9}
+
+  .box{border:1px solid var(--line);border-left:4px solid var(--accent);
+       padding:14px 16px;margin:0 0 18px;background:#FAFBFC;font-size:15px}
+  .box.alert{border-left-color:var(--no);background:#FDF7F7}
+  .box .t{font-size:11.5px;font-weight:800;letter-spacing:.12em;color:var(--accent);display:block;margin-bottom:5px}
+  .box.alert .t{color:var(--no)}
+  .box p:last-child,.box ul:last-child{margin-bottom:0}
+
+  .method{background:#F7F8F9;border:1px solid var(--line);padding:14px 16px;font-size:14px;margin-bottom:26px}
+  .method ul{margin-bottom:0}
+
+  footer{margin-top:60px;padding-top:18px;border-top:1px solid var(--line);
+         font-size:13px;color:var(--muted);line-height:1.7}
+
+  @media(max-width:640px){
+    .page{padding:32px 18px 60px}
+    h1{font-size:22px}h2{font-size:18px}
+    body{font-size:15px}
+    table{font-size:13px}th,td{padding:7px 8px}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+<header>
+  <p class="kicker">전수 조사 결과 · 확정 보고</p>
+  <h1>호서대 RISE 교안 전수 조사<br>— 경남대 8월 특강 재사용 판정</h1>
+  <p class="sub">호서대 5일 과정 자료 전체를 슬라이드 단위로 확인하고, 경남대 8월 특강 교안이 "기반 자산"으로 명시한 항목과 하나씩 대조한 결과입니다. 슬라이드 번호는 실제 파일 기준입니다.</p>
+</header>
+
+<div class="method">
+  <strong>조사 방법</strong>
+  <ul>
+    <li>호서대 Day 1~4 강의교재 PPT를 PDF로 변환 후 <strong>전 슬라이드를 이미지로 렌더링하여 육안 확인</strong> — Day 1(70장), Day 2(69장), Day 3(59장), Day 4(42장), 총 <strong>240장</strong></li>
+    <li>Day 5 PBL 자료(수행계획 PPT, 산출물 템플릿 docx, 평가 루브릭 docx) 텍스트 전문 확인</li>
+    <li>Day 2~4 핸즈온 가이드 docx 원시 XML에서 텍스트·이미지 수 직접 추출</li>
+    <li>전 파일 대상으로 SDD·OpenSpec·GWT·PRD·스펙·인수조건·Supabase·RAG·벡터·임베딩·Text2SQL·GraphRAG·Neo4j·z-score·이상감지·시계열·센서 키워드 전수 검색</li>
+  </ul>
+</div>
+
+<!-- ═══════════ 1 ═══════════ -->
+<h2>1. 교안의 "기반 자산" 주장 검증</h2>
+
+<p class="lead">경남대 교안 1페이지는 호서대 자산 네 가지를 재활용한다고 적었습니다. 대조 결과는 다음과 같습니다.</p>
+
+<div class="tw">
+<table>
+  <thead><tr><th>교안이 명시한 자산</th><th>판정</th><th>실제 확인 내용</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>에이전틱 디자인 패턴 영상</strong></td>
+      <td class="c"><span class="b b-warn">부분 일치</span></td>
+      <td>Day 1에 패턴 자료는 있으나 <strong>15개 패턴 체계(Antonio Gulli 저서 기반)</strong>이고, 경남대가 쓰려는 5종 중 <strong>2종은 이름조차 없음</strong>. 아래 3절 참조</td>
+    </tr>
+    <tr>
+      <td><strong>SDD / OpenSpec 블록</strong></td>
+      <td class="c"><span class="b b-warn">부분 일치</span></td>
+      <td>SDD는 Day 2 슬라이드 58~61에 <strong>실제 존재</strong>. 다만 <strong>OpenSpec은 없음</strong> — 슬라이드 61에 GitHub Spec Kit·AWS Kiro가 이름으로만 언급됨</td>
+    </tr>
+    <tr>
+      <td><strong>Supabase 바이브코딩</strong></td>
+      <td class="c"><span class="b b-warn">부분 일치</span></td>
+      <td>Vibe Coding 블록(Day 2 슬라이드 57~64)은 있으나 <strong>대상이 Supabase가 아니라 Odoo</strong>. 실습도 "Odoo 데이터로 물류 대시보드 만들기"</td>
+    </tr>
+    <tr>
+      <td><strong>MCP·멀티에이전트 재설계 구조</strong></td>
+      <td class="c"><span class="b b-ok">일치</span></td>
+      <td>MCP는 Day 2 슬라이드 21~36, 멀티에이전트·HITL은 Day 4 슬라이드 18~30에 <strong>충실하게 존재</strong>. 재사용률이 가장 높음</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<h3>본문에 적힌 "호서대 영상 재활용" 두 건</h3>
+
+<div class="tw">
+<table>
+  <thead><tr><th>위치</th><th>교안 표기</th><th>판정</th><th>실제</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>Day 1 강의 11–17장</td>
+      <td>에이전틱 디자인 패턴 5종 (호서대 영상 재활용, 각 1분 30초)</td>
+      <td class="c"><span class="b b-warn">부분</span></td>
+      <td>5종 중 2종만 상세 슬라이드 존재</td>
+    </tr>
+    <tr>
+      <td>Day 3 강의 8–12장</td>
+      <td>단순 RAG / Text2SQL / GraphRAG 3방식 대조 (호서대 영상 재활용)</td>
+      <td class="c"><span class="b b-no">없음</span></td>
+      <td><strong>해당 자료 전무.</strong> 240장 육안 확인 + 키워드 전수 검색에서 미발견</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<div class="box alert">
+  <span class="t">"영상"에 대하여</span>
+  <p>업로드된 파일에 <strong>동영상 파일은 없습니다.</strong> Day 1 PPT 70장이 전부 이미지로 렌더링된 슬라이드인데, 이것을 "영상"이라 표현한 것인지 별도 녹화본이 있는지는 자료만으로 판단이 불가합니다. 다만 슬라이드 자체는 완성도가 높아 그대로 활용 가능합니다.</p>
+</div>
+
+<!-- ═══════════ 2 ═══════════ -->
+<h2>2. 호서대 자료 구조 (전수 확인 결과)</h2>
+
+<p>5일 과정이며 과정명은 <strong>"AI 자동화 프로세스 역량강화"</strong>, 도메인은 <strong>물류</strong>입니다. AI 어시스턴트 → AI 디지털 동료 → AI 자율주행의 3단계 성숙도 모델로 설계돼 있습니다.</p>
+
+<div class="tw">
+<table>
+  <thead><tr><th>파일</th><th>장수</th><th>구성</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Day 1</strong></td><td class="s">70장</td><td>Agentic AI 이론 — 2026 트렌드, 생산성의 역설(인간 병목), <strong>디자인 패턴</strong>, ReAct, Mem0 메모리, 멀티에이전트·A2A</td></tr>
+    <tr><td><strong>Day 2</strong></td><td class="s">69장</td><td>Odoo ERP(s6–20) → <strong>MCP</strong>(s21–36) → SKILL(s41–56) → <strong>Vibe Coding·SDD</strong>(s57–64) → 퀴즈·랩업</td></tr>
+    <tr><td><strong>Day 3</strong></td><td class="s">59장</td><td>n8n → BPMN → Process-GPT. <strong>경남대와 겹치는 부분 거의 없음</strong></td></tr>
+    <tr><td><strong>Day 4</strong></td><td class="s">42장</td><td>에이전트 프로필(s5–17) → <strong>Multi-Agent·HITL</strong>(s18–31) → 프로세스 리모델링(s33–39)</td></tr>
+    <tr><td><strong>Day 5</strong></td><td class="s">—</td><td>PBL 캡스톤. Intent → 스펙 → 생성 → 프로세스 연결 4단계 미니사이클, <strong>인수조건 체크리스트 양식</strong> 포함</td></tr>
+  </tbody>
+</table>
+</div>
+
+<!-- ═══════════ 3 ═══════════ -->
+<h2>3. 핵심 발견 — 디자인 패턴 5종 문제</h2>
+
+<p class="lead">경남대 교안이 쓰려는 5종과 호서대 자료의 체계가 <strong>서로 다릅니다.</strong></p>
+
+<p>호서대 Day 1 슬라이드 32는 구글 Antonio Gulli의 <em>Agentic Design Patterns</em> 저서를 요약한 <strong>15개 패턴 체계</strong>입니다. 반면 경남대가 쓰려는 5종 중 <strong>Orchestrator-Worker와 Evaluator-Optimizer는 Anthropic 계열 용어</strong>라 호서대 자료에 그 이름이 등장하지 않습니다.</p>
+
+<div class="tw">
+<table>
+  <caption>경남대 5종 패턴별 소스 확인</caption>
+  <thead><tr><th>패턴</th><th>판정</th><th>호서대 소스</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>Prompt Chaining</strong></td>
+      <td class="c"><span class="b b-ok">상세 있음</span></td>
+      <td>Day 1 s36(작업의 조립 라인) · s37(시장조사 워크플로우 사례) · s38(LangChain LCEL 구현)</td>
+    </tr>
+    <tr>
+      <td><strong>Routing</strong></td>
+      <td class="c"><span class="b b-ok">상세 있음</span></td>
+      <td>Day 1 s39(시스템의 교통경찰) · s40(4가지 라우팅 방식 비교표) · s41(파이프라인 완성)</td>
+    </tr>
+    <tr>
+      <td><strong>Parallelization</strong></td>
+      <td class="c"><span class="b b-warn">이름만</span></td>
+      <td>Day 1 s32 목록 · s35 빌딩블록 아이콘. <strong>전용 설명 슬라이드 없음</strong></td>
+    </tr>
+    <tr>
+      <td><strong>Orchestrator-Worker</strong></td>
+      <td class="c"><span class="b b-no">해당 명칭 없음</span></td>
+      <td>15패턴 목록에 미포함</td>
+    </tr>
+    <tr>
+      <td><strong>Evaluator-Optimizer</strong></td>
+      <td class="c"><span class="b b-no">해당 명칭 없음</span></td>
+      <td>15패턴 목록에 미포함</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<div class="box">
+  <span class="t">다만 우회로가 있습니다</span>
+  <p><strong>Day 4 슬라이드 26 "멀티 에이전트 협업 패턴 한눈에 보기"</strong>에 네 가지 협업 패턴이 한 장에 정리돼 있습니다 — <strong>순차 협업(Sequential) / 병렬 협업(Parallel) / 총괄-분배(Supervisor) / 검증과 되짚기(Review)</strong>. 이것이 각각 Prompt Chaining · Parallelization · Orchestrator-Worker · Evaluator-Optimizer에 대응합니다.</p>
+  <p style="margin-bottom:0">따라서 5종을 채우려면 <strong>Day 1(Chaining·Routing 상세) + Day 4 s26(나머지 3종 개요)</strong>을 조합해야 합니다. 단, Day 4 s26은 한 장에 4개를 압축한 슬라이드라 각 1분 30초 분량으로 쓰려면 <strong>3장 정도는 새로 만들어야</strong> 합니다.</p>
+</div>
+
+<!-- ═══════════ 4 ═══════════ -->
+<h2>4. 재사용 확정 목록 — 슬라이드 번호 단위</h2>
+
+<h3>Day 1로 갈 것 (경남대 Day 1, 24장 중)</h3>
+<div class="tw">
+<table>
+  <thead><tr><th>경남대 위치</th><th>호서대 소스</th><th>장수</th><th>비고</th></tr></thead>
+  <tbody>
+    <tr><td>1–4장 피지컬 AI 정의</td><td>—</td><td class="s">0</td><td>전량 신규</td></tr>
+    <tr><td>5–7장 왜 지금인가</td><td>Day1 s3–16 중 발췌(패러다임 전환, 61조 시장, 산업별 파급력)</td><td class="s">2–3</td><td>물류·CS 예시 → 제조로 치환</td></tr>
+    <tr><td>8–10장 에이전트 정의</td><td>Day1 s33(단발성 한계) · s35(6대 빌딩블록) · s43–48(ReAct)</td><td class="s">3</td><td>ReAct 자료가 "뇌+도구+루프" 설명에 유용</td></tr>
+    <tr><td>11–17장 패턴 5종</td><td>Day1 s32·s36–41 + Day4 s26</td><td class="s">4</td><td>3종은 신규 제작 필요(3절 참조)</td></tr>
+    <tr><td>18–24장 시뮬레이터 투어·실습 예고</td><td>—</td><td class="s">0</td><td>전량 신규</td></tr>
+  </tbody>
+  <tfoot><tr><td colspan="2">Day 1 재사용 소계</td><td class="s">9–10</td><td>24장 중</td></tr></tfoot>
+</table>
+</div>
+
+<h3>Day 2로 갈 것 (경남대 Day 2, 18장 중)</h3>
+<div class="tw">
+<table>
+  <thead><tr><th>경남대 위치</th><th>호서대 소스</th><th>장수</th><th>비고</th></tr></thead>
+  <tbody>
+    <tr><td>1–3장 어제의 붕괴 해부<br><span style="color:var(--muted);font-size:13px">컨텍스트 윈도, 암묵 요구사항, 회귀(regression)</span></td><td><strong>Day2 s58</strong> 바이브코딩 한계(3개월의 벽, Context Rot, AI Slop, Intent Drift)<br><strong>Day2 s59</strong> 3가지 조건(컨텍스트 주입·자동 테스트로 회귀 방지·아키텍트 역할)</td><td class="s">2</td><td>거의 그대로 사용 가능</td></tr>
+    <tr><td>4–6장 물리 세계에서 스펙이 절실한 이유</td><td><strong>Day2 s60</strong> SDD — Prompt-First vs Spec-First, 진실의 원천 비교<br><strong>Day2 s61</strong> 하네스·AI-Driven TDD·Spec Kit·Kiro</td><td class="s">2</td><td>"설비를 세우면 라인이 선다"는 물리 논거는 신규</td></tr>
+    <tr><td>7–16장 산출물 체계·GWT 작성법·빈칸 규칙</td><td>—</td><td class="s">0</td><td><strong>전량 신규.</strong> Day5 인수조건 양식만 참고</td></tr>
+    <tr><td>17–18장 마무리</td><td>—</td><td class="s">0</td><td>신규</td></tr>
+  </tbody>
+  <tfoot><tr><td colspan="2">Day 2 재사용 소계</td><td class="s">4</td><td>18장 중</td></tr></tfoot>
+</table>
+</div>
+
+<h3>Day 3로 갈 것 (경남대 Day 3, 20장 중)</h3>
+<div class="tw">
+<table>
+  <thead><tr><th>경남대 위치</th><th>호서대 소스</th><th>장수</th><th>비고</th></tr></thead>
+  <tbody>
+    <tr><td>1–7장 판단의 재료·데이터 받는 기술</td><td>—</td><td class="s">0</td><td>신규</td></tr>
+    <tr><td>8–12장 데이터 접근 3방식</td><td>—</td><td class="s">0</td><td><strong>소스 없음 확정.</strong> 단순 RAG + Text2SQL 2종으로 축소 권장</td></tr>
+    <tr><td>13–16장 MCP</td><td><strong>Day2 s27</strong> AI를 위한 범용 USB-C<br><strong>Day2 s28</strong> MCP 아키텍처(Host·Client·Server)<br><strong>Day2 s29</strong> 기존 API 연동 vs MCP 표준<br><strong>Day2 s30</strong> 서버의 3가지 기능(Tools·Resources·Prompts)<br><strong>Day2 s31</strong> 통신 방식 stdio·HTTP/SSE<br><strong>Day2 s33</strong> 도구 호출 흐름<br><strong>Day2 s35</strong> 보안·권한·비용</td><td class="s">4</td><td>소스 7장 중 4장 선별. 품질 우수</td></tr>
+    <tr><td>17–20장 이상감지 이론·실습 지도</td><td>—</td><td class="s">0</td><td>신규</td></tr>
+  </tbody>
+  <tfoot><tr><td colspan="2">Day 3 재사용 소계</td><td class="s">4</td><td>20장 중</td></tr></tfoot>
+</table>
+</div>
+
+<h3>Day 4로 갈 것 (경남대 Day 4, 16장 중)</h3>
+<div class="tw">
+<table>
+  <thead><tr><th>경남대 위치</th><th>호서대 소스</th><th>장수</th><th>비고</th></tr></thead>
+  <tbody>
+    <tr><td>1–3장 어제 에이전트 부검</td><td><strong>Day4 s19</strong> 왜 에이전트 하나로는 부족할까<br><strong>Day4 s20</strong> 몇 명을 부르느냐에 따라 결과가 달라진다<br><strong>Day4 s34</strong> 어제 만든 프로세스, 그대로는 왜 안 될까</td><td class="s">3</td><td>논리 전개가 동일</td></tr>
+    <tr><td>4–7장 책임 단위 분해</td><td><strong>Day4 s21</strong> Multi-Agent란(역할분리·명시적 협업·인간 최종책임)<br><strong>Day4 s22</strong> 나누는 기준(단일책임·최소권한·명시적 인터페이스·관측가능성)<br><strong>Day4 s23</strong> 인수인계서(Result·Reasoning·Confidence·Source)<br><strong>Day4 s24</strong> 동작 방식<br><strong>Day4 s26</strong> 협업 패턴 4종</td><td class="s">4</td><td>재사용 품질 최상</td></tr>
+    <tr><td>8–9장 물리 세계의 행동 도구</td><td>—</td><td class="s">0</td><td>시뮬레이터 API 공개라 신규</td></tr>
+    <tr><td>10–11장 HITL</td><td><strong>Day4 s27</strong> 다 맡겨도 될까(되돌릴 수 없는 결정·규정·책임소재)<br><strong>Day4 s28</strong> 사람은 어디에서 확인하나(4지점)<br><strong>Day4 s29</strong> 어떤 방식으로(승인후진행·성공시넘기기·조건부·사후점검)<br><strong>Day4 s30</strong> 핵심 요약(구조·소통·거버넌스)</td><td class="s">3</td><td>승인 게이트 설계 논리 그대로 사용</td></tr>
+    <tr><td>12–16장 라이브 시연·챌린지 안내</td><td>—</td><td class="s">0</td><td>신규</td></tr>
+  </tbody>
+  <tfoot><tr><td colspan="2">Day 4 재사용 소계</td><td class="s">10</td><td>16장 중 — 재사용률 최고</td></tr></tfoot>
+</table>
+</div>
+
+<!-- ═══════════ 5 ═══════════ -->
+<h2>5. 슬라이드 외 재사용 자산</h2>
+
+<div class="tw">
+<table>
+  <thead><tr><th>자산</th><th>출처</th><th>경남대 사용처</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>인수조건 체크리스트 양식</strong></td>
+      <td>Day 5 PBL 산출물 docx — "Intent 1문장 + 인수조건 3개 이상 + 조건별 판정 방법 + 근거" 표</td>
+      <td>Lab 2-1 빈칸 채우기 양식</td>
+    </tr>
+    <tr>
+      <td><strong>핸즈온 가이드 문서 형식</strong></td>
+      <td>Day 2·3·4 가이드 docx (각각 이미지 53·149·116장 첨부된 완성품)<br>구조: 0장 시작 전 확인 4가지 → 따라해보기 N → 완료 조건 → 부록 A 자주 막히는 곳 → 부록 B 체크리스트</td>
+      <td>가이드 4벌 전체 틀. 경남대 30p 기준과 부합</td>
+    </tr>
+    <tr>
+      <td><strong>에이전트 프로필 5요소</strong></td>
+      <td>Day 4 s8–s14 (역할·목표·페르소나·도구·스킬, 좋은/아쉬운 프로필 비교)</td>
+      <td>Day 4 챌린지에서 팀별 에이전트 정의 시 참고자료</td>
+    </tr>
+    <tr>
+      <td><strong>Neo4j 지식그래프 슬라이드</strong></td>
+      <td>Day 3 Process-GPT 파트</td>
+      <td>GraphRAG를 한 줄로 넘길 때</td>
+    </tr>
+    <tr>
+      <td><strong>퀴즈 형식</strong></td>
+      <td>Day 2·3·4 말미 4지선다 3문항 + Wrap up</td>
+      <td>일자별 랩업 구성 참고</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<!-- ═══════════ 6 ═══════════ -->
+<h2>6. 최종 견적</h2>
+
+<div class="tw">
+<table>
+  <thead><tr><th>구분</th><th>총량</th><th>재사용</th><th>신규</th><th>신규 비율</th></tr></thead>
+  <tbody>
+    <tr><td>Day 1 강의</td><td class="c">24장</td><td class="c">9–10</td><td class="c">14–15</td><td class="c">60%</td></tr>
+    <tr><td>Day 2 강의</td><td class="c">18장</td><td class="c">4</td><td class="c">14</td><td class="c">78%</td></tr>
+    <tr><td>Day 3 강의</td><td class="c">20장</td><td class="c">4</td><td class="c">16</td><td class="c">80%</td></tr>
+    <tr><td>Day 4 강의</td><td class="c">16장</td><td class="c">10</td><td class="c">6</td><td class="c">38%</td></tr>
+    <tr><td>핸즈온 가이드 4벌</td><td class="c">120p</td><td class="c">형식만</td><td class="c">내용 전량</td><td class="c">100%</td></tr>
+    <tr><td>팩토리 시뮬레이터</td><td class="c">1식</td><td class="c">0</td><td class="c">전량</td><td class="c">100%</td></tr>
+    <tr><td>스펙 저장소 · 센서 데이터셋</td><td class="c">2식</td><td class="c">0</td><td class="c">전량</td><td class="c">100%</td></tr>
+  </tbody>
+  <tfoot><tr><td>강의 슬라이드 합계</td><td class="c">78장</td><td class="c">27–28장</td><td class="c">50–51장</td><td class="c">65%</td></tr></tfoot>
+</table>
+</div>
+
+<div class="box">
+  <span class="t">단서</span>
+  <p style="margin-bottom:0">재사용 27~28장도 <strong>전부 예시를 갈아끼워야 합니다.</strong> 원본 예시가 재고 조회·배차·통관·정산 등 물류 일색입니다. 교안이 "Routing = 알람 등급별 대응 분기"라고 적어 둔 것이 정확히 이 작업입니다. 슬라이드가 대부분 이미지로 렌더링돼 있어 <strong>텍스트 교체가 아니라 재작성에 가까울 수 있습니다</strong> — 원본 편집 가능 파일 확보 여부를 확인하시는 것이 좋습니다.</p>
+</div>
+
+<!-- ═══════════ 7 ═══════════ -->
+<h2>7. 조치가 필요한 항목</h2>
+
+<div class="tw">
+<table>
+  <thead><tr><th>#</th><th>사안</th><th>권장 조치</th></tr></thead>
+  <tbody>
+    <tr>
+      <td class="s">1</td>
+      <td><strong>Day 3 RAG 3방식 비교 소스 없음</strong><br>교안이 "호서대 영상 재활용"으로 표기했으나 실물 부재</td>
+      <td>단순 RAG + Text2SQL <strong>2종으로 축소</strong>(실습이 SQL 조회라 정합성도 더 좋음). 학습목표 2번 문장도 함께 수정</td>
+    </tr>
+    <tr>
+      <td class="s">2</td>
+      <td><strong>패턴 5종 중 3종 소스 부족</strong><br>Parallelization은 이름만, Orchestrator-Worker·Evaluator-Optimizer는 명칭 자체가 없음</td>
+      <td>Day 4 s26의 4개 협업 패턴을 소스로 삼아 <strong>3장 신규 제작</strong>. 또는 패턴을 Chaining·Routing 2종으로 줄이고 나머지는 Day 4에서 다루기</td>
+    </tr>
+    <tr>
+      <td class="s">3</td>
+      <td><strong>OpenSpec 실물 없음</strong><br>교안이 산출물 체계로 내세우나 형식 미정</td>
+      <td>리서치 결론대로 <strong>순수 Markdown 4단계 템플릿</strong>(intent→PRD→spec→acceptance) + EARS/GWT 문법으로 강사 제작</td>
+    </tr>
+    <tr>
+      <td class="s">4</td>
+      <td><strong>원본 편집 가능 파일 확인 필요</strong><br>슬라이드 대부분이 이미지 렌더링 상태</td>
+      <td>재사용 27~28장의 예시 치환이 가능한지 확인. 불가하면 신규 제작 분량이 늘어남</td>
+    </tr>
+    <tr>
+      <td class="s">5</td>
+      <td><strong>팩토리 시뮬레이터 담당 미정</strong><br>기한은 특강 2주 전</td>
+      <td>가장 큰 단일 리스크. 담당자와 특강 날짜 확정 후 역산 필요</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<footer>
+  조사 대상 파일: day1.pptx(70장) · Day-2/3/4 강의교재.pptx(69·59·42장) · Day-2/3/4 핸즈온가이드 docx·pdf · Day-5 PBL 수행계획.pptx·산출물템플릿.docx·평가루브릭.docx · 교과정_소개.pptx · Prerequisite_Guide_v2.pdf<br>
+  대조 기준: 경남대_피지컬AI사관학교_8월특강_상세교안.pdf (9페이지)<br>
+  슬라이드 번호는 PDF 변환 후 페이지 기준이며 원본 PPT 슬라이드 순서와 일치합니다.
+</footer>
+
+</div>
+</body>
+</html>
