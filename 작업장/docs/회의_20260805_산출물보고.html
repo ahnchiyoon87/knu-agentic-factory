@@ -374,6 +374,27 @@ th{color:var(--muted);font-size:12px}
 </svg>
 </div>
 
+  <div class="more"><span class="t">교재의 실물 — 어떤 형태로 준비돼 있나</span>
+  교재 하나 = <b>폴더 하나</b>이고, 셋 다 깃 저장소(knu-agentic-factory)의 산출물/ 아래에
+  커밋돼 있습니다. 폴더 안에는 빈칸 뚫린 코드 + 실행법 README + 자동 채점기 + 강사용 정답이
+  들어 있어, 학생은 <b>① 폴더 내려받기 → ② TODO/★ 채우기(접속 키는 .env 한 줄) →
+  ③ 실행하고 verify_lab.py 로 즉시 채점</b> — 세 동작이면 됩니다. 설치·연결·채점은 이미
+  만들어져 있습니다.
+  <pre style="margin-top:10px">
+산출물/                          ← 깃 저장소에 커밋된 상태
+├ Lab3-2_이상감지뼈대/              교재 ①
+│   detect.py      TODO 3곳이 든 감지 코드 (학생이 채움)
+│   run.py         실행기 — python run.py
+│   verify_lab.py  자동 채점 · README.md 실행법 · 정답/ 강사용
+├ Lab3-3_MCP도구템플릿/             교재 ②
+│   mcp_server.py  MCP 도구 2개 등록 코드
+│   config.json    접속 설정 · requirements.txt 설치 목록 · 정답/ 강사용
+└ W6_폐루프템플릿/                  교재 ③
+    loop.py        폐루프 실행기 — python loop.py
+    agents/        detector·diagnoser·actuator — ★ 채울 3곳
+    hitl.py        HITL 승인 관문(팀이 못 건드리는 계층) · 정답/ 강사용</pre>
+  <div style="margin-top:8px;color:#77828E;font-size:13px">단, 학생에게 어느 저장소로 나눠줄지
+  (실습 저장소와 둘째 날 스펙 껍데기 저장소의 단일화 여부)는 강의자료 담당과 협의할 미결 항목입니다.</div></div>
   <div class="more"><span class="t">조금 더 자세히</span>
   세 교재 모두 「빈칸을 채우면 의도한 교훈이 실제로 재현되는지」 자동 검사(verify_lab.py)를
   붙여 확인했습니다. 수업 중 한 팀이 막혀도 강사 쪽 정답 경로(--use-answers 옵션)로 갈아탈
