@@ -19,3 +19,4 @@ loadtest_result_*.json
 # ── 저장소에 넣기엔 큰 원본 (…/_보관/ 에 있음) ────────────
 *.pptx
 *.zip
+배포표.html
