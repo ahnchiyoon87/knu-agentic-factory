@@ -40,12 +40,13 @@ from pathlib import Path
 
 import httpx
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parent          # 산출물/0_공통
+OUT = ROOT.parent                                # 산출물/
 W1 = ROOT / "W1_팩토리시뮬레이터"
-W5 = ROOT / "W5_센서데이터셋"
-LAB32 = ROOT / "Lab3-2_이상감지뼈대"
-LAB33 = ROOT / "Lab3-3_MCP도구템플릿"
-W6 = ROOT / "W6_폐루프템플릿"
+W5 = OUT / "3일차_알기" / "W5_센서데이터셋"
+LAB32 = OUT / "3일차_알기" / "Lab3-2_이상감지뼈대"
+LAB33 = OUT / "3일차_알기" / "Lab3-3_MCP도구템플릿"
+W6 = OUT / "4일차_움직이기" / "W6_폐루프템플릿"
 
 START = time.time()
 results: list[tuple[str, str, bool, str]] = []   # (일자, 항목, 통과, 상세)

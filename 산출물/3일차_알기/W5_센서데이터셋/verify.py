@@ -30,7 +30,7 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parent
 DATA = ROOT / "데이터"
-W1_CONFIG = ROOT.parent / "W1_팩토리시뮬레이터" / "config"
+W1_CONFIG = ROOT.parents[1] / "0_공통" / "W1_팩토리시뮬레이터" / "config"
 
 COLUMNS = ["equipment_id", "timestamp", "temperature", "vibration", "rpm", "run_state"]
 
@@ -82,7 +82,7 @@ def main() -> int:
 
     # ---------------------------------------------------- 2. W1 실시간 스트림 정합
     print("\n2. W1 시뮬레이터 실시간 스트림과 동일 스키마인가")
-    w1_sql = (ROOT.parent / "W1_팩토리시뮬레이터" / "db" / "migrations"
+    w1_sql = (ROOT.parents[1] / "0_공통" / "W1_팩토리시뮬레이터" / "db" / "migrations"
               / "002_views_functions.sql").read_text(encoding="utf-8")
     view_cols = [c.strip().strip('"') for c in
                  w1_sql.split("create or replace view sensor_readings_csv as")[1]

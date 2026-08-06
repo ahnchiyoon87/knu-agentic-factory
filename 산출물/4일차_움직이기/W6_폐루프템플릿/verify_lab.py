@@ -175,7 +175,7 @@ def part_detect() -> None:
           f"드리프트 +{v_drift['delta']}℃ vs 평탄 미검출" if v_drift else "미탐")
 
     try:
-        sys.path.insert(0, str(ROOT.parent / "Lab3-2_이상감지뼈대" / "정답"))
+        sys.path.insert(0, str(ROOT.parents[1] / "3일차_알기" / "Lab3-2_이상감지뼈대" / "정답"))
         from detect_answer import detect as zscore
         n_drift = sum(1 for f in zscore(list(drift), window=cfg["spike_window"],
                                         k=cfg["spike_k"]) if f)

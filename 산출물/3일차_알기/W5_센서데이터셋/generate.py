@@ -38,7 +38,7 @@ import numpy as np
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parent
-DEFAULT_W1_CONFIG = ROOT.parent / "W1_팩토리시뮬레이터" / "config"
+DEFAULT_W1_CONFIG = ROOT.parents[1] / "0_공통" / "W1_팩토리시뮬레이터" / "config"
 
 # 교안 부록 A 가 고정한 컬럼. 순서를 바꾸지 말 것.
 COLUMNS = ["equipment_id", "timestamp", "temperature", "vibration", "rpm", "run_state"]
