@@ -242,18 +242,128 @@ th{color:var(--muted);font-size:12px}
 
   <div class="card"><b>교재 ① 이상 찾기 연습 (셋째 날)</b> — 이상을 찾아내는 계산에서 핵심 3곳만 빈칸.
   이 수업만큼은 AI에게 안 맡기고 학생이 직접 짭니다(전공 자부심을 건드리는 게 교안의 의도).
-  채워서 돌리면 — 튀는 고장은 3개 다 잡히고, 슬금슬금 고장은 끝내 못 잡고, 더 민감하게 조정하면
-  엉뚱한 경보가 <b>20배</b>로 폭증합니다. 「민감하게 하면 다 잡히겠지」가 왜 틀렸는지 몸으로 배웁니다.</div>
+  채워서 실행하면 아래처럼 <b>세 갈래 결과</b>를 겪게 설계돼 있습니다.
+  
+<svg viewBox="0 0 900 250" xmlns="http://www.w3.org/2000/svg" role="img"
+     style="width:100%;background:#0B0E13;border:1px solid #232A34;border-radius:8px;margin-top:10px"
+     font-family="Pretendard,'Malgun Gothic',sans-serif">
+  <defs><marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+    <path d="M0,0 L10,5 L0,10 z" fill="#77828E"/></marker></defs>
+  <!-- 코드 문서 -->
+  <rect x="25" y="30" width="240" height="190" rx="8" fill="#161B22" stroke="#232A34"/>
+  <text x="45" y="58" fill="#B9C4CF" font-size="12.5" font-weight="700">우리가 준 코드</text>
+  <rect x="45" y="72" width="180" height="8" rx="4" fill="#2A3442"/>
+  <rect x="45" y="88" width="150" height="8" rx="4" fill="#2A3442"/>
+  <rect x="45" y="104" width="200" height="14" rx="4" fill="#3A2E15" stroke="#E3B341"/>
+  <text x="52" y="115" fill="#E3B341" font-size="10" font-weight="700">★ 빈칸 1 — 평균에서 얼마나 벗어났나</text>
+  <rect x="45" y="126" width="165" height="8" rx="4" fill="#2A3442"/>
+  <rect x="45" y="142" width="200" height="14" rx="4" fill="#3A2E15" stroke="#E3B341"/>
+  <text x="52" y="153" fill="#E3B341" font-size="10" font-weight="700">★ 빈칸 2 — 얼마나 벗어나면 경보인가</text>
+  <rect x="45" y="164" width="140" height="8" rx="4" fill="#2A3442"/>
+  <rect x="45" y="180" width="200" height="14" rx="4" fill="#3A2E15" stroke="#E3B341"/>
+  <text x="52" y="191" fill="#E3B341" font-size="10" font-weight="700">★ 빈칸 3 — 먹통 데이터는 어떻게 하나</text>
+  <!-- 화살표 -->
+  <line x1="275" y1="125" x2="360" y2="125" stroke="#77828E" stroke-width="1.5" marker-end="url(#a1)"/>
+  <text x="282" y="112" fill="#B9C4CF" font-size="11.5">학생이 채우고</text>
+  <text x="282" y="145" fill="#B9C4CF" font-size="11.5">실행하면</text>
+  <!-- 결과 3갈래 -->
+  <rect x="375" y="30" width="500" height="56" rx="8" fill="#12211A" stroke="#1E4230"/>
+  <text x="393" y="53" fill="#5FD37E" font-size="12.5" font-weight="700">✓ 갑자기 튀는 고장 — 3개 중 3개 잡힘</text>
+  <text x="393" y="73" fill="#77828E" font-size="11">평균에서 확 벗어나니 계산에 바로 걸린다</text>
+  <rect x="375" y="96" width="500" height="56" rx="8" fill="#241318" stroke="#4B2430"/>
+  <text x="393" y="119" fill="#FF6B6B" font-size="12.5" font-weight="700">✗ 슬금슬금 오르는 고장 — 끝내 못 잡음</text>
+  <text x="393" y="139" fill="#77828E" font-size="11">천천히 오르면 「평균」도 같이 올라서 안 걸린다 → 이 한계가 4일차 숙제</text>
+  <rect x="375" y="162" width="500" height="56" rx="8" fill="#231D10" stroke="#4A3B1B"/>
+  <text x="393" y="185" fill="#E3B341" font-size="12.5" font-weight="700">⚠ 더 민감하게 조정하면 — 엉뚱한 경보 20배</text>
+  <text x="393" y="205" fill="#77828E" font-size="11">「민감하게 하면 다 잡히겠지」가 왜 틀렸는지 몸으로 배움</text>
+</svg>
+</div>
 
   <div class="card"><b>교재 ② 내 코드를 AI의 손에 (셋째 날)</b> — 방금 짠 코드를 <b>AI가 도구처럼
   집어 쓸 수 있게 연결하는 틀.</b> 학생이 AI에게 말로 「지난주 이상을 점검하고 원인을 추정해 봐」 하면,
-  AI가 학생 코드를 스스로 불러 검사하고 정비 기록을 찾아 <b>원인 추정 보고서</b>를 써냅니다 —
-  「내가 만든 것을 AI가 쓴다」는 셋째 날의 목표 경험입니다.</div>
+  AI가 학생 코드를 스스로 불러 검사하고 정비 기록을 찾아 <b>원인 추정 보고서</b>를 써냅니다.
+  
+<svg viewBox="0 0 900 240" xmlns="http://www.w3.org/2000/svg" role="img"
+     style="width:100%;background:#0B0E13;border:1px solid #232A34;border-radius:8px;margin-top:10px"
+     font-family="Pretendard,'Malgun Gothic',sans-serif">
+  <defs><marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+    <path d="M0,0 L10,5 L0,10 z" fill="#4B9FFF"/></marker></defs>
+  <!-- 학생 -->
+  <circle cx="80" cy="80" r="22" fill="#1B2E4B"/>
+  <text x="80" y="86" fill="#4B9FFF" font-size="14" font-weight="700" text-anchor="middle">학생</text>
+  <rect x="130" y="45" width="240" height="40" rx="18" fill="#161B22" stroke="#232A34"/>
+  <text x="148" y="70" fill="#B9C4CF" font-size="11.5">「지난주 이상 점검하고 원인 추정해 봐」</text>
+  <line x1="370" y1="65" x2="440" y2="65" stroke="#4B9FFF" stroke-width="1.5" marker-end="url(#a2)"/>
+  <text x="382" y="53" fill="#77828E" font-size="11">말로 시킴</text>
+  <!-- AI -->
+  <rect x="450" y="35" width="120" height="60" rx="10" fill="#12211A" stroke="#2E5B40" stroke-width="1.5"/>
+  <text x="510" y="61" fill="#5FD37E" font-size="14" font-weight="700" text-anchor="middle">AI</text>
+  <text x="510" y="81" fill="#77828E" font-size="10.5" text-anchor="middle">스스로 판단해서</text>
+  <!-- AI가 집어 쓰는 두 도구 -->
+  <rect x="330" y="150" width="180" height="56" rx="8" fill="#161B22" stroke="#E3B341"/>
+  <text x="420" y="173" fill="#E3B341" font-size="12" font-weight="700" text-anchor="middle">교재①에서 학생이 짠 코드</text>
+  <text x="420" y="192" fill="#77828E" font-size="10.5" text-anchor="middle">AI가 「도구」로 집어 씀</text>
+  <rect x="530" y="150" width="140" height="56" rx="8" fill="#161B22" stroke="#232A34"/>
+  <text x="600" y="173" fill="#B9C4CF" font-size="12" font-weight="700" text-anchor="middle">정비 기록</text>
+  <text x="600" y="192" fill="#77828E" font-size="10.5" text-anchor="middle">과거 수리 이력</text>
+  <line x1="480" y1="97" x2="430" y2="147" stroke="#5FD37E" stroke-width="1.5" marker-end="url(#a2)"/>
+  <line x1="540" y1="97" x2="590" y2="147" stroke="#5FD37E" stroke-width="1.5" marker-end="url(#a2)"/>
+  <!-- 보고서 -->
+  <line x1="570" y1="65" x2="660" y2="65" stroke="#4B9FFF" stroke-width="1.5" marker-end="url(#a2)"/>
+  <rect x="670" y="25" width="205" height="150" rx="8" fill="#161B22" stroke="#31485F"/>
+  <text x="688" y="52" fill="#4B9FFF" font-size="12.5" font-weight="700">원인 추정 보고서</text>
+  <line x1="688" y1="62" x2="857" y2="62" stroke="#232A34"/>
+  <text x="688" y="84" fill="#B9C4CF" font-size="11">· 3번 기계 온도 이상 확인</text>
+  <text x="688" y="106" fill="#B9C4CF" font-size="11">· 원인: 냉각장치 점검이</text>
+  <text x="698" y="124" fill="#B9C4CF" font-size="11">부품 지연으로 보류 중</text>
+  <text x="688" y="150" fill="#77828E" font-size="10.5">근거로 정비 기록 번호를 인용</text>
+  <text x="80" y="225" fill="#77828E" font-size="11.5">핵심 경험: 「내가 만든 코드를 AI가 알아서 집어 쓴다」 — 셋째 날의 목표</text>
+</svg>
+</div>
 
   <div class="card"><b>교재 ③ 마지막 날 팀 과제 틀 (넷째 날)</b> — 8팀이 「감지 → 진단 → 조치」 AI 팀을
   완성하는 틀. 교안의 요구가 <b>「모든 팀이 60분 안에 성공」</b>이라, 채울 곳 3군데만 남기고
-  연결·안전장치·실행은 완성해 뒀습니다. 위험한 조작(정지·로봇 출동)은 <b>사람이 승인해야만 실행</b>되는
-  안전장치도 이 틀이 강제합니다.</div>
+  연결·안전장치·실행은 완성해 뒀습니다.
+  
+<svg viewBox="0 0 900 250" xmlns="http://www.w3.org/2000/svg" role="img"
+     style="width:100%;background:#0B0E13;border:1px solid #232A34;border-radius:8px;margin-top:10px"
+     font-family="Pretendard,'Malgun Gothic',sans-serif">
+  <defs><marker id="a3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+    <path d="M0,0 L10,5 L0,10 z" fill="#77828E"/></marker></defs>
+  <text x="25" y="35" fill="#B9C4CF" font-size="12.5" font-weight="700">팀이 완성하는 AI 3인조 — 연결·실행은 다 돼 있고, ★ 3군데만 채우면 돌아간다</text>
+  <!-- 3 에이전트 -->
+  <rect x="25" y="55" width="170" height="80" rx="10" fill="#161B22" stroke="#31485F" stroke-width="1.5"/>
+  <text x="110" y="83" fill="#4B9FFF" font-size="13.5" font-weight="700" text-anchor="middle">① 감지 AI</text>
+  <text x="110" y="103" fill="#B9C4CF" font-size="11" text-anchor="middle">온도 기록을 지켜보다</text>
+  <text x="110" y="119" fill="#B9C4CF" font-size="11" text-anchor="middle">「정상이 아니다」 포착 <tspan fill="#E3B341" font-weight="700">★</tspan></text>
+  <line x1="195" y1="95" x2="235" y2="95" stroke="#77828E" stroke-width="1.5" marker-end="url(#a3)"/>
+  <rect x="240" y="55" width="170" height="80" rx="10" fill="#161B22" stroke="#31485F" stroke-width="1.5"/>
+  <text x="325" y="83" fill="#4B9FFF" font-size="13.5" font-weight="700" text-anchor="middle">② 진단 AI</text>
+  <text x="325" y="103" fill="#B9C4CF" font-size="11" text-anchor="middle">정비 기록을 뒤져</text>
+  <text x="325" y="119" fill="#B9C4CF" font-size="11" text-anchor="middle">원인 추정 <tspan fill="#E3B341" font-weight="700">★</tspan></text>
+  <line x1="410" y1="95" x2="450" y2="95" stroke="#77828E" stroke-width="1.5" marker-end="url(#a3)"/>
+  <rect x="455" y="55" width="170" height="80" rx="10" fill="#161B22" stroke="#31485F" stroke-width="1.5"/>
+  <text x="540" y="83" fill="#4B9FFF" font-size="13.5" font-weight="700" text-anchor="middle">③ 조치 AI</text>
+  <text x="540" y="103" fill="#B9C4CF" font-size="11" text-anchor="middle">무엇을 할지 결정 <tspan fill="#E3B341" font-weight="700">★</tspan></text>
+  <text x="540" y="119" fill="#B9C4CF" font-size="11" text-anchor="middle">두 갈래로 실행 ↓</text>
+  <!-- 자동 경로 -->
+  <line x1="500" y1="135" x2="500" y2="170" stroke="#5FD37E" stroke-width="1.5" marker-end="url(#a3)"/>
+  <rect x="390" y="175" width="220" height="50" rx="8" fill="#12211A" stroke="#2E5B40"/>
+  <text x="500" y="196" fill="#5FD37E" font-size="12" font-weight="700" text-anchor="middle">가벼운 조치는 자동</text>
+  <text x="500" y="214" fill="#77828E" font-size="10.5" text-anchor="middle">기계 속도 낮추기 · 알람 확인</text>
+  <!-- 승인 경로 -->
+  <line x1="625" y1="95" x2="665" y2="95" stroke="#E3B341" stroke-width="1.5" marker-end="url(#a3)"/>
+  <rect x="670" y="55" width="115" height="80" rx="10" fill="#231D10" stroke="#E3B341" stroke-width="1.5"/>
+  <text x="727" y="85" fill="#E3B341" font-size="13" font-weight="700" text-anchor="middle">사람 승인</text>
+  <text x="727" y="105" fill="#B9C4CF" font-size="10.5" text-anchor="middle">위험한 조치는</text>
+  <text x="727" y="120" fill="#B9C4CF" font-size="10.5" text-anchor="middle">여기서 멈춰 묻는다</text>
+  <rect x="700" y="175" width="175" height="50" rx="8" fill="#161B22" stroke="#232A34"/>
+  <text x="787" y="196" fill="#B9C4CF" font-size="12" font-weight="700" text-anchor="middle">정지 · 로봇 출동</text>
+  <text x="787" y="214" fill="#77828E" font-size="10.5" text-anchor="middle">승인해야만 실행 — 거부하면 안 움직임</text>
+  <line x1="750" y1="135" x2="775" y2="170" stroke="#77828E" stroke-width="1.5" marker-end="url(#a3)"/>
+  <text x="25" y="240" fill="#77828E" font-size="11.5">이 관문은 교재 틀이 강제한다 — 팀이 코드를 잘못 짜도 사람을 건너뛸 수 없음</text>
+</svg>
+</div>
 
   <div class="more"><span class="t">조금 더 자세히</span>
   세 교재 모두 「빈칸을 채우면 의도한 교훈이 실제로 재현되는지」 자동 검사를 붙여 확인했습니다.
@@ -314,7 +424,34 @@ th{color:var(--muted);font-size:12px}
     실제로 이 검사가 <b>수업을 망칠 뻔한 문제 3개</b>를 미리 잡아 고쳤습니다 — 예: AI가 「온도가 조금밖에
     안 올랐네요, 지켜보죠」라며 아무 조치를 안 해 시연이 끝나 버리는 문제.</div>
   </div>
-  <pre>
+  
+<svg viewBox="0 0 900 190" xmlns="http://www.w3.org/2000/svg" role="img"
+     style="width:100%;background:#0B0E13;border:1px solid #232A34;border-radius:8px;margin-top:10px"
+     font-family="Pretendard,'Malgun Gothic',sans-serif">
+  <defs><marker id="a4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+    <path d="M0,0 L10,5 L0,10 z" fill="#5FD37E"/></marker></defs>
+  <text x="25" y="35" fill="#B9C4CF" font-size="12.5" font-weight="700">사람 없이, 4일치 수업을 순서대로 통째로 — 중간 초기화 없이 한 번에</text>
+  <line x1="40" y1="95" x2="855" y2="95" stroke="#2A3442" stroke-width="2"/>
+  <rect x="60" y="65" width="160" height="60" rx="10" fill="#12211A" stroke="#2E5B40" stroke-width="1.5"/>
+  <text x="140" y="90" fill="#5FD37E" font-size="12.5" font-weight="700" text-anchor="middle">1일차 흉내</text>
+  <text x="140" y="110" fill="#B9C4CF" font-size="11" text-anchor="middle">화면·데이터 ✓ 14항목</text>
+  <line x1="220" y1="95" x2="255" y2="95" stroke="#5FD37E" stroke-width="1.5" marker-end="url(#a4)"/>
+  <rect x="260" y="65" width="160" height="60" rx="10" fill="#12211A" stroke="#2E5B40" stroke-width="1.5"/>
+  <text x="340" y="90" fill="#5FD37E" font-size="12.5" font-weight="700" text-anchor="middle">2일차 흉내</text>
+  <text x="340" y="110" fill="#B9C4CF" font-size="11" text-anchor="middle">설계 재료 ✓ 3항목</text>
+  <line x1="420" y1="95" x2="455" y2="95" stroke="#5FD37E" stroke-width="1.5" marker-end="url(#a4)"/>
+  <rect x="460" y="65" width="160" height="60" rx="10" fill="#12211A" stroke="#2E5B40" stroke-width="1.5"/>
+  <text x="540" y="90" fill="#5FD37E" font-size="12.5" font-weight="700" text-anchor="middle">3일차 흉내</text>
+  <text x="540" y="110" fill="#B9C4CF" font-size="11" text-anchor="middle">이상 찾기·AI 연결 ✓ 6항목</text>
+  <line x1="620" y1="95" x2="655" y2="95" stroke="#5FD37E" stroke-width="1.5" marker-end="url(#a4)"/>
+  <rect x="660" y="65" width="160" height="60" rx="10" fill="#12211A" stroke="#2E5B40" stroke-width="1.5"/>
+  <text x="740" y="90" fill="#5FD37E" font-size="12.5" font-weight="700" text-anchor="middle">4일차 흉내</text>
+  <text x="740" y="110" fill="#B9C4CF" font-size="11" text-anchor="middle">AI 3인조 완주 ✓ 16항목</text>
+  <text x="60" y="165" fill="#5FD37E" font-size="12.5" font-weight="700">총 39항목 전부 통과 · 8분 33초</text>
+  <text x="320" y="165" fill="#E3B341" font-size="12">이 검사가 수업 망칠 뻔한 문제 3개를 당일 전에 미리 잡아냈다</text>
+</svg>
+
+  <pre style="margin-top:14px">
   ✔ 1일차 — 학생 화면·데이터 확인          14/14
   ✔ 2일차 — 설계 수업 재료 확인              3/3
   ✔ 3일차 — 이상 찾기·AI 연결 확인           6/6
