@@ -240,9 +240,12 @@ th{color:var(--muted);font-size:12px}
   「실습 교재」 세 벌을 만들었습니다. 책이 아니라 <b>반쯤 완성된 코드 묶음</b>입니다.</div>
   <div class="shead"><span class="no">4</span><h2>실습 교재 세 벌 — 빈칸만 채우면 돌아가는 코드</h2><small>Lab 3-2 · Lab 3-3 · 견적서 W6</small></div>
 
-  <div class="card"><b>교재 ① 이상 찾기 연습 (셋째 날)</b> — 이상을 찾아내는 계산에서 핵심 3곳만 빈칸.
-  이 수업만큼은 AI에게 안 맡기고 학생이 직접 짭니다(전공 자부심을 건드리는 게 교안의 의도).
-  채워서 실행하면 아래처럼 <b>세 갈래 결과</b>를 겪게 설계돼 있습니다.
+  <div class="card"><b>교재 ① 이상 감지 뼈대 (Lab 3-2 · 셋째 날)</b> — 통계 기반 이상 감지 코드에서
+  핵심 3곳만 빈칸(TODO)으로 남긴 뼈대입니다: ① 이동 평균·표준편차 대비 얼마나 벗어났는지
+  (<b>z-score</b>) 계산 ② 몇부터 경보로 볼지 <b>임계값</b> 판정 ③ 센서 먹통 구간의
+  <b>결측치</b> 처리. 이 수업만큼은 AI에게 안 맡기고 학생이 직접 짭니다(전공 자부심을
+  건드리는 게 교안의 의도). 채워서 실행하면 <b>세 갈래 결과</b>를 겪게 설계돼 있습니다 —
+  특히 드리프트가 안 잡히는 건 z-score 방식의 구조적 한계로, 넷째 날 감지 방식의 복선입니다.
   
 <svg viewBox="0 0 900 250" xmlns="http://www.w3.org/2000/svg" role="img"
      style="width:100%;background:#0B0E13;border:1px solid #232A34;border-radius:8px;margin-top:10px"
@@ -255,33 +258,36 @@ th{color:var(--muted);font-size:12px}
   <rect x="45" y="72" width="180" height="8" rx="4" fill="#2A3442"/>
   <rect x="45" y="88" width="150" height="8" rx="4" fill="#2A3442"/>
   <rect x="45" y="104" width="200" height="14" rx="4" fill="#3A2E15" stroke="#E3B341"/>
-  <text x="52" y="115" fill="#E3B341" font-size="10" font-weight="700">★ 빈칸 1 — 평균에서 얼마나 벗어났나</text>
+  <text x="52" y="115" fill="#E3B341" font-size="10" font-weight="700">★ TODO 1 — z-score 계산</text>
   <rect x="45" y="126" width="165" height="8" rx="4" fill="#2A3442"/>
   <rect x="45" y="142" width="200" height="14" rx="4" fill="#3A2E15" stroke="#E3B341"/>
-  <text x="52" y="153" fill="#E3B341" font-size="10" font-weight="700">★ 빈칸 2 — 얼마나 벗어나면 경보인가</text>
+  <text x="52" y="153" fill="#E3B341" font-size="10" font-weight="700">★ TODO 2 — 임계값 판정</text>
   <rect x="45" y="164" width="140" height="8" rx="4" fill="#2A3442"/>
   <rect x="45" y="180" width="200" height="14" rx="4" fill="#3A2E15" stroke="#E3B341"/>
-  <text x="52" y="191" fill="#E3B341" font-size="10" font-weight="700">★ 빈칸 3 — 먹통 데이터는 어떻게 하나</text>
+  <text x="52" y="191" fill="#E3B341" font-size="10" font-weight="700">★ TODO 3 — 결측치(센서 먹통) 처리</text>
   <!-- 화살표 -->
   <line x1="275" y1="125" x2="360" y2="125" stroke="#77828E" stroke-width="1.5" marker-end="url(#a1)"/>
   <text x="282" y="112" fill="#B9C4CF" font-size="11.5">학생이 채우고</text>
   <text x="282" y="145" fill="#B9C4CF" font-size="11.5">실행하면</text>
   <!-- 결과 3갈래 -->
   <rect x="375" y="30" width="500" height="56" rx="8" fill="#12211A" stroke="#1E4230"/>
-  <text x="393" y="53" fill="#5FD37E" font-size="12.5" font-weight="700">✓ 갑자기 튀는 고장 — 3개 중 3개 잡힘</text>
-  <text x="393" y="73" fill="#77828E" font-size="11">평균에서 확 벗어나니 계산에 바로 걸린다</text>
+  <text x="393" y="53" fill="#5FD37E" font-size="12.5" font-weight="700">✓ 스파이크(급증) — 3개 중 3개 검출</text>
+  <text x="393" y="73" fill="#77828E" font-size="11">평균에서 확 벗어나 z-score 가 즉시 반응</text>
   <rect x="375" y="96" width="500" height="56" rx="8" fill="#241318" stroke="#4B2430"/>
-  <text x="393" y="119" fill="#FF6B6B" font-size="12.5" font-weight="700">✗ 슬금슬금 오르는 고장 — 끝내 못 잡음</text>
-  <text x="393" y="139" fill="#77828E" font-size="11">천천히 오르면 「평균」도 같이 올라서 안 걸린다 → 이 한계가 4일차 숙제</text>
+  <text x="393" y="119" fill="#FF6B6B" font-size="12.5" font-weight="700">✗ 드리프트(서서히 상승) — 0개 검출</text>
+  <text x="393" y="139" fill="#77828E" font-size="11">이동 평균이 같이 올라가 z-score 무반응 — 구조적 한계, 4일차 감지 방식의 복선</text>
   <rect x="375" y="162" width="500" height="56" rx="8" fill="#231D10" stroke="#4A3B1B"/>
-  <text x="393" y="185" fill="#E3B341" font-size="12.5" font-weight="700">⚠ 더 민감하게 조정하면 — 엉뚱한 경보 20배</text>
-  <text x="393" y="205" fill="#77828E" font-size="11">「민감하게 하면 다 잡히겠지」가 왜 틀렸는지 몸으로 배움</text>
+  <text x="393" y="185" fill="#E3B341" font-size="12.5" font-weight="700">⚠ 임계값을 낮추면 — 오탐(엉뚱한 경보) 20배</text>
+  <text x="393" y="205" fill="#77828E" font-size="11">민감도와 오탐의 맞교환을 몸으로 배움</text>
 </svg>
 </div>
 
-  <div class="card"><b>교재 ② 내 코드를 AI의 손에 (셋째 날)</b> — 방금 짠 코드를 <b>AI가 도구처럼
-  집어 쓸 수 있게 연결하는 틀.</b> 학생이 AI에게 말로 「지난주 이상을 점검하고 원인을 추정해 봐」 하면,
-  AI가 학생 코드를 스스로 불러 검사하고 정비 기록을 찾아 <b>원인 추정 보고서</b>를 써냅니다.
+  <div class="card"><b>교재 ② MCP 도구 템플릿 (Lab 3-3 · 셋째 날)</b> — 교재①에서 짠 감지 함수를
+  <b>MCP 도구로 등록하는 템플릿 2개</b>입니다. MCP(Model Context Protocol)는 AI가 외부
+  프로그램을 「도구」로 집어 쓰게 해 주는 표준 규약입니다. 등록해 두면 학생이 자연어로
+  「지난주 이상을 점검하고 원인을 추정해 봐」 한마디만 해도, LLM이 <b>tool call 로 학생 코드를
+  직접 호출</b>해 검사하고 정비 기록(work order)을 조회한 뒤 근거를 인용한 <b>원인 추정
+  보고서</b>를 써냅니다.
   
 <svg viewBox="0 0 900 240" xmlns="http://www.w3.org/2000/svg" role="img"
      style="width:100%;background:#0B0E13;border:1px solid #232A34;border-radius:8px;margin-top:10px"
@@ -294,18 +300,18 @@ th{color:var(--muted);font-size:12px}
   <rect x="130" y="45" width="240" height="40" rx="18" fill="#161B22" stroke="#232A34"/>
   <text x="148" y="70" fill="#B9C4CF" font-size="11.5">「지난주 이상 점검하고 원인 추정해 봐」</text>
   <line x1="370" y1="65" x2="440" y2="65" stroke="#4B9FFF" stroke-width="1.5" marker-end="url(#a2)"/>
-  <text x="382" y="53" fill="#77828E" font-size="11">말로 시킴</text>
+  <text x="378" y="53" fill="#77828E" font-size="11">프롬프트</text>
   <!-- AI -->
   <rect x="450" y="35" width="120" height="60" rx="10" fill="#12211A" stroke="#2E5B40" stroke-width="1.5"/>
-  <text x="510" y="61" fill="#5FD37E" font-size="14" font-weight="700" text-anchor="middle">AI</text>
-  <text x="510" y="81" fill="#77828E" font-size="10.5" text-anchor="middle">스스로 판단해서</text>
+  <text x="510" y="61" fill="#5FD37E" font-size="14" font-weight="700" text-anchor="middle">LLM</text>
+  <text x="510" y="81" fill="#77828E" font-size="10.5" text-anchor="middle">tool call 로 호출 ↓</text>
   <!-- AI가 집어 쓰는 두 도구 -->
   <rect x="330" y="150" width="180" height="56" rx="8" fill="#161B22" stroke="#E3B341"/>
-  <text x="420" y="173" fill="#E3B341" font-size="12" font-weight="700" text-anchor="middle">교재①에서 학생이 짠 코드</text>
-  <text x="420" y="192" fill="#77828E" font-size="10.5" text-anchor="middle">AI가 「도구」로 집어 씀</text>
+  <text x="420" y="173" fill="#E3B341" font-size="12" font-weight="700" text-anchor="middle">학생의 감지 함수</text>
+  <text x="420" y="192" fill="#77828E" font-size="10.5" text-anchor="middle">교재①의 코드 — MCP 도구로 등록됨</text>
   <rect x="530" y="150" width="140" height="56" rx="8" fill="#161B22" stroke="#232A34"/>
-  <text x="600" y="173" fill="#B9C4CF" font-size="12" font-weight="700" text-anchor="middle">정비 기록</text>
-  <text x="600" y="192" fill="#77828E" font-size="10.5" text-anchor="middle">과거 수리 이력</text>
+  <text x="600" y="173" fill="#B9C4CF" font-size="12" font-weight="700" text-anchor="middle">정비 기록 조회 도구</text>
+  <text x="600" y="192" fill="#77828E" font-size="10.5" text-anchor="middle">work order 이력</text>
   <line x1="480" y1="97" x2="430" y2="147" stroke="#5FD37E" stroke-width="1.5" marker-end="url(#a2)"/>
   <line x1="540" y1="97" x2="590" y2="147" stroke="#5FD37E" stroke-width="1.5" marker-end="url(#a2)"/>
   <!-- 보고서 -->
@@ -316,59 +322,62 @@ th{color:var(--muted);font-size:12px}
   <text x="688" y="84" fill="#B9C4CF" font-size="11">· 3번 기계 온도 이상 확인</text>
   <text x="688" y="106" fill="#B9C4CF" font-size="11">· 원인: 냉각장치 점검이</text>
   <text x="698" y="124" fill="#B9C4CF" font-size="11">부품 지연으로 보류 중</text>
-  <text x="688" y="150" fill="#77828E" font-size="10.5">근거로 정비 기록 번호를 인용</text>
-  <text x="80" y="225" fill="#77828E" font-size="11.5">핵심 경험: 「내가 만든 코드를 AI가 알아서 집어 쓴다」 — 셋째 날의 목표</text>
+  <text x="688" y="150" fill="#77828E" font-size="10.5">근거: WO-2026-0801 인용</text>
+  <text x="80" y="225" fill="#77828E" font-size="11.5">핵심 경험: 「내가 만든 코드가 MCP 도구가 되어 AI 손에 들어간다」 — 셋째 날의 목표</text>
 </svg>
 </div>
 
-  <div class="card"><b>교재 ③ 마지막 날 팀 과제 틀 (넷째 날)</b> — 8팀이 「감지 → 진단 → 조치」 AI 팀을
-  완성하는 틀. 교안의 요구가 <b>「모든 팀이 60분 안에 성공」</b>이라, 채울 곳 3군데만 남기고
-  연결·안전장치·실행은 완성해 뒀습니다.
+  <div class="card"><b>교재 ③ 폐루프 템플릿 (W6 · 넷째 날)</b> — 8팀이 「감지 → 진단 → 조치」
+  에이전트 3개를 완성해 <b>폐루프(closed loop)</b>를 돌리는 틀. 교안의 요구가 <b>「모든 팀이
+  60분 안에 성공」</b>이라, 채울 곳(★) 3군데만 남기고 연결·안전장치·실행은 완성해 뒀습니다.
+  감지는 교재①에서 안 잡혔던 드리프트를 잡는 방식(최근 구간의 앞/뒤 절반 평균 비교),
+  진단은 <b>LLM 실호출</b>, 조치는 <b>MCP 도구를 거쳐 공장 제어 API 호출</b>이며, 위험한
+  조작에는 <b>HITL</b>(Human-in-the-Loop — 사람 승인) 관문이 붙습니다.
   
 <svg viewBox="0 0 900 250" xmlns="http://www.w3.org/2000/svg" role="img"
      style="width:100%;background:#0B0E13;border:1px solid #232A34;border-radius:8px;margin-top:10px"
      font-family="Pretendard,'Malgun Gothic',sans-serif">
   <defs><marker id="a3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
     <path d="M0,0 L10,5 L0,10 z" fill="#77828E"/></marker></defs>
-  <text x="25" y="35" fill="#B9C4CF" font-size="12.5" font-weight="700">팀이 완성하는 AI 3인조 — 연결·실행은 다 돼 있고, ★ 3군데만 채우면 돌아간다</text>
+  <text x="25" y="35" fill="#B9C4CF" font-size="12.5" font-weight="700">팀이 완성하는 에이전트 3개 — 연결·실행은 다 돼 있고, ★ 3군데만 채우면 폐루프가 돈다</text>
   <!-- 3 에이전트 -->
   <rect x="25" y="55" width="170" height="80" rx="10" fill="#161B22" stroke="#31485F" stroke-width="1.5"/>
-  <text x="110" y="83" fill="#4B9FFF" font-size="13.5" font-weight="700" text-anchor="middle">① 감지 AI</text>
-  <text x="110" y="103" fill="#B9C4CF" font-size="11" text-anchor="middle">온도 기록을 지켜보다</text>
-  <text x="110" y="119" fill="#B9C4CF" font-size="11" text-anchor="middle">「정상이 아니다」 포착 <tspan fill="#E3B341" font-weight="700">★</tspan></text>
+  <text x="110" y="83" fill="#4B9FFF" font-size="13.5" font-weight="700" text-anchor="middle">① 감지 에이전트</text>
+  <text x="110" y="103" fill="#B9C4CF" font-size="11" text-anchor="middle">최근 구간 앞/뒤 절반</text>
+  <text x="110" y="119" fill="#B9C4CF" font-size="11" text-anchor="middle">평균 비교 → 드리프트 검출 <tspan fill="#E3B341" font-weight="700">★</tspan></text>
   <line x1="195" y1="95" x2="235" y2="95" stroke="#77828E" stroke-width="1.5" marker-end="url(#a3)"/>
   <rect x="240" y="55" width="170" height="80" rx="10" fill="#161B22" stroke="#31485F" stroke-width="1.5"/>
-  <text x="325" y="83" fill="#4B9FFF" font-size="13.5" font-weight="700" text-anchor="middle">② 진단 AI</text>
-  <text x="325" y="103" fill="#B9C4CF" font-size="11" text-anchor="middle">정비 기록을 뒤져</text>
-  <text x="325" y="119" fill="#B9C4CF" font-size="11" text-anchor="middle">원인 추정 <tspan fill="#E3B341" font-weight="700">★</tspan></text>
+  <text x="325" y="83" fill="#4B9FFF" font-size="13.5" font-weight="700" text-anchor="middle">② 진단 에이전트</text>
+  <text x="325" y="103" fill="#B9C4CF" font-size="11" text-anchor="middle">LLM 실호출 — 정비 이력</text>
+  <text x="325" y="119" fill="#B9C4CF" font-size="11" text-anchor="middle">근거로 원인 추정 <tspan fill="#E3B341" font-weight="700">★</tspan></text>
   <line x1="410" y1="95" x2="450" y2="95" stroke="#77828E" stroke-width="1.5" marker-end="url(#a3)"/>
   <rect x="455" y="55" width="170" height="80" rx="10" fill="#161B22" stroke="#31485F" stroke-width="1.5"/>
-  <text x="540" y="83" fill="#4B9FFF" font-size="13.5" font-weight="700" text-anchor="middle">③ 조치 AI</text>
-  <text x="540" y="103" fill="#B9C4CF" font-size="11" text-anchor="middle">무엇을 할지 결정 <tspan fill="#E3B341" font-weight="700">★</tspan></text>
-  <text x="540" y="119" fill="#B9C4CF" font-size="11" text-anchor="middle">두 갈래로 실행 ↓</text>
+  <text x="540" y="83" fill="#4B9FFF" font-size="13.5" font-weight="700" text-anchor="middle">③ 조치 에이전트</text>
+  <text x="540" y="103" fill="#B9C4CF" font-size="11" text-anchor="middle">행동 결정 <tspan fill="#E3B341" font-weight="700">★</tspan> → MCP 도구</text>
+  <text x="540" y="119" fill="#B9C4CF" font-size="11" text-anchor="middle">경유로 제어 API 호출 ↓</text>
   <!-- 자동 경로 -->
   <line x1="500" y1="135" x2="500" y2="170" stroke="#5FD37E" stroke-width="1.5" marker-end="url(#a3)"/>
   <rect x="390" y="175" width="220" height="50" rx="8" fill="#12211A" stroke="#2E5B40"/>
-  <text x="500" y="196" fill="#5FD37E" font-size="12" font-weight="700" text-anchor="middle">가벼운 조치는 자동</text>
-  <text x="500" y="214" fill="#77828E" font-size="10.5" text-anchor="middle">기계 속도 낮추기 · 알람 확인</text>
+  <text x="500" y="196" fill="#5FD37E" font-size="12" font-weight="700" text-anchor="middle">자동 실행 — slow_down · ack_alarm</text>
+  <text x="500" y="214" fill="#77828E" font-size="10.5" text-anchor="middle">감속·알람 확인 같은 가역적 조치</text>
   <!-- 승인 경로 -->
   <line x1="625" y1="95" x2="665" y2="95" stroke="#E3B341" stroke-width="1.5" marker-end="url(#a3)"/>
   <rect x="670" y="55" width="115" height="80" rx="10" fill="#231D10" stroke="#E3B341" stroke-width="1.5"/>
-  <text x="727" y="85" fill="#E3B341" font-size="13" font-weight="700" text-anchor="middle">사람 승인</text>
-  <text x="727" y="105" fill="#B9C4CF" font-size="10.5" text-anchor="middle">위험한 조치는</text>
-  <text x="727" y="120" fill="#B9C4CF" font-size="10.5" text-anchor="middle">여기서 멈춰 묻는다</text>
+  <text x="727" y="85" fill="#E3B341" font-size="13" font-weight="700" text-anchor="middle">HITL 승인</text>
+  <text x="727" y="105" fill="#B9C4CF" font-size="10.5" text-anchor="middle">stop · dispatch 는</text>
+  <text x="727" y="120" fill="#B9C4CF" font-size="10.5" text-anchor="middle">사람이 승인해야 실행</text>
   <rect x="700" y="175" width="175" height="50" rx="8" fill="#161B22" stroke="#232A34"/>
-  <text x="787" y="196" fill="#B9C4CF" font-size="12" font-weight="700" text-anchor="middle">정지 · 로봇 출동</text>
-  <text x="787" y="214" fill="#77828E" font-size="10.5" text-anchor="middle">승인해야만 실행 — 거부하면 안 움직임</text>
+  <text x="787" y="196" fill="#B9C4CF" font-size="12" font-weight="700" text-anchor="middle">정지 · 로봇(AMR) 출동</text>
+  <text x="787" y="214" fill="#77828E" font-size="10.5" text-anchor="middle">거부하면 실행되지 않음</text>
   <line x1="750" y1="135" x2="775" y2="170" stroke="#77828E" stroke-width="1.5" marker-end="url(#a3)"/>
-  <text x="25" y="240" fill="#77828E" font-size="11.5">이 관문은 교재 틀이 강제한다 — 팀이 코드를 잘못 짜도 사람을 건너뛸 수 없음</text>
+  <text x="25" y="240" fill="#77828E" font-size="11.5">승인 관문은 템플릿 계층(hitl)이 강제 — 팀이 에이전트 코드를 잘못 짜도 우회 불가</text>
 </svg>
 </div>
 
   <div class="more"><span class="t">조금 더 자세히</span>
-  세 교재 모두 「빈칸을 채우면 의도한 교훈이 실제로 재현되는지」 자동 검사를 붙여 확인했습니다.
-  수업 중 한 팀이 막혀도 설정 한 줄로 강사 쪽 예비 경로로 갈아탈 수 있어 수업이 멈추지 않고,
-  시간이 모자란 팀을 위한 「최소 성공 경로」 카드도 준비돼 있습니다.</div>
+  세 교재 모두 「빈칸을 채우면 의도한 교훈이 실제로 재현되는지」 자동 검사(verify_lab.py)를
+  붙여 확인했습니다. 수업 중 한 팀이 막혀도 강사 쪽 정답 경로(--use-answers 옵션)로 갈아탈
+  수 있어 수업이 멈추지 않고, 시간이 모자란 팀을 위한 「최소 성공 경로」 카드도 준비돼 있습니다.</div>
 </section>
 
 <!-- ══════════ 5 ══════════ -->
@@ -442,13 +451,14 @@ th{color:var(--muted);font-size:12px}
   <line x1="420" y1="95" x2="455" y2="95" stroke="#5FD37E" stroke-width="1.5" marker-end="url(#a4)"/>
   <rect x="460" y="65" width="160" height="60" rx="10" fill="#12211A" stroke="#2E5B40" stroke-width="1.5"/>
   <text x="540" y="90" fill="#5FD37E" font-size="12.5" font-weight="700" text-anchor="middle">3일차 흉내</text>
-  <text x="540" y="110" fill="#B9C4CF" font-size="11" text-anchor="middle">이상 찾기·AI 연결 ✓ 6항목</text>
+  <text x="540" y="110" fill="#B9C4CF" font-size="11" text-anchor="middle">감지 뼈대·MCP 도구 ✓ 6항목</text>
   <line x1="620" y1="95" x2="655" y2="95" stroke="#5FD37E" stroke-width="1.5" marker-end="url(#a4)"/>
   <rect x="660" y="65" width="160" height="60" rx="10" fill="#12211A" stroke="#2E5B40" stroke-width="1.5"/>
   <text x="740" y="90" fill="#5FD37E" font-size="12.5" font-weight="700" text-anchor="middle">4일차 흉내</text>
-  <text x="740" y="110" fill="#B9C4CF" font-size="11" text-anchor="middle">AI 3인조 완주 ✓ 16항목</text>
+  <text x="740" y="107" fill="#B9C4CF" font-size="10.5" text-anchor="middle">제어 개방→주입→감지</text>
+  <text x="740" y="120" fill="#B9C4CF" font-size="10.5" text-anchor="middle">→진단→HITL 조치 ✓ 16항목</text>
   <text x="60" y="165" fill="#5FD37E" font-size="12.5" font-weight="700">총 39항목 전부 통과 · 8분 33초</text>
-  <text x="320" y="165" fill="#E3B341" font-size="12">이 검사가 수업 망칠 뻔한 문제 3개를 당일 전에 미리 잡아냈다</text>
+  <text x="320" y="165" fill="#E3B341" font-size="12">잡아낸 결함 예: LLM 이 +0.4℃를 사소하게 봐 무조치 → 프롬프트 수정으로 해결</text>
 </svg>
 
   <pre style="margin-top:14px">
