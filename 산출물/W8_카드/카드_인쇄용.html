@@ -1,0 +1,131 @@
+<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8">
+<title>W8 카드 인쇄 시트 — 요구사항 5 · 힌트 3 · 확장미션 5 · 최소경로 1</title>
+<style>
+body{font-family:'Malgun Gothic',sans-serif;margin:0;padding:10mm;color:#111;font-size:13px}
+h1{font-size:16px;margin:0 0 2mm} .tips{font-size:11px;color:#555;margin:0 0 6mm}
+h2{font-size:14px;margin:8mm 0 3mm;border-bottom:2px solid #333;padding-bottom:1mm;page-break-before:always}
+h2:first-of-type{page-break-before:auto}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:5mm}
+.card{border:1.6px dashed #888;border-radius:10px;padding:4mm 5mm;page-break-inside:avoid;position:relative}
+.tag{display:inline-block;font-size:10px;font-weight:800;padding:1px 8px;border-radius:10px;margin-bottom:2mm}
+.req .tag{background:#e8f0fe;color:#1a56db} .hint .tag{background:#fdf3d7;color:#92600a}
+.mis .tag{background:#e6f4ea;color:#137333} .path .tag{background:#fce8e6;color:#c5221f}
+.t{font-size:15px;font-weight:800;margin:0 0 2mm}
+p{margin:0 0 2mm;line-height:1.55} .small{font-size:11px;color:#666}
+code,pre{font-family:Consolas,monospace;font-size:11px;background:#f4f4f4;border-radius:4px}
+pre{padding:2mm 3mm;margin:2mm 0;line-height:1.5;overflow:hidden}
+table{width:100%;border-collapse:collapse;font-size:11px;margin:1mm 0}
+th,td{border:1px solid #ddd;padding:1.5mm 2mm;text-align:left;vertical-align:top}
+.wide{grid-column:1/3}
+@media print{.tips{display:none}}
+</style></head><body>
+
+<h1>W8 카드 인쇄 시트</h1>
+<p class="tips">인쇄 → 점선대로 자르기. 요구사항 카드는 1일차 Step 2에서 <b>한 장씩 순서대로</b> 배부(한꺼번에 주지 말 것).
+힌트 카드는 3일차 Lab 3-2에서 15/25/35분 경과 시 공개. 확장미션·최소경로 카드는 4일차 팀 챌린지용(팀 수만큼 인쇄).</p>
+
+<h2>1일차 — 발주처 추가 요구사항 카드 (Step 2 · 한 장씩 순서대로)</h2>
+<div class="grid">
+<div class="card req"><span class="tag">추가 요구 1 / 5</span>
+  <p class="t">온도 임계 알람 표시</p>
+  <p>K-정밀 운영팀 요청입니다. 설비 온도가 기준값을 넘으면 <b>대시보드에 눈에 띄는 경고</b>가 떠야 합니다.
+  기준값은 여러분이 정하되, 화면만 봐도 "지금 어느 기계가 위험한지" 알 수 있어야 합니다.</p>
+  <p class="small">완료 기준: 온도가 기준을 넘는 순간 화면에 경고가 나타난다</p></div>
+<div class="card req"><span class="tag">추가 요구 2 / 5</span>
+  <p class="t">설비별 이력 그래프</p>
+  <p>"지금 값"만으로는 부족하다는 현장 의견입니다. <b>기계를 선택하면 지나간 온도 추이가 그래프로</b>
+  보여야 합니다. (지나간 기록은 <code>/readings</code> 창구에서 옵니다)</p>
+  <p class="small">완료 기준: 아무 기계나 골라 최근 추이 그래프를 볼 수 있다</p></div>
+<div class="card req"><span class="tag">추가 요구 3 / 5</span>
+  <p class="t">AMR 경로 표시</p>
+  <p>물류팀 요청입니다. 운반 로봇 2대가 <b>지금 어디에 있고 어디로 가는 중인지</b> 화면에서
+  보여야 합니다. 점이 움직이는 것만으로도 좋고, 경로 선까지 그리면 더 좋습니다.</p>
+  <p class="small">완료 기준: 로봇의 위치 변화가 화면에서 보인다</p></div>
+<div class="card req"><span class="tag">추가 요구 4 / 5</span>
+  <p class="t">알람 담당자 배정</p>
+  <p>알람이 떠도 "누가 처리하는지"가 없다는 지적입니다. <b>알람마다 담당자를 지정하고 표시</b>할 수
+  있어야 합니다. 담당자 명단은 여러분이 만들어도 됩니다.</p>
+  <p class="small">완료 기준: 알람에 담당자 이름이 붙는다 · ⚠ 이쯤에서 앞 기능이 깨져도 정상입니다 — 몇 장째인지 메모하세요</p></div>
+<div class="card req"><span class="tag">추가 요구 5 / 5</span>
+  <p class="t">야간모드 / 권한 분리</p>
+  <p>야간 근무조 요청입니다. <b>어두운 화면(야간모드)</b>과, <b>보는 사람에 따라 다른 화면</b>
+  (운영자는 전부, 방문자는 요약만)이 필요합니다.</p>
+  <p class="small">완료 기준: 화면 모드가 전환된다 · 깨졌다면 어디까지 되던 게 무너졌는지 기록 — 그 메모가 내일 재료입니다</p></div>
+</div>
+
+<h2>3일차 — Lab 3-2 힌트 카드 (15 / 25 / 35분 경과 시 공개)</h2>
+<div class="grid">
+<div class="card hint"><span class="tag">힌트 1 · 15분 — TODO 1 윈도 통계</span>
+  <p>막히는 곳은 <b>"지금 값을 통계에 넣느냐"</b>와 슬라이싱 범위입니다.</p>
+  <p>· 통계는 지금 값 <b>바로 앞 W개로만</b> — 지금 값을 넣으면 튀는 값이 자기 평균을 끌어올려 자신을 숨깁니다<br>
+  · <code>values[i-window:i]</code> — 파이썬 슬라이싱은 뒤끝(i)을 뺍니다<br>
+  · 앞이 모자라면(<code>i &lt; window</code>) <code>None</code> · 표본 표준편차는 <b>(개수−1)</b>로 나눔</p>
+  <pre>seg = values[i - window:i]
+mean = sum(seg) / len(seg)
+var  = sum((x-mean)**2 for x in seg) / (len(seg)-1)</pre></div>
+<div class="card hint"><span class="tag">힌트 2 · 25분 — TODO 2 임계 판정</span>
+  <p><code>ZeroDivisionError</code> = <b>표준편차 0</b> — 최근 W개가 완전히 똑같았다는 뜻이고 실제 데이터에서 생깁니다.
+  정답이 하나가 아닙니다. 하나를 고르고 <b>이유를 말할 수 있으면</b> 됩니다:</p>
+  <table><tr><th>선택</th><th>뜻</th></tr>
+  <tr><td>False 반환</td><td>판단 불가 구간은 알람 안 울림</td></tr>
+  <tr><td>평균과 다르면 True</td><td>계속 같다가 달라졌으니 이상</td></tr>
+  <tr><td>작은 수를 더해 나눔</td><td>편법 — 왜 위험한지 설명할 것</td></tr></table>
+  <pre>z = (value - mean) / std
+return abs(z) > k</pre></div>
+<div class="card hint wide"><span class="tag">힌트 3 · 35분 — TODO 3 결측 처리</span>
+  <p><code>TypeError: unsupported operand ...</code> = <b>None 을 계산에 넣은 것</b>. EQ-01에 2시간(120개) 결측이 있습니다.
+  확인은 <code>if v is None:</code> (== None 아님). 선택지와 <b>각각의 대가</b> — 이게 오후 비교 토론의 재료입니다:</p>
+  <table><tr><th>방침</th><th>대가</th></tr>
+  <tr><td>그냥 둔다 (그 구간 판정 안 함)</td><td>결측 자체는 못 잡는다</td></tr>
+  <tr><td>직전 값으로 메운다 (ffill)</td><td>2시간 내내 같은 값 → 표준편차 0 → 값이 돌아오는 순간 <b>없던 이상이 생긴다</b></td></tr>
+  <tr><td>앞뒤 평균으로 보간</td><td>없는 값을 지어냄 — 그 구간 z-score 는 거짓말</td></tr>
+  <tr><td>결측 자체를 이상으로 본다</td><td>센서 고장을 잡는다 — 단, 온도·진동 이상과는 다른 종류</td></tr></table></div>
+</div>
+
+<h2>4일차 — 확장 미션 카드 (기본 미션 완료 팀만 · 택1)</h2>
+<div class="grid">
+<div class="card mis"><span class="tag">확장 미션 A</span>
+  <p class="t">예방정비 스케줄러</p>
+  <p>이상이 얼마나 자주 났는지와 가동시간을 근거로 <b>정비 작업지시를 자동 발행</b>하는
+  에이전트를 추가하라.</p>
+  <p class="small">재료: 감지 결과 누적 + query_equipment 의 가동 데이터 · 새 에이전트는 오케스트레이터 밑에 워커로</p></div>
+<div class="card mis"><span class="tag">확장 미션 B</span>
+  <p class="t">AMR 작업 할당</p>
+  <p>정비·운반 요청이 들어오면 <b>배터리와 거리를 따져 가장 적합한 로봇을 배차</b>하는
+  에이전트를 추가하라.</p>
+  <p class="small">재료: /robots 의 battery·pos_x·pos_y · Day 1에 배운 Routing 패턴</p></div>
+<div class="card mis"><span class="tag">확장 미션 C</span>
+  <p class="t">안전 인터록</p>
+  <p>이상 등급이 '심각'이면 <b>옆에 붙은 설비들까지 연달아 감속</b>시키고 전체 승인을 요청하는
+  에이전트를 추가하라.</p>
+  <p class="small">재료: set_equipment_speed 를 여러 대에 · Parallelization 패턴 · 승인 관문은 그대로 통과해야 함</p></div>
+<div class="card mis"><span class="tag">확장 미션 D</span>
+  <p class="t">교대 리포트</p>
+  <p>교대 시점마다 <b>지난 8시간의 이상과 조치를 요약한 리포트</b>를 자동 작성하는
+  에이전트를 추가하라.</p>
+  <p class="small">재료: 루프의 조치 기록 + LLM 요약 · 리포트에 근거(작업지시 번호) 인용</p></div>
+<div class="card mis wide"><span class="tag">확장 미션 — 자유 주제</span>
+  <p class="t">우리 팀 아이디어</p>
+  <p>폐루프에 붙일 새 에이전트를 직접 설계하라. 시작 전 <b>강사 승인 필수</b> — 한 문장으로
+  설명해서 승인받을 것: "우리 에이전트는 ___가 일어나면 ___를 근거로 ___를 한다."</p>
+  <p class="small">평가는 동일: 실제로 도는가 40 · 스펙 문서화 30 · 창의성 30</p></div>
+</div>
+
+<h2>4일차 — 동작 보장 최소 경로 카드 (막힌 팀 구제용 · 요청 시 배부)</h2>
+<div class="grid">
+<div class="card path wide"><span class="tag">최소 성공 경로 — 막히면 이 순서대로</span>
+  <p class="t">60분 안에 폐루프를 돌리는 가장 짧은 길</p>
+  <p><b>0. 붙는가 (3분)</b> — <code>python loop.py --check</code> → 연결 줄이 나와야 함.
+  안 나오면: base_url 오타 / T3은 <b>대문자</b> / 키 미입력 / "제어 잠김"이면 강사에게 개방 요청.
+  이어서 <code>python control_mcp.py --check</code> — MCP가 안 떠도 <b>그대로 진행 가능</b>
+  (loop.py 가 직접 경로로 자동 전환. 안 되면 config 의 control_transport 를 "direct" 로).</p>
+  <p><b>1. 감지부터 (15분)</b> — 세 자리 중 <b>detector 먼저</b>. 감지가 안 잡으면 뒤는 아예 안 불립니다.
+  <code>python loop.py --once</code> 로 「감지 이상 1건」 확인. 안 잡히면: 강사 주입 여부 확인(2D 뷰 온도)
+  → 임계 drift_delta_c 0.4→0.3 → <b>오래 돌리다 안 잡히면 judge() 에서 최근 window×2 만 자르기</b>(희석 함정).</p>
+  <p><b>2. 진단·조치 (각 10분)</b> — diagnoser 프롬프트에 「드리프트는 계속 오른다」와
+  「정비 보류가 원인이면 파견 요청까지」 명시. actuator 는 감속(자동)부터.</p>
+  <p><b>그래도 안 되면</b> — 막힘 티켓 → 스태프. 상세 표는 <code>W6_폐루프템플릿/동작보장_최소경로.md</code>.</p>
+  <p class="small">실측: 주입 후 감지까지 갓 켠 팀 40초, 계속 돌린 팀 90~230초 — 침묵 2분은 고장이 아니라 대기입니다</p></div>
+</div>
+
+</body></html>
