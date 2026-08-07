@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -45,7 +46,10 @@ async def via_mcp(script: Path) -> tuple[list[str], dict, dict]:
     from mcp import ClientSession
     from mcp.client.stdio import StdioServerParameters, stdio_client
 
-    params = StdioServerParameters(command=sys.executable, args=[str(script)], cwd=str(ROOT))
+    # MCP 는 자식 프로세스에 환경변수를 걸러서 넘긴다 — 필요한 것은 명시해야 전달된다
+    child_env = {**os.environ}
+    params = StdioServerParameters(command=sys.executable, args=[str(script)],
+                                   cwd=str(ROOT), env=child_env)
     with open(ROOT / "_verify_server.log", "w", encoding="utf-8") as errlog:
         async with stdio_client(params, errlog=errlog) as (r, w):
             async with ClientSession(r, w) as s:
