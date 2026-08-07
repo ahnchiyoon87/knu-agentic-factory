@@ -195,8 +195,9 @@ def day2(s: Sim, ns: str) -> None:
 # =============================================================================
 # Day 3 — 알기 : 이상감지 · MCP 도구화
 # =============================================================================
-def run_script(path: Path, args: list[str], timeout: int) -> tuple[bool, str]:
-    env = {**os.environ, "PYTHONIOENCODING": "utf-8", "PYTHONUTF8": "1"}
+def run_script(path: Path, args: list[str], timeout: int,
+               extra_env: dict[str, str] | None = None) -> tuple[bool, str]:
+    env = {**os.environ, "PYTHONIOENCODING": "utf-8", "PYTHONUTF8": "1", **(extra_env or {})}
     try:
         p = subprocess.run([sys.executable, str(path.name), *args], cwd=str(path.parent),
                            capture_output=True, text=True, timeout=timeout, env=env)
@@ -228,7 +229,8 @@ def day3(s: Sim, ns: str) -> None:
     ok, msg = run_script(LAB32 / "verify_lab.py", [], 300)
     check("Lab 3-2 이상감지 뼈대 — 교안이 가르치려는 것이 재현된다", ok, msg)
 
-    ok, msg = run_script(LAB33 / "verify_lab.py", [], 300)
+    # 정비 이력을 가져올 강사 시뮬레이터 주소를 넘긴다 (로컬/클라우드 공통)
+    ok, msg = run_script(LAB33 / "verify_lab.py", [], 300, {"SHARED_API": s.base})
     check("Lab 3-3 MCP 도구 템플릿 — 서버를 띄워 도구가 왕복한다", ok, msg)
 
     r = s.get(f"/api/v1/{ns}/readings", equipment_id="EQ-01", minutes=60, limit=20000)

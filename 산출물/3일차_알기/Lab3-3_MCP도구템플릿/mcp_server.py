@@ -33,6 +33,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -114,7 +115,9 @@ def _fetch_maintenance(equipment_id: str) -> list[dict]:
     """
     if CFG["data_source"] == "fallback":
         fb = CFG["fallback"]
-        r = httpx.get(f"{fb['shared_api'].rstrip('/')}/api/v1/{fb['tenant']}/maintenance",
+        # 강사 시뮬레이터 주소 — 환경변수가 있으면 그것을 쓴다(리허설·클라우드 전환용)
+        shared = (os.environ.get("SHARED_API") or fb["shared_api"]).rstrip("/")
+        r = httpx.get(f"{shared}/api/v1/{fb['tenant']}/maintenance",
                       params={"equipment_id": equipment_id}, timeout=30)
         r.raise_for_status()
         return r.json()["maintenance"]
