@@ -78,18 +78,27 @@ gcloud compute ssh "$NAME" --zone="$ZONE" --command='
   ./.venv/bin/pip install -q -r requirements.txt
 '
 
-say "6. .env 업로드 (로컬 것 그대로)"
-gcloud compute scp "$HERE/.env" "$NAME":"knu-agentic-factory/산출물/0_공통/W1_팩토리시뮬레이터/.env" --zone="$ZONE"
+say "6. .env 업로드"
+# Windows 의 pscp 는 경로에 한글이 있으면 열지 못한다 → 양쪽 다 ASCII 경로로 보내고 원격에서 옮긴다
+TMP_LOCAL="${TMPDIR:-/tmp}/factory_env_tmp"
+cp "$HERE/.env" "$TMP_LOCAL"
+gcloud compute scp "$TMP_LOCAL" "$NAME":"/home/$USER/env_upload" --zone="$ZONE" --quiet
+rm -f "$TMP_LOCAL"
+gcloud compute ssh "$NAME" --zone="$ZONE" --quiet --command='
+  APP=$(find $HOME/knu-agentic-factory -maxdepth 3 -type d -name "W1_*" | head -1)
+  mv ~/env_upload "$APP/.env" && chmod 600 "$APP/.env" && echo "   .env 배치 완료"
+'
 
 say "7. 상시 기동 등록 (systemd)"
-gcloud compute ssh "$NAME" --zone="$ZONE" --command='
-  APP=$HOME/knu-agentic-factory/산출물/0_공통/W1_팩토리시뮬레이터
+gcloud compute ssh "$NAME" --zone="$ZONE" --quiet --command='
+  APP=$(find $HOME/knu-agentic-factory -maxdepth 3 -type d -name "W1_*" | head -1)
   sudo tee /etc/systemd/system/factory.service > /dev/null <<UNIT
 [Unit]
 Description=K-Precision Factory Simulator
 After=network-online.target
 
 [Service]
+User=$USER
 WorkingDirectory=$APP
 ExecStart=$APP/.venv/bin/python -m uvicorn server.app.main:app --host 0.0.0.0 --port 8000 --workers 1
 Restart=always
@@ -100,11 +109,13 @@ WantedBy=multi-user.target
 UNIT
   sudo systemctl daemon-reload
   sudo systemctl enable --now factory
+  sleep 10
+  systemctl is-active factory
 '
 
-say "8. 헬스체크"
-sleep 8
-curl -s -m 10 "http://$IP:8000/api/v1/health" | head -c 300 && echo
+say "8. 헬스체크 (외부 접속)"
+sleep 5
+curl -s -m 15 "http://$IP:8000/api/v1/health" | head -c 300 && echo
 
 say "완료"
 echo "  학생 화면   http://$IP:8000/view?tenant=S01"
