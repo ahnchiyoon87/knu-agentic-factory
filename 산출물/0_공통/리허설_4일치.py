@@ -241,8 +241,8 @@ def day3(s: Sim, ns: str) -> None:
 def day4(s: Sim, base: str, token: str, teams: list[str], quick: bool) -> None:
     phase("Day 4 — 움직이기 : 제어 개방과 폐루프")
 
-    # 강사가 누르는 것 — 명령 하나
-    ok, msg = run_script(W1 / "tools" / "day4.py", [], 120)
+    # 강사가 누르는 것 — 명령 하나 (검사 대상 서버를 그대로 넘긴다: 로컬/클라우드 공통)
+    ok, msg = run_script(W1 / "tools" / "day4.py", ["--base", base], 120)
     check("Day 4 준비가 명령 하나로 끝난다 (tools/day4.py)", ok, msg)
 
     st = s.get(f"/api/v1/{teams[0]}/state")
@@ -426,7 +426,7 @@ def main() -> int:
         day4(s, args.base_url, args.token, teams, args.quick)
     finally:
         phase("정리 — Day 1~3 상태로 되돌린다")
-        run_script(W1 / "tools" / "day4.py", ["--end"], 120)
+        run_script(W1 / "tools" / "day4.py", ["--end", "--base", args.base_url], 120)
         for t in [args.ns, *teams]:
             try:
                 s.inst("POST", "/reset", params={"tenant_id": t})

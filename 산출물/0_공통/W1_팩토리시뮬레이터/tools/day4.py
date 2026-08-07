@@ -23,7 +23,7 @@ import httpx
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def _env() -> tuple[str, str]:
+def _env(base_override: str | None = None) -> tuple[str, str]:
     path = ROOT / ".env"
     if path.is_file():
         for line in path.read_text(encoding="utf-8").splitlines():
@@ -31,7 +31,8 @@ def _env() -> tuple[str, str]:
             if line and not line.startswith("#") and "=" in line:
                 k, _, v = line.partition("=")
                 os.environ.setdefault(k.strip(), v.strip())
-    base = os.environ.get("BASE_URL", "http://127.0.0.1:8000").rstrip("/")
+    base = (base_override or os.environ.get("BASE_URL")
+            or "http://127.0.0.1:8000").rstrip("/")
     token = os.environ.get("INSTRUCTOR_TOKEN", "")
     if not token:
         sys.exit("INSTRUCTOR_TOKEN 을 못 찾았습니다 (.env 확인)")
@@ -65,9 +66,13 @@ def main() -> int:
     ap.add_argument("--scale", type=float, default=120.0, help="시연 배속 (기본 120)")
     ap.add_argument("--status", action="store_true")
     ap.add_argument("--end", action="store_true", help="Day 1~3 상태로 되돌림")
+    ap.add_argument("--base", metavar="주소",
+                    help="서버 주소. 클라우드로 수업할 때 지정 (예: http://34.64.94.16:8000). "
+                         "생략하면 .env 의 BASE_URL, 그것도 없으면 http://127.0.0.1:8000")
     args = ap.parse_args()
 
-    base, token = _env()
+    base, token = _env(args.base)
+    print(f"대상  {base}\n")
 
     if args.status:
         print("현재 상태")
