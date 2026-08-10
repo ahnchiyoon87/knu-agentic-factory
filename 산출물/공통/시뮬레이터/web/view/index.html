@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>K-정밀 팩토리 시뮬레이터 — 2D 공장 뷰</title>
+<style>
+  :root{
+    --bg:#0E1116; --panel:#161B22; --line:#232A34; --line2:#2E3742;
+    --ink:#E6EDF3; --ink2:#9BA7B4; --muted:#6B7784;
+    --ok:#2EA043; --warn:#D29922; --crit:#DA3633; --idle:#4A5568;
+    --accent:#2F81F7;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:"Pretendard Variable",Pretendard,-apple-system,"Malgun Gothic",system-ui,sans-serif;
+    font-size:14px;
+  }
+  header{
+    display:flex; align-items:center; gap:16px; flex-wrap:wrap;
+    padding:12px 20px; background:var(--panel); border-bottom:1px solid var(--line);
+  }
+  header h1{font-size:16px; font-weight:800; margin:0; letter-spacing:-.01em}
+  header h1 small{display:block; font-size:11px; color:var(--muted); font-weight:500; letter-spacing:.06em}
+  .spacer{flex:1}
+  label{font-size:12px; color:var(--ink2)}
+  select,input{
+    background:#0D1117; color:var(--ink); border:1px solid var(--line2);
+    border-radius:6px; padding:6px 9px; font-size:13px; font-family:inherit;
+  }
+  select:focus,input:focus{outline:1px solid var(--accent)}
+  .pill{
+    display:inline-flex; align-items:center; gap:6px; font-size:12px;
+    padding:4px 10px; border-radius:999px; border:1px solid var(--line2); color:var(--ink2);
+  }
+  .dot{width:7px; height:7px; border-radius:50%; background:var(--muted)}
+  .dot.live{background:var(--ok); box-shadow:0 0 0 3px rgba(46,160,67,.18)}
+  .dot.err{background:var(--crit); box-shadow:0 0 0 3px rgba(218,54,51,.18)}
+
+  /* 가상 시각 · 배속 바 */
+  #clockbar{
+    display:flex; align-items:center; gap:26px; flex-wrap:wrap;
+    padding:9px 20px; background:#12181F; border-bottom:1px solid var(--line);
+    font-variant-numeric:tabular-nums;
+  }
+  #clockbar.accel{background:#1B1710; border-bottom-color:#4A3A15}
+  .cb-item{display:flex; align-items:baseline; gap:8px}
+  .cb-item--right{margin-left:auto}
+  .cb-label{font-size:11px; letter-spacing:.1em; color:var(--muted); font-weight:700}
+  .cb-value{font-size:16px; font-weight:800; letter-spacing:-.01em}
+  .cb-value.dim{font-size:13px; font-weight:600; color:var(--ink2)}
+  #clockbar.accel #vscale{color:var(--warn)}
+  .cb-note{font-size:12px; color:var(--ink2)}
+  #clockbar.accel .cb-note{color:#E3B341}
+
+  main{display:grid; grid-template-columns:minmax(0,1fr) 330px; gap:14px; padding:14px 20px 24px}
+  @media(max-width:1080px){ main{grid-template-columns:minmax(0,1fr)} }
+  /* 무대 아래 — 오른쪽 열이 세로로 넘치지 않게 범례·시연을 이쪽으로 내린다.
+     덱B 33장이 요구하는 「볼 것 셋」이 스크롤 없이 한 화면에 있어야 한다. */
+  .stagecol{display:flex; flex-direction:column; gap:14px; min-width:0}
+  .under{display:grid; grid-template-columns:1fr auto; gap:14px; align-items:start}
+  .under > .card{margin:0}
+  #demoCard.on{display:block}
+
+  #stageWrap{background:var(--panel); border:1px solid var(--line); border-radius:10px; overflow:hidden}
+  #stage{display:block; margin:0 auto}
+
+  aside{display:flex; flex-direction:column; gap:12px; min-width:0}
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:12px 14px}
+  .card h2{font-size:12px; letter-spacing:.1em; color:var(--muted); margin:0 0 10px; font-weight:800}
+
+  table{width:100%; border-collapse:collapse; font-size:12.5px}
+  th,td{text-align:left; padding:5px 4px; border-bottom:1px solid var(--line)}
+  th{color:var(--muted); font-weight:700; font-size:11px}
+  tr:last-child td{border-bottom:none}
+  td.num{text-align:right; font-variant-numeric:tabular-nums}
+  .s-run{color:var(--ok)} .s-idle{color:var(--ink2)} .s-stop{color:var(--muted)} .s-alarm{color:var(--crit)}
+  .null{color:var(--crit); font-style:italic}
+
+  .alarm{padding:8px 10px; border-radius:7px; margin-bottom:7px; border-left:3px solid var(--warn); background:#1C1B12}
+  .alarm.crit{border-left-color:var(--crit); background:#1F1414}
+  .alarm b{display:block; font-size:12.5px}
+  .alarm span{font-size:11px; color:var(--ink2)}
+  .empty{color:var(--muted); font-size:12px; padding:6px 2px}
+
+  /* 이 공장이 누구 것인가 (덱B 33장 하단 본문) */
+  #nsCard{border-color:#2A3A4C;background:#141C26}
+  .nsName{font-size:19px;font-weight:800;letter-spacing:-.01em;margin-bottom:5px}
+  .nsNote{margin:0;font-size:11.5px;color:var(--ink2);line-height:1.55}
+
+  /* 제어 통로 (덱B 33장 셋째) */
+  .lock{float:right;font-size:10px;font-weight:800;padding:2px 8px;border-radius:3px;
+    letter-spacing:0;background:#2B313B;color:#9BA7B4}
+  .lock.open{background:#12301C;color:#5FD37E}
+  .channels{list-style:none;margin:0;padding:0}
+  .channels li{display:flex;align-items:baseline;gap:8px;padding:5px 0;
+    border-bottom:1px solid var(--line);font-size:12.5px}
+  .channels li:last-child{border-bottom:none}
+  .channels .ico{flex:none;width:14px;color:var(--muted);font-size:11px}
+  .channels.open .ico{color:var(--ok)}
+  .channels .sig{font-family:ui-monospace,Consolas,monospace;font-size:11px;color:var(--muted)}
+  .lockNote{margin:9px 0 0;font-size:11.5px;color:#E3B341;
+    background:#1C1B12;border-left:3px solid var(--warn);border-radius:5px;padding:7px 9px}
+  .lockNote.open{color:#7EE29A;background:#101E14;border-left-color:var(--ok)}
+
+  /* 시연 패널 — /view?demo=1 일 때만 보인다 */
+  /* 시연 모드에서는 설비·로봇 표를 접는다.
+     2D 상자가 온도·진동·rpm 을 이미 보여주므로 중복이고,
+     접어야 「제어 통로」까지 스크롤 없이 한 화면에 들어간다. */
+  body.demo .foldable{display:none}
+  #demoCard{display:none}
+  #demoCard.on{display:block}
+  #demoCard .row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:7px}
+  #demoCard{min-width:0}
+  .under #demoCard .row{flex-wrap:nowrap}
+  .under #demoCard input{flex:1 1 180px;min-width:140px}
+  .under #demoCard button{flex:0 0 auto;min-width:auto}
+  #demoCard button{flex:1;min-width:96px;background:#21262D;color:var(--ink);
+    border:1px solid var(--line2);border-radius:6px;padding:7px 9px;font-size:12px;
+    font-family:inherit;cursor:pointer}
+  #demoCard button:hover{background:#2C333B;border-color:#3D4753}
+  #demoCard button.warn{background:#3B1A19;border-color:#6E2C2A;color:#FF9E99}
+  #demoCard input{width:100%;margin-bottom:8px}
+  #demoLog{font-size:11px;color:var(--ink2);min-height:16px;line-height:1.5}
+
+  .legend{display:flex; gap:14px; flex-wrap:wrap; font-size:11.5px; color:var(--ink2)}
+  .legend i{display:inline-block; width:9px; height:9px; border-radius:2px; margin-right:5px}
+  footer{padding:0 20px 22px; color:var(--muted); font-size:11.5px; line-height:1.7}
+  code{background:#0D1117; border:1px solid var(--line2); border-radius:4px; padding:1px 5px; font-size:11px}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>K-정밀 팩토리 시뮬레이터<small>경남대 RISE 피지컬AI 사관학교 · 8월 특강 W1</small></h1>
+  <div class="spacer"></div>
+  <label>네임스페이스 <select id="tenant"></select></label>
+  <label>폴링 <select id="interval">
+      <option value="1000" selected>1초</option>
+      <option value="2000">2초</option>
+      <option value="3000">3초</option>
+      <option value="5000">5초</option>
+  </select></label>
+  <span class="pill"><span class="dot" id="dot"></span><span id="status">연결 중</span></span>
+</header>
+
+<!-- 가상 시각 · 배속.
+     강사가 "실제로는 네 시간에 걸친 일입니다"라고 말할 때 학생이 화면으로 확인해야 한다. -->
+<div id="clockbar">
+  <div class="cb-item">
+    <span class="cb-label">공장 시각</span>
+    <span class="cb-value" id="vtime">—</span>
+  </div>
+  <div class="cb-item">
+    <span class="cb-label">배속</span>
+    <span class="cb-value" id="vscale">×1</span>
+  </div>
+  <div class="cb-item cb-note" id="vnote">실시간</div>
+  <div class="cb-item cb-item--right">
+    <span class="cb-label">실제 시각</span>
+    <span class="cb-value dim" id="rtime">—</span>
+  </div>
+</div>
+
+<main>
+  <div class="stagecol">
+    <div id="stageWrap"><div id="stage"></div></div>
+    <div class="under">
+      <!-- 강사 시연용. /view?demo=1 로 열었을 때만 나타난다.
+         덱B 33장 「볼 것 셋」 중 둘째를 다른 탭으로 넘어가지 않고 보여주기 위한 것이다. -->
+      <div class="card" id="demoCard">
+        <h2>시연 — 이상 주입</h2>
+        <input id="demoToken" type="password" placeholder="INSTRUCTOR_TOKEN" autocomplete="off">
+        <div class="row">
+          <button data-kind="temp_drift">온도 드리프트</button>
+          <button data-kind="vibration_spike">진동 스파이크</button>
+        </div>
+        <div class="row">
+          <button data-kind="sensor_dropout">센서 결측</button>
+          <button id="demoStop" class="warn">전체 중단</button>
+        </div>
+        <div class="row">
+          <button data-scale="1">배속 ×1</button>
+          <button data-scale="60">배속 ×60</button>
+        </div>
+        <div id="demoLog"></div>
+      </div>
+      <div class="card">
+        <h2>범례</h2>
+        <div class="legend">
+          <span><i style="background:#2EA043"></i>가동</span>
+          <span><i style="background:#D29922"></i>주의</span>
+          <span><i style="background:#DA3633"></i>알람</span>
+          <span><i style="background:#4A5568"></i>정지·유휴</span>
+          <span><i style="background:#8B5CF6"></i>센서 결측</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <aside>
+    <!-- 덱B 33장 하단 —
+         "여러분 각자에게 자기 몫의 공장이 따로 주어진다.
+          옆 사람이 내린 명령이 내 공장에 영향을 주지 않는다." -->
+    <div class="card" id="nsCard">
+      <h2>이 공장</h2>
+      <div class="nsName" id="nsName">—</div>
+      <p class="nsNote">자기 몫의 공장입니다. 옆 사람이 내린 명령은 이 공장에 영향을 주지 않습니다.</p>
+    </div>
+
+    <div class="card foldable">
+      <h2>CNC 설비 6대</h2>
+      <table id="eqTable">
+        <thead><tr><th>설비</th><th class="num">온도</th><th class="num">진동</th><th class="num">rpm</th><th>상태</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="card foldable">
+      <h2>AMR 2대</h2>
+      <table id="rbTable">
+        <thead><tr><th>로봇</th><th class="num">배터리</th><th>적재</th><th>상태</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>알람</h2>
+      <div id="alarms"><div class="empty">없음</div></div>
+    </div>
+
+    <!-- Day 1 덱B 33장 「볼 것 셋」 중 셋째 —
+         "명령을 넣는 통로가 네 개 준비돼 있다 / 그 네 개는 오늘 열지 않는다" -->
+    <div class="card" id="controlCard">
+      <h2>제어 통로 <span id="lockBadge" class="lock">잠김</span></h2>
+      <ul class="channels" id="channels"></ul>
+      <p class="lockNote" id="lockNote">넷째 날에 엽니다.</p>
+    </div>
+
+  </aside>
+</main>
+
+<footer>
+  읽기 API — <code id="apiHint">GET /api/v1/{네임스페이스}/state</code> · 이 화면은 그 응답만으로 그려집니다.
+  제어 API 4종은 교안상 2일차 에 개방됩니다.
+</footer>
+
+<script src="/static/vendor/konva.min.js"></script>
+<script>
+// =============================================================================
+// K-정밀 2D 공장 뷰
+//
+// 리서치 확정안: 2D 백본은 Konva.js. Realtime 구독이 아니라 1~2초 폴링.
+// 레이어를 정적/동적으로 나눠 배경은 한 번만 그리고 상태만 다시 그린다.
+// =============================================================================
+const API = location.origin;
+const COLOR = {
+  RUN:'#1F6F3A', IDLE:'#3A4553', STOP:'#2B313B', ALARM:'#8B2321',
+  WARN:'#7A5A10', OFFLINE:'#4C3A7A',
+  edge:{ RUN:'#2EA043', IDLE:'#4A5568', STOP:'#4A5568', ALARM:'#DA3633',
+         WARN:'#D29922', OFFLINE:'#8B5CF6' }
+};
+const LOGICAL_W = 1000, LOGICAL_H = 600;
+
+let layout=null, stage=null, bgLayer=null, fgLayer=null;
+let eqNodes={}, rbNodes={}, scale=1;
+let timer=null, tenant=null, failures=0;
+
+// ------------------------------------------------------------------ 부트스트랩
+async function boot(){
+  layout = await (await fetch(`${API}/api/v1/layout`)).json();
+  const list = await (await fetch(`${API}/api/v1/tenants`)).json();
+
+  const sel = document.getElementById('tenant');
+  sel.innerHTML = list.tenants
+    .map(t => `<option value="${t.tenant_id}">${t.tenant_id} · ${t.display_name}</option>`)
+    .join('');
+
+  // URL 로 고정 가능:  /view?tenant=S07   (학생에게 개인 링크를 줄 때)
+  const want = new URLSearchParams(location.search).get('tenant');
+  if (want && list.tenants.some(t => t.tenant_id === want)) sel.value = want;
+  tenant = sel.value;
+  document.getElementById('apiHint').textContent = `GET /api/v1/${tenant}/state`;
+  showNamespace(sel);
+
+  sel.onchange = () => {
+    tenant = sel.value;
+    document.getElementById('apiHint').textContent = `GET /api/v1/${tenant}/state`;
+    showNamespace(sel);
+    restart();
+  };
+  document.getElementById('interval').onchange = restart;
+
+  buildStage();
+  window.addEventListener('resize', () => { buildStage(); });
+  restart();
+}
+
+function showNamespace(sel){
+  const opt = sel.options[sel.selectedIndex];
+  document.getElementById('nsName').textContent = opt ? opt.text : tenant;
+}
+
+// ------------------------------------------------------------------ 무대 구성
+function buildStage(){
+  // 폭뿐 아니라 남은 높이까지 보고 축척을 정한다.
+  // 덱B 33장이 요구하는 「볼 것 셋」이 프로젝터에서 스크롤 없이 한 화면에 있어야 한다.
+  const wrap = document.getElementById('stageWrap');
+  const availW = wrap.clientWidth;
+  const top = wrap.getBoundingClientRect().top + window.scrollY;
+  const under = document.querySelector('.under');
+  const underH = under ? under.getBoundingClientRect().height + 14 : 0;
+  const availH = Math.max(300, window.innerHeight - top - underH - 96);
+
+  scale = Math.min(availW / LOGICAL_W, availH / LOGICAL_H);
+  const w = LOGICAL_W * scale, h = LOGICAL_H * scale;
+
+  if (stage) stage.destroy();
+  stage = new Konva.Stage({ container:'stage', width:w, height:h });
+  bgLayer = new Konva.Layer({ listening:false });
+  fgLayer = new Konva.Layer();
+  stage.add(bgLayer); stage.add(fgLayer);
+
+  drawBackground();
+  drawEquipment();
+  drawRobots();
+
+  // 정적 배경은 한 번 그린 뒤 비트맵으로 캐시한다(매 폴링마다 다시 그리지 않는다)
+  bgLayer.cache();
+  bgLayer.draw();
+  fgLayer.draw();
+}
+
+const S = v => v * scale;
+
+function drawBackground(){
+  bgLayer.add(new Konva.Rect({ x:0, y:0, width:stage.width(), height:stage.height(), fill:'#11161D' }));
+
+  // 바닥 격자
+  for (let x=0; x<=LOGICAL_W; x+=50)
+    bgLayer.add(new Konva.Line({ points:[S(x),0,S(x),S(LOGICAL_H)], stroke:'#171E26', strokeWidth:1 }));
+  for (let y=0; y<=LOGICAL_H; y+=50)
+    bgLayer.add(new Konva.Line({ points:[0,S(y),S(LOGICAL_W),S(y)], stroke:'#171E26', strokeWidth:1 }));
+
+  // AMR 통로 (경로 그래프의 간선)
+  layout.edges.forEach(([a,b]) => {
+    const p = layout.nodes[a], q = layout.nodes[b];
+    bgLayer.add(new Konva.Line({
+      points:[S(p.x),S(p.y),S(q.x),S(q.y)],
+      stroke:'#28313D', strokeWidth:Math.max(6, S(14)), lineCap:'round'
+    }));
+  });
+
+  // 스테이션 (창고·도크)
+  ['WH','DOCK'].forEach(n => {
+    const p = layout.nodes[n];
+    bgLayer.add(new Konva.Rect({
+      x:S(p.x-55), y:S(p.y-32), width:S(110), height:S(64),
+      fill:'#1A222C', stroke:'#323C49', strokeWidth:1, cornerRadius:S(6)
+    }));
+    // 라벨은 박스 위쪽 가장자리에 둔다. 로봇이 노드 중앙에 서기 때문에
+    // 가운데에 두면 로봇·배터리 표시와 겹친다.
+    bgLayer.add(new Konva.Text({
+      x:S(p.x-55), y:S(p.y-50), width:S(110), align:'center',
+      text:p.label, fontSize:Math.max(9,S(13)), fill:'#8A96A3',
+      fontFamily:'Pretendard, Malgun Gothic, sans-serif'
+    }));
+  });
+}
+
+function drawEquipment(){
+  eqNodes = {};
+  const box = layout.equipment_box;
+  layout.equipment.forEach(e => {
+    const g = new Konva.Group({ x:S(e.pos_x - box.width/2), y:S(e.pos_y - box.height/2) });
+
+    const rect = new Konva.Rect({
+      width:S(box.width), height:S(box.height),
+      fill:COLOR.RUN, stroke:COLOR.edge.RUN, strokeWidth:2, cornerRadius:S(8),
+      shadowColor:'#000', shadowBlur:S(10), shadowOpacity:.35
+    });
+    const name = new Konva.Text({
+      x:S(10), y:S(8), text:e.equipment_id, fontSize:Math.max(11,S(16)),
+      fontStyle:'bold', fill:'#FFFFFF', fontFamily:'Pretendard, Malgun Gothic, sans-serif'
+    });
+    const sub = new Konva.Text({
+      x:S(10), y:S(28), text:e.display_name, fontSize:Math.max(8,S(11)),
+      fill:'rgba(255,255,255,.62)', fontFamily:'Pretendard, Malgun Gothic, sans-serif'
+    });
+    const vals = new Konva.Text({
+      x:S(10), y:S(48), text:'—', fontSize:Math.max(9,S(13)), lineHeight:1.35,
+      fill:'#FFFFFF', fontFamily:'Pretendard, Malgun Gothic, sans-serif'
+    });
+    const ring = new Konva.Rect({
+      x:-S(5), y:-S(5), width:S(box.width+10), height:S(box.height+10),
+      stroke:COLOR.edge.ALARM, strokeWidth:2, cornerRadius:S(11), opacity:0
+    });
+
+    g.add(ring); g.add(rect); g.add(name); g.add(sub); g.add(vals);
+    fgLayer.add(g);
+    eqNodes[e.equipment_id] = { g, rect, vals, ring };
+  });
+}
+
+function drawRobots(){
+  rbNodes = {};
+  layout.robots.forEach((r,i) => {
+    const home = layout.nodes[r.home_node];
+    const g = new Konva.Group({ x:S(home.x), y:S(home.y) });
+    const halo = new Konva.Circle({ radius:S(22), fill:'rgba(47,129,247,.14)' });
+    const body = new Konva.Circle({
+      radius:S(15), fill: i===0 ? '#2F81F7' : '#00A9A5',
+      stroke:'#0D1117', strokeWidth:2, shadowColor:'#000', shadowBlur:S(8), shadowOpacity:.5
+    });
+    const tag = new Konva.Text({
+      x:-S(30), y:S(17), width:S(60), align:'center', text:r.robot_id,
+      fontSize:Math.max(9,S(12)), fontStyle:'bold', fill:'#C9D6E4',
+      fontFamily:'Pretendard, Malgun Gothic, sans-serif'
+    });
+    const bat = new Konva.Text({
+      x:-S(30), y:S(30), width:S(60), align:'center', text:'',
+      fontSize:Math.max(8,S(11)), fill:'#7C8794',
+      fontFamily:'Pretendard, Malgun Gothic, sans-serif'
+    });
+    g.add(halo); g.add(body); g.add(tag); g.add(bat);
+    fgLayer.add(g);
+    rbNodes[r.robot_id] = { g, body, bat, halo };
+  });
+}
+
+// ------------------------------------------------------------------ 폴링 루프
+function restart(){
+  if (timer) clearInterval(timer);
+  const ms = Number(document.getElementById('interval').value);
+  poll();
+  timer = setInterval(poll, ms);
+}
+
+async function poll(){
+  try{
+    const res = await fetch(`${API}/api/v1/${tenant}/state`, { cache:'no-store' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    render(await res.json());
+    failures = 0;
+    setStatus(true, '수신 중 · ' + new Date().toLocaleTimeString('ko-KR'));
+  }catch(err){
+    failures++;
+    setStatus(false, `연결 실패 (${failures}회) — ${err.message}`);
+  }
+}
+
+function setStatus(ok, msg){
+  const dot = document.getElementById('dot');
+  dot.className = 'dot ' + (ok ? 'live' : 'err');
+  document.getElementById('status').textContent = msg;
+}
+
+// --------------------------------------------------- 가상 시각 · 배속 표시
+function renderClock(c){
+  if (!c) return;
+  const bar = document.getElementById('clockbar');
+  const accel = c.time_scale > 1;
+  bar.classList.toggle('accel', accel);
+
+  const vt = new Date(c.virtual_time);
+  document.getElementById('vtime').textContent =
+    vt.toLocaleString('ko-KR', { month:'2-digit', day:'2-digit',
+                                hour:'2-digit', minute:'2-digit', second:'2-digit' });
+  document.getElementById('vscale').textContent = '×' + c.time_scale;
+  document.getElementById('rtime').textContent =
+    new Date(c.real_time).toLocaleTimeString('ko-KR');
+
+  // 기울기는 그대로다. 시계만 빨라진다 — 그 점이 화면에 드러나야 한다.
+  document.getElementById('vnote').textContent = accel
+    ? `실제 ${c.real_tick_seconds}초 = 공장 ${Math.round(c.virtual_step_seconds/60)}분 · `
+      + `공장 4시간이 실제 ${(4*3600/c.time_scale/60).toFixed(0)}분`
+    : '실시간';
+}
+
+// ------------------------------------------- 제어 통로 (덱B 33장 셋째)
+function renderControl(c){
+  if (!c) return;
+  const open = c.unlocked;
+  const badge = document.getElementById('lockBadge');
+  badge.textContent = open ? '개방' : '잠김';
+  badge.className = 'lock' + (open ? ' open' : '');
+
+  const ul = document.getElementById('channels');
+  ul.className = 'channels' + (open ? ' open' : '');
+  ul.innerHTML = c.channels.map(ch =>
+    `<li><span class="ico">${open ? '●' : '🔒'}</span>
+       <span><b>${ch.label}</b><br><span class="sig">${ch.signature}</span></span></li>`).join('');
+
+  const note = document.getElementById('lockNote');
+  note.textContent = open
+    ? '열려 있습니다. 에이전트가 이 공장을 움직일 수 있습니다.'
+    : `${c.opens_on} 에 엽니다. 오늘은 보기만 합니다.`;
+  note.className = 'lockNote' + (open ? ' open' : '');
+}
+
+// ------------------------------------------------------------------ 렌더
+function render(s){
+  renderClock(s.clock);
+  renderControl(s.control);
+  const alarmByEq = {};
+  s.alarms.forEach(a => {
+    const cur = alarmByEq[a.equipment_id];
+    if (!cur || a.severity === 'CRITICAL') alarmByEq[a.equipment_id] = a;
+  });
+
+  // --- 설비 ---
+  s.equipment.forEach(e => {
+    const n = eqNodes[e.equipment_id];
+    if (!n) return;
+    const al = alarmByEq[e.equipment_id];
+
+    let key = e.run_state;
+    if (!e.sensor_online) key = 'OFFLINE';
+    else if (al) key = al.severity === 'CRITICAL' ? 'ALARM' : 'WARN';
+
+    n.rect.fill(COLOR[key] || COLOR.IDLE);
+    n.rect.stroke(COLOR.edge[key] || COLOR.edge.IDLE);
+    n.vals.text(
+      e.sensor_online
+        ? `${fmt(e.temperature,1)}℃   ${fmt(e.vibration,2)} mm/s\n${fmt(e.rpm,0)} rpm   ${e.run_state}`
+        : `센서 결측\n값 수신 없음`
+    );
+    n.ring.opacity(al ? 0.85 : 0);
+  });
+
+  // --- 로봇 (부드럽게 이동) ---
+  s.robots.forEach(r => {
+    const n = rbNodes[r.robot_id];
+    if (!n) return;
+    const tx = S(r.pos_x), ty = S(r.pos_y);
+    const d = Math.hypot(n.g.x()-tx, n.g.y()-ty);
+    if (d > S(140)) { n.g.position({x:tx, y:ty}); }      // 순간이동(리셋 등)
+    else {
+      const ms = Number(document.getElementById('interval').value);
+      n.g.to({ x:tx, y:ty, duration: ms/1000, easing: Konva.Easings.Linear });
+    }
+    n.bat.text(`${r.battery.toFixed(0)}%  ${r.status === 'MOVING' ? '이동중' :
+                 r.status === 'CHARGING' ? '충전중' : '대기'}`);
+    n.halo.opacity(r.status === 'MOVING' ? 1 : 0.35);
+    n.body.fill(r.battery < 20 ? '#DA3633' : (r.robot_id === 'AMR-01' ? '#2F81F7' : '#00A9A5'));
+  });
+
+  fgLayer.batchDraw();
+  renderTables(s);
+}
+
+function fmt(v, digits){ return v === null || v === undefined ? '—' : Number(v).toFixed(digits); }
+
+function renderTables(s){
+  document.querySelector('#eqTable tbody').innerHTML = s.equipment.map(e => {
+    const cls = 's-' + (e.run_state || '').toLowerCase();
+    const off = !e.sensor_online;
+    return `<tr>
+      <td>${e.equipment_id}</td>
+      <td class="num ${off?'null':''}">${off?'NULL':fmt(e.temperature,1)}</td>
+      <td class="num ${off?'null':''}">${off?'NULL':fmt(e.vibration,2)}</td>
+      <td class="num ${off?'null':''}">${off?'NULL':fmt(e.rpm,0)}</td>
+      <td class="${cls}">${off?'결측':e.run_state}</td></tr>`;
+  }).join('');
+
+  document.querySelector('#rbTable tbody').innerHTML = s.robots.map(r => `<tr>
+      <td>${r.robot_id}</td>
+      <td class="num">${r.battery.toFixed(0)}%</td>
+      <td>${r.payload_state === 'LOADED' ? '적재' : '공차'}</td>
+      <td>${r.status === 'MOVING' ? `이동 → ${r.target_node ?? ''}` :
+             r.status === 'CHARGING' ? '충전' : '대기'}</td></tr>`).join('');
+
+  const box = document.getElementById('alarms');
+  box.innerHTML = s.alarms.length
+    ? s.alarms.map(a => `<div class="alarm ${a.severity === 'CRITICAL' ? 'crit' : ''}">
+        <b>${a.message}</b>
+        <span>${a.rule_code} · ${a.state}${a.value != null ? ` · 측정 ${Number(a.value).toFixed(2)}` : ''}
+        · ${new Date(a.raised_at).toLocaleTimeString('ko-KR')}</span></div>`).join('')
+    : '<div class="empty">없음</div>';
+}
+
+// --------------------------------------------- 시연 패널 (?demo=1)
+(function initDemo(){
+  if (new URLSearchParams(location.search).get('demo') !== '1') return;
+  const card = document.getElementById('demoCard');
+  card.classList.add('on');
+  document.body.classList.add('demo');
+
+  const tok = () => document.getElementById('demoToken').value.trim();
+  const log = m => document.getElementById('demoLog').textContent = m;
+  const saved = sessionStorage.getItem('instructorToken');
+  if (saved) document.getElementById('demoToken').value = saved;
+
+  async function call(path, method){
+    const r = await fetch(API + path, {
+      method, headers: { 'X-Instructor-Token': tok(), 'Content-Type': 'application/json' },
+      body: method === 'POST' && path.includes('/inject')
+        ? JSON.stringify({ tenant_id: tenant, kind: path.split('kind=')[1] }) : undefined,
+    });
+    const b = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(b.detail || `HTTP ${r.status}`);
+    return b;
+  }
+
+  card.querySelectorAll('button[data-kind]').forEach(b => b.onclick = async () => {
+    if (!tok()) return log('토큰을 입력하세요.');
+    sessionStorage.setItem('instructorToken', tok());
+    try{
+      const r = await fetch(API + '/api/instructor/inject', {
+        method: 'POST',
+        headers: { 'X-Instructor-Token': tok(), 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tenant_id: tenant, kind: b.dataset.kind }),
+      });
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.detail || r.status);
+      log(`주입 #${j.id} — ${j.equipment_id} / ${j.kind}`);
+    }catch(e){ log('실패 — ' + e.message); }
+  });
+
+  document.getElementById('demoStop').onclick = async () => {
+    try{ const j = await call('/api/instructor/inject', 'DELETE'); log(`주입 ${j.stopped}건 중단`); }
+    catch(e){ log('실패 — ' + e.message); }
+  };
+
+  card.querySelectorAll('button[data-scale]').forEach(b => b.onclick = async () => {
+    try{
+      const j = await call('/api/instructor/time-scale?scale=' + b.dataset.scale, 'POST');
+      log(`배속 ×${j.time_scale} — 공장 4시간이 실제 ${j.four_hours_takes_real_minutes}분`);
+    }catch(e){ log('실패 — ' + e.message); }
+  });
+})();
+
+boot().catch(err => setStatus(false, '초기화 실패 — ' + err.message));
+</script>
+</body>
+</html>

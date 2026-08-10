@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>강사 콘솔 — K-정밀 팩토리 시뮬레이터</title>
+<style>
+  :root{
+    --bg:#0E1116; --panel:#161B22; --line:#232A34; --line2:#2E3742;
+    --ink:#E6EDF3; --ink2:#9BA7B4; --muted:#6B7784;
+    --ok:#2EA043; --warn:#D29922; --crit:#DA3633; --accent:#2F81F7;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Pretendard Variable",Pretendard,-apple-system,"Malgun Gothic",system-ui,sans-serif;font-size:14px}
+  header{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:12px 20px;
+    background:var(--panel);border-bottom:1px solid var(--line)}
+  header h1{font-size:16px;font-weight:800;margin:0}
+  header h1 small{display:block;font-size:11px;color:var(--muted);font-weight:500;letter-spacing:.06em}
+  .spacer{flex:1}
+  label{font-size:12px;color:var(--ink2)}
+  input,select,textarea{background:#0D1117;color:var(--ink);border:1px solid var(--line2);
+    border-radius:6px;padding:7px 9px;font-size:13px;font-family:inherit}
+  input:focus,select:focus{outline:1px solid var(--accent)}
+  button{background:#21262D;color:var(--ink);border:1px solid var(--line2);border-radius:6px;
+    padding:7px 13px;font-size:13px;font-family:inherit;cursor:pointer}
+  button:hover{background:#2C333B;border-color:#3D4753}
+  button.primary{background:#1F6FEB;border-color:#1F6FEB;color:#fff}
+  button.primary:hover{background:#388BFD}
+  button.danger{background:#3B1A19;border-color:#6E2C2A;color:#FF9E99}
+  button.danger:hover{background:#4E211F}
+  button:disabled{opacity:.45;cursor:not-allowed}
+
+  main{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:14px;padding:14px 20px 30px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+  .card.wide{grid-column:1/-1}
+  .card h2{font-size:12px;letter-spacing:.1em;color:var(--muted);margin:0 0 4px;font-weight:800}
+  .card p.hint{font-size:12px;color:var(--muted);margin:0 0 12px;line-height:1.6}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:9px}
+  .row > label{min-width:74px}
+  .row input,.row select{flex:1;min-width:80px}
+
+  .presets{display:flex;flex-direction:column;gap:7px}
+  .preset{display:flex;gap:10px;align-items:flex-start;text-align:left;width:100%;
+    background:#0D1117;border:1px solid var(--line2);border-radius:8px;padding:10px 12px;cursor:pointer}
+  .preset:hover{border-color:var(--accent);background:#111823}
+  .preset b{display:block;font-size:13px;margin-bottom:3px}
+  .preset span{font-size:11.5px;color:var(--muted);line-height:1.55}
+  .k{flex:none;font-size:10px;padding:2px 7px;border-radius:4px;font-weight:800;margin-top:2px}
+  .k.temp_drift{background:#3A2A10;color:#E3B341}
+  .k.vibration_spike{background:#10303A;color:#56C7DE}
+  .k.sensor_dropout{background:#2E1F3D;color:#C69BFF}
+
+  table{width:100%;border-collapse:collapse;font-size:12.5px}
+  th,td{text-align:left;padding:6px 5px;border-bottom:1px solid var(--line)}
+  th{color:var(--muted);font-weight:700;font-size:11px}
+  td.num{text-align:right;font-variant-numeric:tabular-nums}
+  .tag{font-size:10.5px;padding:2px 7px;border-radius:4px;font-weight:700}
+  .tag.on{background:#12301C;color:#5FD37E} .tag.off{background:#2B313B;color:#8B95A1}
+  #log{background:#0D1117;border:1px solid var(--line2);border-radius:8px;padding:10px 12px;
+    height:170px;overflow:auto;font-family:ui-monospace,Consolas,monospace;font-size:11.5px;line-height:1.7}
+  #log .e{color:#FF9E99} #log .o{color:#5FD37E} #log .t{color:var(--muted)}
+  .stat{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--line);font-size:12.5px}
+  .stat:last-child{border-bottom:none}
+  .stat span:last-child{font-variant-numeric:tabular-nums;color:var(--ink2)}
+  .warnbox{background:#1C1B12;border-left:3px solid var(--warn);border-radius:6px;padding:9px 11px;
+    font-size:12px;color:#E6D9A8;line-height:1.6;margin-bottom:11px}
+  .clockbox{display:flex;flex-direction:column;gap:2px;background:#0D1117;border:1px solid var(--line2);
+    border-radius:8px;padding:9px 14px;min-width:150px}
+  .clockbox span{font-size:10.5px;letter-spacing:.1em;color:var(--muted);font-weight:700}
+  .clockbox b{font-size:16px;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+  #clockCard.accel{border-color:#4A3A15;background:#191710}
+  #clockCard.accel #cScale{color:var(--warn)}
+  .scaleBtn.on{background:#1F6FEB;border-color:#1F6FEB;color:#fff}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>강사 콘솔<small>K-정밀 팩토리 시뮬레이터 · 시나리오 주입</small></h1>
+  <div class="spacer"></div>
+  <label>토큰 <input id="token" type="password" placeholder="INSTRUCTOR_TOKEN" size="26"></label>
+  <button id="connect" class="primary">연결</button>
+  <a href="/view" target="_blank"><button>2D 뷰 열기</button></a>
+</header>
+
+<main>
+
+  <!-- ─────────────── 서버 경고 (있을 때만) ─────────────── -->
+  <div class="card wide" id="serverWarnings" style="display:none;padding:10px 16px"></div>
+
+  <!-- ─────────────── 2일차 원클릭 ─────────────── -->
+  <div class="card wide">
+    <h2>2일차 준비 — 한 번에</h2>
+    <p class="hint">
+      제어 개방 + 배속 ×120 을 한 번에 겁니다. 발표 때는 아래 「시연 주입」으로
+      해당 팀 공장에 드리프트를 쏩니다 — <b>팀이 발표석에 서기 전에</b> 쏘십시오
+      (주입 → 감지가 79~190초 걸립니다).
+    </p>
+    <div class="row">
+      <button class="primary" id="day4Prep">2일차 시작 (제어 개방 + 배속 ×120)</button>
+      <select id="day4Team"></select>
+      <button id="day4Inject">이 팀에 시연 주입 (EQ-03 드리프트)</button>
+      <span class="spacer"></span>
+      <button class="danger" id="day4End">2일차 종료 (1일차 상태로)</button>
+    </div>
+  </div>
+
+  <!-- ─────────────── 가상 시계 ─────────────── -->
+  <div class="card wide" id="clockCard">
+    <h2>가상 시계 — 배속</h2>
+    <p class="hint">
+      드리프트를 강의 시간 안에 보여줄 때 <b>기울기를 키우지 않는다.</b>
+      샘플당 상승폭이 커지면 1일차 의 「드리프트는 이동평균이 적응해 미탐된다」와 모순되고,
+      Day 1 의 「사람이 못 알아챌 만큼 미묘하다」도 무너지기 때문이다.
+      대신 1분 간격 가상 샘플을 그대로 둔 채 그 샘플을 더 빨리 내보낸다 —
+      샘플당 상승폭이 W5 레거시 CSV 와 같게 유지된다.
+    </p>
+    <div class="row" style="gap:14px">
+      <div class="clockbox">
+        <span>공장 시각</span><b id="cVTime">—</b>
+      </div>
+      <div class="clockbox">
+        <span>배속</span><b id="cScale">×1</b>
+      </div>
+      <div class="clockbox">
+        <span>샘플당 드리프트</span><b id="cPerSample">—</b>
+      </div>
+      <div class="clockbox">
+        <span>공장 4시간 = 실제</span><b id="cFourHours">—</b>
+      </div>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <button data-scale="1"   class="scaleBtn">×1 실시간</button>
+      <button data-scale="60"  class="scaleBtn primary">×60 (4시간 → 4분)</button>
+      <button data-scale="80"  class="scaleBtn">×80 (4시간 → 3분)</button>
+      <button data-scale="120" class="scaleBtn">×120 (4시간 → 2분)</button>
+    </div>
+    <div class="warnbox" style="margin:11px 0 0">
+      <b>×60 권장.</b> 실제 tick 이 정확히 1초라 교안의 「1초 주기 변동」이 그대로 유지되고 적재량도 같다.
+      ×120 은 적재량이 2배(39개 기준 624행/초)가 되므로 팀 모드(8개)에서만 쓴다.<br>
+      시연 순서 — <b>배속을 올려 드리프트를 만들고, 에이전트가 감지하면 ×1 로 되돌려</b>
+      감속·로봇 파견을 실시간으로 보여준다. AMR 주행은 배속과 무관하게 항상 실시간이다.
+    </div>
+  </div>
+
+  <!-- ─────────────── 프리셋 주입 ─────────────── -->
+  <div class="card">
+    <h2>이상 주입 — 프리셋</h2>
+    <p class="hint">버튼 하나로 바로 쏜다. 대상 네임스페이스는 아래 선택을 따른다.</p>
+    <div class="row">
+      <label>대상</label>
+      <select id="presetTenant"><option value="*">* 전체 네임스페이스</option></select>
+    </div>
+    <div class="presets" id="presets"></div>
+  </div>
+
+  <!-- ─────────────── 수동 주입 ─────────────── -->
+  <div class="card">
+    <h2>이상 주입 — 직접 지정</h2>
+    <p class="hint">교안 3종. 비운 값은 sim_profile.json 기본값이 쓰인다.</p>
+    <div class="row"><label>대상</label>
+      <select id="mTenant"><option value="*">* 전체</option></select></div>
+    <div class="row"><label>종류</label>
+      <select id="mKind">
+        <option value="temp_drift">온도 드리프트</option>
+        <option value="vibration_spike">진동 스파이크</option>
+        <option value="sensor_dropout">센서 결측</option>
+      </select></div>
+    <div class="row"><label>설비</label>
+      <select id="mEq">
+        <option value="">(종류별 기본)</option>
+        <option>EQ-01</option><option>EQ-02</option><option>EQ-03</option>
+        <option>EQ-04</option><option>EQ-05</option><option>EQ-06</option>
+      </select></div>
+    <div id="mParams"></div>
+    <div class="row"><label>지연</label><input id="mDelay" type="number" value="0" min="0"> 초 뒤 시작</div>
+    <div class="row"><button class="primary" id="mFire">주입</button>
+      <button class="danger" id="stopAll">전체 주입 중단</button></div>
+  </div>
+
+  <!-- ─────────────── 진행 중 주입 ─────────────── -->
+  <div class="card">
+    <h2>진행 중인 주입</h2>
+    <table><thead><tr><th>#</th><th>대상</th><th>설비</th><th>종류</th><th>종료</th><th></th></tr></thead>
+      <tbody id="injBody"><tr><td colspan="6" style="color:var(--muted)">없음</td></tr></tbody></table>
+  </div>
+
+  <!-- ─────────────── 제어 API 개방 ─────────────── -->
+  <div class="card">
+    <h2>제어 API 개방 — 2일차</h2>
+    <div class="warnbox">
+      교안상 제어 API 4종은 <b>2일차 에 처음 개방</b>한다. 1일차 에는 잠가 둔다.
+      개방하면 해당 네임스페이스의 <code>X-Access-Key</code> 보유자가 설비를 정지·감속하고 로봇을 파견할 수 있다.
+    </div>
+    <div class="row"><label>대상</label>
+      <select id="lockTenant"><option value="*">* 전체</option></select></div>
+    <div class="row">
+      <button class="primary" id="unlock">개방</button>
+      <button class="danger" id="lock">잠금</button>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <label style="min-width:auto">네임스페이스 초기화</label>
+      <select id="resetTenant"></select>
+      <button class="danger" id="reset">리셋</button>
+    </div>
+  </div>
+
+  <!-- ─────────────── 상태 ─────────────── -->
+  <div class="card">
+    <h2>러너 상태</h2>
+    <div id="stats"><div class="stat"><span>연결 안 됨</span><span>—</span></div></div>
+    <div class="row" style="margin-top:10px">
+      <button id="pruneNow">보존정책 즉시 실행</button>
+      <button id="dbSize">DB 사용량</button>
+    </div>
+  </div>
+
+  <!-- ─────────────── 네임스페이스 ─────────────── -->
+  <div class="card wide">
+    <h2>네임스페이스 · 접속 키</h2>
+    <p class="hint">access_key 는 2일차 제어 API 호출에 쓴다. 팀 편성은 tenant_member 기준이다.</p>
+    <div style="max-height:260px;overflow:auto">
+      <table><thead><tr><th>ID</th><th>구분</th><th>이름</th><th>팀</th><th>제어</th><th>access_key</th></tr></thead>
+        <tbody id="tenantBody"></tbody></table>
+    </div>
+  </div>
+
+  <!-- ─────────────── 로그 ─────────────── -->
+  <div class="card wide">
+    <h2>동작 로그</h2>
+    <div id="log"></div>
+  </div>
+
+</main>
+
+<script>
+const API = location.origin;
+let TOKEN = sessionStorage.getItem('instructorToken') || '';
+let PRESETS = {}, TENANTS = [], statusTimer = null;
+
+const $ = id => document.getElementById(id);
+const H = () => ({ 'X-Instructor-Token': TOKEN, 'Content-Type':'application/json' });
+
+function log(msg, cls='o'){
+  const el = $('log');
+  const t = new Date().toLocaleTimeString('ko-KR');
+  el.insertAdjacentHTML('afterbegin', `<div><span class="t">${t}</span> <span class="${cls}">${msg}</span></div>`);
+}
+
+async function call(path, opts={}){
+  const res = await fetch(API + path, { headers:H(), ...opts });
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(body.detail || `HTTP ${res.status}`);
+  return body;
+}
+
+// ------------------------------------------------------------------- 연결
+$('token').value = TOKEN;
+$('connect').onclick = connect;
+$('token').addEventListener('keydown', e => { if (e.key === 'Enter') connect(); });
+
+async function connect(){
+  TOKEN = $('token').value.trim();
+  if (!TOKEN) return log('토큰을 입력하세요.', 'e');
+  sessionStorage.setItem('instructorToken', TOKEN);
+  try{
+    await refreshStatus();
+    await refreshTenants();
+    await loadPresets();
+    log('연결됨');
+    if (statusTimer) clearInterval(statusTimer);
+    statusTimer = setInterval(refreshStatus, 3000);
+  }catch(err){ log('연결 실패 — ' + err.message, 'e'); }
+}
+
+// ------------------------------------------------------------------- 프리셋
+async function loadPresets(){
+  const r = await call('/api/instructor/presets');
+  PRESETS = r.presets || {};
+  renderPresets();
+}
+
+function renderPresets(){
+  const el = $('presets');
+  const entries = Object.entries(PRESETS);
+  if (!entries.length){ el.innerHTML = '<div style="color:var(--muted);font-size:12px">프리셋을 불러오지 못했습니다. 아래 직접 지정을 쓰세요.</div>'; return; }
+  el.innerHTML = entries.map(([name, p]) => `
+    <button class="preset" data-name="${encodeURIComponent(name)}">
+      <span class="k ${p.kind}">${({temp_drift:'드리프트',vibration_spike:'스파이크',sensor_dropout:'결측'})[p.kind]}</span>
+      <span><b>${name}${p.suggest_time_scale ? ` <em style="font-style:normal;color:var(--warn);font-size:11px">권장 x${p.suggest_time_scale}</em>` : ''}</b><span>${p.note || ''}</span></span>
+    </button>`).join('');
+  el.querySelectorAll('.preset').forEach(b => b.onclick = () => firePreset(decodeURIComponent(b.dataset.name)));
+}
+
+async function firePreset(name){
+  const p = PRESETS[name];
+  try{
+    const r = await call('/api/instructor/inject', {
+      method:'POST',
+      body: JSON.stringify({ tenant_id:$('presetTenant').value, kind:p.kind,
+                             equipment_id:p.equipment_id, params:p.params })
+    });
+    log(`주입 #${r.id} — ${name} → ${r.tenant_id} / ${r.equipment_id}`);
+    if (p.suggest_time_scale && p.suggest_time_scale > 1)
+      log(`이 프리셋은 배속 x${p.suggest_time_scale} 를 권장합니다. 위 「가상 시계」에서 올리세요.`);
+    refreshStatus();
+  }catch(err){ log('주입 실패 — ' + err.message, 'e'); }
+}
+
+// ------------------------------------------------------------------- 수동 주입
+const PARAM_FIELDS = {
+  temp_drift: [
+    ['slope_c_per_hour', '기울기(℃/시간)', 0.5],
+    ['duration_hours',   '상승 지속(시간)', 4.0],
+    ['hold_hours',       '최고점 유지(시간)', 1.0],
+  ],
+  vibration_spike: [
+    ['magnitude_mm_s',   '진폭(mm/s, 비우면 σ배수)', ''],
+    ['magnitude_sigma',  '진폭(노이즈 σ 배수)', 6.0],
+    ['duration_seconds', '1회 지속(초)', 3.0],
+    ['repeat_count',     '반복 횟수', 1],
+    ['repeat_interval_seconds', '반복 간격(초)', 20.0],
+  ],
+  sensor_dropout: [
+    ['duration_seconds', '결측 지속(초)', 120.0],
+  ],
+};
+
+function renderParams(){
+  const kind = $('mKind').value;
+  $('mParams').innerHTML = PARAM_FIELDS[kind].map(([k, label, def]) =>
+    `<div class="row"><label style="min-width:150px;font-size:11.5px">${label}</label>
+     <input data-k="${k}" value="${def}"></div>`).join('');
+}
+$('mKind').onchange = renderParams;
+renderParams();
+
+$('mFire').onclick = async () => {
+  const params = {};
+  $('mParams').querySelectorAll('input').forEach(i => {
+    if (i.value !== '') params[i.dataset.k] = Number(i.value);
+  });
+  try{
+    const r = await call('/api/instructor/inject', {
+      method:'POST',
+      body: JSON.stringify({ tenant_id:$('mTenant').value, kind:$('mKind').value,
+                             equipment_id:$('mEq').value || null, params,
+                             delay_seconds:Number($('mDelay').value || 0) })
+    });
+    log(`주입 #${r.id} — ${r.kind} → ${r.tenant_id} / ${r.equipment_id}`);
+    refreshStatus();
+  }catch(err){ log('주입 실패 — ' + err.message, 'e'); }
+};
+
+$('stopAll').onclick = async () => {
+  try{ const r = await call('/api/instructor/inject', { method:'DELETE' });
+       log(`주입 ${r.stopped}건 중단`); refreshStatus(); }
+  catch(err){ log('중단 실패 — ' + err.message, 'e'); }
+};
+
+// ------------------------------------------------------------------- 제어 개방
+$('unlock').onclick = () => setLock(true);
+$('lock').onclick   = () => setLock(false);
+async function setLock(unlocked){
+  try{
+    const t = $('lockTenant').value;
+    await call(`/api/instructor/control-lock?unlocked=${unlocked}&tenant_id=${encodeURIComponent(t)}`,
+               { method:'POST' });
+    log(`제어 API ${unlocked ? '개방' : '잠금'} — ${t}`);
+    refreshTenants();
+  }catch(err){ log('실패 — ' + err.message, 'e'); }
+}
+
+// ------------------------------------------------------------------- 2일차 원클릭
+$('day4Prep').onclick = async () => {
+  try{
+    await call('/api/instructor/control-lock?unlocked=true&tenant_id=*', { method:'POST' });
+    await call('/api/instructor/time-scale?scale=120', { method:'POST' });
+    log('2일차 시작 — 제어 전체 개방 · 배속 x120. 팀별 키는 아래 표에 있습니다.');
+    refreshTenants(); refreshStatus();
+  }catch(err){ log('실패 — ' + err.message, 'e'); }
+};
+$('day4Inject').onclick = async () => {
+  try{
+    const t = $('day4Team').value;
+    if (!t) { log('팀을 고르세요', 'e'); return; }
+    const r = await call('/api/instructor/inject', { method:'POST',
+      body: JSON.stringify({ tenant_id: t, equipment_id: 'EQ-03', kind: 'temp_drift' }) });
+    log(`시연 주입 — ${t} EQ-03 드리프트. ${r.note || ''}`);
+    refreshStatus();
+  }catch(err){ log('실패 — ' + err.message, 'e'); }
+};
+$('day4End').onclick = async () => {
+  try{
+    await call('/api/instructor/inject', { method:'DELETE' });
+    await call('/api/instructor/control-lock?unlocked=false&tenant_id=*', { method:'POST' });
+    await call('/api/instructor/time-scale?scale=60', { method:'POST' });
+    log('2일차 종료 — 주입 중단 · 제어 잠금 · 배속 x60(기본값)');
+    refreshTenants(); refreshStatus();
+  }catch(err){ log('실패 — ' + err.message, 'e'); }
+};
+
+$('reset').onclick = async () => {
+  const t = $('resetTenant').value;
+  if (!confirm(`${t} 의 이력·알람·명령·주입을 전부 삭제합니다. 진행할까요?`)) return;
+  try{ await call(`/api/instructor/reset?tenant_id=${encodeURIComponent(t)}`, { method:'POST' });
+       log(`${t} 초기화 완료`); refreshStatus(); }
+  catch(err){ log('초기화 실패 — ' + err.message, 'e'); }
+};
+
+$('pruneNow').onclick = async () => {
+  try{ const r = await call('/api/instructor/prune', { method:'POST' });
+       log(`보존정책 실행 — 센서 ${r.sensor_deleted}행 / 로봇 ${r.robot_deleted}행 삭제 (최근 ${r.retain_hours}시간 유지)`); }
+  catch(err){ log('실패 — ' + err.message, 'e'); }
+};
+
+$('dbSize').onclick = async () => {
+  try{ const r = await call('/api/instructor/db-size');
+       log(`DB 사용량 ${r.database_pretty} / 무료 티어 한도 ${r.free_tier_limit_mb}MB — ` +
+           r.tables.slice(0,3).map(t => `${t.table} ${t.pretty}`).join(', ')); }
+  catch(err){ log('실패 — ' + err.message, 'e'); }
+};
+
+// ------------------------------------------------------------------- 가상 시계
+document.querySelectorAll('.scaleBtn').forEach(b => b.onclick = async () => {
+  try{
+    const r = await call('/api/instructor/time-scale?scale=' + b.dataset.scale, { method:'POST' });
+    log(`배속 x${r.time_scale} — 실제 ${r.real_tick_seconds}초마다 공장 ${r.virtual_step_seconds}초 진행 · `
+        + `샘플당 드리프트 ${r.drift_per_sample_c}℃ (기울기는 그대로)`);
+    renderClock(r);
+    refreshStatus();
+  }catch(err){ log('배속 변경 실패 — ' + err.message, 'e'); }
+});
+
+function renderClock(c){
+  if (!c) return;
+  const accel = c.time_scale > 1;
+  $('clockCard').classList.toggle('accel', accel);
+  $('cVTime').textContent = new Date(c.virtual_time).toLocaleString('ko-KR',
+      { month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit' });
+  $('cScale').textContent = 'x' + c.time_scale;
+  $('cPerSample').textContent = (0.5 * c.virtual_step_seconds / 3600).toFixed(5) + ' ℃';
+  $('cFourHours').textContent = (4*3600/c.time_scale/60).toFixed(0) + ' 분';
+  document.querySelectorAll('.scaleBtn').forEach(b =>
+    b.classList.toggle('on', Number(b.dataset.scale) === c.time_scale));
+}
+
+// ------------------------------------------------------------------- 상태
+function renderWarnings(warnings){
+  // 서버가 "빠뜨린 것"을 스스로 말한다 — 제어를 열었는데 배속이 1이거나 주입이 없을 때.
+  // 교안에 없는 조작이라 교안이 알려주지 않으므로 콘솔이 대신 기억한다.
+  const box = $('serverWarnings');
+  if (!warnings || !warnings.length){ box.style.display = 'none'; box.innerHTML = ''; return; }
+  box.style.display = 'block';
+  box.innerHTML = warnings.map(w =>
+    `<div class="warnbox" style="border-left-color:var(--crit);background:#241416;color:#F0B9B5">
+       <b>⚠ ${w.message}</b><br><code style="font-size:11px">${w.fix}</code></div>`).join('');
+}
+
+async function refreshStatus(){
+  const s = await call('/api/instructor/status');
+  const st = s.stats;
+  renderClock(s.clock);
+  renderWarnings(s.warnings);
+  $('stats').innerHTML = [
+    ['네임스페이스', s.tenants + '개'],
+    ['배속', 'x' + s.clock.time_scale],
+    ['실제 tick / flush', `${s.clock.real_tick_seconds}s / ${s.settings.flush_seconds}s`],
+    ['누적 tick', st.ticks.toLocaleString()],
+    ['적재 행', st.rows_written.toLocaleString()],
+    ['마지막 tick 소요', st.last_tick_ms + ' ms'],
+    ['마지막 적재 소요', st.last_flush_ms + ' ms'],
+    ['tick 지연(overrun)', st.tick_overruns + '회'],
+    ['DB 오류', st.db_errors + '회'],
+    ['보존', s.settings.retention_hours + '시간'],
+    ['최근 오류', st.last_error || '없음'],
+  ].map(([k,v]) => `<div class="stat"><span>${k}</span><span>${v}</span></div>`).join('');
+
+  const inj = s.active_injections;
+  $('injBody').innerHTML = inj.length ? inj.map(i => `<tr>
+      <td>${i.id}</td><td>${i.tenant_id}</td><td>${i.equipment_id}</td>
+      <td><span class="k ${i.kind}">${({temp_drift:'드리프트',vibration_spike:'스파이크',sensor_dropout:'결측'})[i.kind]}</span></td>
+      <td>${i.ends_at ? new Date(i.ends_at).toLocaleTimeString('ko-KR') : '—'}</td>
+      <td><button data-id="${i.id}" class="stopInj danger">중단</button></td></tr>`).join('')
+    : '<tr><td colspan="6" style="color:var(--muted)">없음</td></tr>';
+  document.querySelectorAll('.stopInj').forEach(b => b.onclick = async () => {
+    try{ await call('/api/instructor/inject/' + b.dataset.id, { method:'DELETE' });
+         log(`주입 #${b.dataset.id} 중단`); refreshStatus(); }
+    catch(err){ log('실패 — ' + err.message, 'e'); }
+  });
+}
+
+async function refreshTenants(){
+  const r = await call('/api/instructor/tenants');
+  TENANTS = r.tenants;
+  const opts = TENANTS.map(t =>
+    `<option value="${t.tenant_id}">${t.tenant_id} · ${t.display_name}</option>`).join('');
+  ['presetTenant','mTenant','lockTenant'].forEach(id =>
+    $(id).innerHTML = '<option value="*">* 전체 네임스페이스</option>' + opts);
+  $('resetTenant').innerHTML = opts;
+  const teams = TENANTS.filter(t => t.tenant_type === 'team');
+  $('day4Team').innerHTML = '<option value="">발표 팀…</option>' + teams.map(t =>
+    `<option value="${t.tenant_id}">${t.tenant_id} · ${t.display_name}</option>`).join('');
+
+  $('tenantBody').innerHTML = TENANTS.map(t => `<tr>
+      <td>${t.tenant_id}</td>
+      <td>${t.tenant_type === 'team' ? '팀' : '개인'}</td>
+      <td>${t.display_name}</td>
+      <td>${t.teams || '—'}</td>
+      <td><span class="tag ${t.control_unlocked ? 'on' : 'off'}">${t.control_unlocked ? '개방' : '잠김'}</span></td>
+      <td style="font-family:ui-monospace,Consolas,monospace;font-size:11px">${t.access_key}</td></tr>`).join('');
+}
+
+if (TOKEN) connect();
+</script>
+</body>
+</html>
