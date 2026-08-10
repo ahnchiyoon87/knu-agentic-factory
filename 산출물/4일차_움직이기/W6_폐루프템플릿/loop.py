@@ -13,6 +13,18 @@ Day 1 에 배운 Orchestrator-Worker 패턴입니다.
 
 from __future__ import annotations
 
+# ── 한글 윈도우(cp949)에서 출력이 깨져 죽는 것을 막는다 ──────────────────
+#    학생 PC 기본 콘솔은 cp949 라 `—` `→` 같은 글자에서 UnicodeEncodeError 가 난다.
+#    리허설은 PYTHONUTF8=1 로 돌아가 이 문제가 안 보인다. 학생은 그냥 실행한다.
+import sys as _sys
+for _s in (_sys.stdout, _sys.stderr):
+    if (getattr(_s, "encoding", "") or "").lower().replace("-", "") != "utf8":
+        try:
+            _s.reconfigure(encoding="utf-8", errors="replace")
+        except Exception:
+            pass
+# ─────────────────────────────────────────────────────────────────────────
+
 import argparse
 import json
 import sys
@@ -43,6 +55,9 @@ class Context:
     slow_clock: bool = False          # 배속이 1이면 드리프트가 안 잡힌다
     quiet_rounds: int = 0
     lines: list[str] = field(default_factory=list)
+    # 같은 설비를 회차마다 다시 진단하면 39명분 호출이 몰려 한도를 넘는다.
+    # 한 번 낸 진단을 재사용하고, 조치는 매 회차 새로 판단한다.
+    진단캐시: dict = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         if self.control is None:
@@ -88,8 +103,15 @@ def one_round(ctx: Context) -> dict:
     # 2~3. 이상마다 진단하고 조치한다
     cases = []
     for finding in findings:
-        ctx.log(f"\n진단  {finding['equipment_id']}")
-        diagnosis = agents.DIAGNOSE.run(ctx, finding)
+        eq = finding["equipment_id"]
+        기존 = ctx.진단캐시.get(eq)
+        if 기존 is not None:
+            ctx.log(f"\n진단  {eq}  (앞서 낸 진단을 그대로 씁니다)")
+            diagnosis = 기존
+        else:
+            ctx.log(f"\n진단  {eq}")
+            diagnosis = agents.DIAGNOSE.run(ctx, finding)
+            ctx.진단캐시[eq] = diagnosis
         ctx.log(f"  원인({diagnosis.get('backend')})  {diagnosis.get('cause')}")
         for e in diagnosis.get("evidence", []):
             ctx.log(f"  근거  {e}")
@@ -136,6 +158,9 @@ def main() -> int:
     ap.add_argument("--rounds", type=int, default=None, help="몇 바퀴 돌지")
     ap.add_argument("--tenant", default=None, help="네임스페이스 (기본: config.json)")
     ap.add_argument("--base-url", default=None, help="시뮬레이터 주소")
+    ap.add_argument("--규칙으로", dest="rules", action="store_true",
+                    help="AI 없이 규칙으로 돌린다. **강사 안내가 있을 때만 쓰세요.** "
+                         "오늘의 핵심 장면(AI 가 정비 이력을 근거로 원인을 대는 것)을 못 봅니다")
     ap.add_argument("--use-answers", action="store_true",
                     help="강사용 — 정답/ 의 참고 답안으로 채워서 돌린다 (라이브 시연)")
     args = ap.parse_args()
@@ -145,6 +170,14 @@ def main() -> int:
         import agent_bodies
         agent_bodies.install()
         print("참고 답안으로 실행합니다 (강사 시연 모드)")
+
+    if args.rules:
+        CFG["diagnose"]["backend"] = "rules"
+        print("=" * 58)
+        print("  규칙 모드로 돕니다 — AI 진단이 아닙니다.")
+        print("  오늘 봐야 할 장면(AI 가 정비 이력을 읽고 원인을 대는 것)은")
+        print("  이 모드에서 나오지 않습니다. 강사 안내에 따라 쓰세요.")
+        print("=" * 58)
 
     api = FactoryAPI(base_url=args.base_url, tenant=args.tenant)
 

@@ -14,6 +14,18 @@ MCP 서버를 실제로 띄우고 클라이언트로 붙어 도구를 호출한�
 
 from __future__ import annotations
 
+# ── 한글 윈도우(cp949)에서 출력이 깨져 죽는 것을 막는다 ──────────────────
+#    학생 PC 기본 콘솔은 cp949 라 `—` `→` 같은 글자에서 UnicodeEncodeError 가 난다.
+#    리허설은 PYTHONUTF8=1 로 돌아가 이 문제가 안 보인다. 학생은 그냥 실행한다.
+import sys as _sys
+for _s in (_sys.stdout, _sys.stderr):
+    if (getattr(_s, "encoding", "") or "").lower().replace("-", "") != "utf8":
+        try:
+            _s.reconfigure(encoding="utf-8", errors="replace")
+        except Exception:
+            pass
+# ─────────────────────────────────────────────────────────────────────────
+
 import asyncio
 import json
 import os

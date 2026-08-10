@@ -19,7 +19,7 @@ from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 from . import db
-from .api import control, instructor, read
+from .api import control, instructor, read, diagnose
 from .config import ROOT, get_settings
 from .sim.runner import runner
 
@@ -70,6 +70,7 @@ app.add_middleware(
 
 app.include_router(read.router)
 app.include_router(control.router)
+app.include_router(diagnose.router)
 app.include_router(instructor.router)
 
 # 2D 공장 뷰 · 강사 콘솔 · 폴백 대시보드

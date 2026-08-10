@@ -195,6 +195,28 @@ def _ask_openai(key: str, system: str, user: str, dcfg: dict) -> dict:
     return json.loads(choice.message.content)
 
 
+def _ask_server(ctx, system: str, user: str, dcfg: dict) -> dict:
+    """강사 서버를 거쳐 진단한다 — 학생 PC 에 LLM 키를 두지 않기 위한 것.
+
+    내 접속 키로 서버에 붙고, 서버가 자기 키로 모델을 부른다.
+    프롬프트는 **내가 만든 것이 그대로** 올라간다. 서버는 중계만 한다.
+    """
+    import httpx
+
+    api = ctx.api
+    r = httpx.post(
+        f"{api.base}/api/v1/{api.tenant}/diagnose",
+        headers={"X-Access-Key": api.key},
+        json={"system": system, "user": user, "schema": SCHEMA,
+              "max_tokens": int(dcfg.get("max_tokens", 2000))},
+        timeout=90,
+    )
+    if r.status_code == 429:
+        raise RuntimeError("진단 호출이 1분 한도를 넘었습니다 — 잠시 뒤 다시 돕니다")
+    r.raise_for_status()
+    return r.json()
+
+
 def _by_rules(evidence: dict, acfg: dict) -> dict:
     """규칙 기반 진단 — API 키가 없거나 호출이 실패했을 때의 안전망.
 
@@ -244,7 +266,35 @@ def run(ctx, finding: dict) -> dict:
     # 지시문은 항상 만듭니다. 규칙으로 떨어져도 내가 쓴 지시문이 기록에 남습니다.
     system, user = build_prompt(evidence, acfg)
 
-    backend = dcfg.get("backend", "auto")
+    backend = dcfg.get("backend", "server")
+
+    # 기본 경로 — 강사 서버 중계. 학생 PC 에 키가 없어도 된다.
+    if backend == "server":
+        try:
+            out = _ask_server(ctx, system, user, dcfg)
+            out["backend"] = "server"
+            out["prompt"] = user
+            return out
+        except Exception as exc:                                   # noqa: BLE001
+            # 조용히 규칙으로 떨어지지 않는다. 그러면 학생은 자기가
+            # **AI 진단을 못 봤다는 사실 자체를 모르고** 지나간다.
+            # 그렇다고 루프를 죽이지도 않는다 — 다시 켜면 감지까지 또 몇 분을 기다린다.
+            # 그래서 **감지 상태는 유지한 채 다음 회차에 자동으로 다시 건다.**
+            ctx.진단실패 = getattr(ctx, "진단실패", 0) + 1
+            ctx.log("")
+            ctx.log(f"  AI 진단 실패 ({ctx.진단실패}회) — {type(exc).__name__}: {exc}")
+            if ctx.진단실패 < 3:
+                ctx.log("  다음 회차에 자동으로 다시 겁니다. 그대로 두세요.")
+                ctx.log("  (감지는 그대로 살아 있어 처음부터 기다릴 필요가 없습니다)")
+            else:
+                ctx.log("  " + "=" * 56)
+                ctx.log("  세 번 연속 실패했습니다 — 일시적인 문제가 아닙니다.")
+                ctx.log("  손을 드세요. 오늘 봐야 할 장면이 여기입니다.")
+                ctx.log("  (강사 안내가 있을 때만) 규칙으로 계속하려면 Ctrl+C 후:")
+                ctx.log("      python loop.py --규칙으로")
+                ctx.log("  " + "=" * 56)
+            raise                                     # 이 회차의 진단만 건너뛴다
+
     found = credentials(dcfg)
     if backend in ("claude", "openai"):
         provider, key = backend, (found[1] if found and found[0] == backend else None)

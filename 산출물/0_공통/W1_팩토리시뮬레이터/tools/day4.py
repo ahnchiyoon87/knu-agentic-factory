@@ -1,20 +1,36 @@
-"""Day 4 준비 — 강사가 누르는 것을 한 번으로.
+"""제어 개방·주입 — 강사가 누르는 것을 한 번으로.
 
 교안에 없는 조작(제어 개방·배속·주입)은 교안이 알려주지 않는다.
 그래서 사람 기억에 맡기지 않고 여기 한 곳에 모았다.
 
-    python tools/day4.py                 준비 (제어 개방 + 배속 + 팀 키 출력)
-    python tools/day4.py --inject T3     그 팀 공장에 시연용 드리프트 주입
+    python tools/day4.py                 준비 (제어 개방 + 배속 + 개인 키 확인)
+    python tools/day4.py --inject S07    그 학생 공장에 드리프트 주입
+    python tools/day4.py --inject-all    개인 공장 전체에 주입  ← 수업 중 이걸 쓴다
     python tools/day4.py --status        지금 상태와 경고 확인
-    python tools/day4.py --end           Day 1~3 상태로 되돌림
+    python tools/day4.py --end           제어 잠금 · 주입 중단 · 배속 원복
 
 접속 정보는 .env 에서 읽는다. 서버가 떠 있어야 한다.
+
+※ 파일 이름이 day4 인 것은 교안이 제어를 Day 4 에 열도록 잡았기 때문이다.
+   우리 커리큘럼에서는 **Day 3 오후**에 연다. 실습은 처음부터 끝까지 **개인 단위**이고
+   팀(T1~T8)은 쓰지 않는다.
 """
 
 from __future__ import annotations
 
+# ── 한글 윈도우(cp949)에서 출력이 깨져 죽는 것을 막는다 ──────────────────
+import sys as _sys
+for _s in (_sys.stdout, _sys.stderr):
+    if (getattr(_s, "encoding", "") or "").lower().replace("-", "") != "utf8":
+        try:
+            _s.reconfigure(encoding="utf-8", errors="replace")
+        except Exception:
+            pass
+# ─────────────────────────────────────────────────────────────────────────
+
 import argparse
 import os
+import time
 import sys
 from pathlib import Path
 
@@ -60,9 +76,14 @@ def show_status(base: str, token: str) -> None:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="Day 4 준비")
-    ap.add_argument("--inject", metavar="팀", help="그 팀 공장에 온도 드리프트 주입 (예: T3)")
+    ap = argparse.ArgumentParser(description="제어 개방 · 주입")
+    ap.add_argument("--inject", metavar="번호", help="그 공장에 온도 드리프트 주입 (예: S07)")
+    ap.add_argument("--inject-all", action="store_true",
+                    help="개인 공장(S01~) 전체에 주입 — 수업 중에는 이걸 쓴다")
     ap.add_argument("--equipment", default="EQ-03")
+    ap.add_argument("--stagger", type=float, default=2.0, metavar="초",
+                    help="--inject-all 에서 한 명씩 벌리는 간격 (기본 2초). "
+                         "동시에 넣으면 감지도 동시에 몰려 진단 호출이 한꺼번에 나간다")
     ap.add_argument("--scale", type=float, default=120.0, help="시연 배속 (기본 120)")
     ap.add_argument("--status", action="store_true")
     ap.add_argument("--end", action="store_true", help="Day 1~3 상태로 되돌림")
@@ -86,38 +107,65 @@ def main() -> int:
         print("Day 1~3 상태로 되돌렸습니다 (제어 잠금 · 주입 중단 · 배속 60)")
         return 0
 
-    if args.inject:
+    def inject_one(tid: str) -> str:
         out = httpx.post(f"{base}/api/instructor/inject",
-                         json={"tenant_id": args.inject, "equipment_id": args.equipment,
+                         json={"tenant_id": tid, "equipment_id": args.equipment,
                                "kind": "temp_drift"},
                          headers={"X-Instructor-Token": token}, timeout=30).json()
-        print(f"주입  {args.inject} · {out['equipment_id']} · {out['params']}")
+        return out["equipment_id"]
+
+    if args.inject:
+        eq = inject_one(args.inject)
+        print(f"주입  {args.inject} · {eq}")
         print("  감지까지 배속 x120 기준 약 100초, x60 기준 약 190초 걸립니다.")
-        print("  팀이 발표석에 서기 **전에** 주입해 두십시오.")
         return 0
 
-    # ---- 기본: Day 4 준비 ----------------------------------------------------
-    print("Day 4 준비")
+    if args.inject_all:
+        people = [t["tenant_id"] for t in call(base, token, "GET", "/tenants")["tenants"]
+                  if t["tenant_type"] == "individual"]
+        if not people:
+            print("⚠ 개인 네임스페이스가 안 떠 있습니다. TENANT_MODE 를 확인하세요.")
+            return 2
+        print(f"개인 공장 {len(people)}곳에 주입합니다 — {args.equipment} "
+              f"· {args.stagger:g}초 간격")
+        fail = []
+        for i, tid in enumerate(people, 1):
+            try:
+                inject_one(tid)
+                print(f"  [{i:>2}/{len(people)}] {tid}  주입")
+            except Exception as exc:                                    # noqa: BLE001
+                fail.append(tid)
+                print(f"  [{i:>2}/{len(people)}] {tid}  실패 — {type(exc).__name__}")
+            if args.stagger and i < len(people):
+                time.sleep(args.stagger)
+        print(f"\n완료 {len(people) - len(fail)} / {len(people)}")
+        if fail:
+            print("  실패:", " ".join(fail))
+            print("  → 실패한 것만 다시:  python tools/day4.py --inject <번호>")
+        print("\n  감지까지 배속 x120 기준 약 100초, x60 기준 약 190초 걸립니다.")
+        print("  학생에게 '지금 넣었습니다. 1~3분 조용한 것이 정상입니다' 라고 말해 두십시오.")
+        return 2 if fail else 0
+
+    # ---- 기본: 제어 개방 준비 ------------------------------------------------
+    print("제어 개방 준비")
     call(base, token, "POST", "/time-scale", params={"scale": args.scale})
     call(base, token, "POST", "/control-lock", params={"unlocked": "true", "tenant_id": "*"})
-    print(f"  제어 API 개방 · 배속 x{args.scale:g}")
+    print(f"  제어 API 개방(전체) · 배속 x{args.scale:g}")
 
-    teams = [t for t in call(base, token, "GET", "/tenants")["tenants"]
-             if t["tenant_type"] == "team"]
-    if not teams:
-        print("\n  ⚠ 팀 네임스페이스가 안 떠 있습니다. TENANT_MODE 를 both 로 두고 재시작하세요.")
+    people = [t for t in call(base, token, "GET", "/tenants")["tenants"]
+              if t["tenant_type"] == "individual"]
+    if not people:
+        print("\n  ⚠ 개인 네임스페이스가 안 떠 있습니다. TENANT_MODE 를 확인하고 재시작하세요.")
         return 2
 
-    print(f"\n팀에 나눠 줄 값 ({len(teams)}팀)")
-    print(f"  {'팀':<6}{'이름':<10}{'access_key'}")
-    for t in teams:
-        print(f"  {t['tenant_id']:<6}{t['display_name']:<10}{t['access_key']}")
-    print(f"\n  base_url : {base}")
-    print("  학생 config.json 의 tenant · access_key · base_url 세 줄만 채우면 됩니다.")
+    print(f"\n개인 공장 {len(people)}곳 준비됨 — {people[0]['tenant_id']} ~ {people[-1]['tenant_id']}")
+    print(f"  base_url : {base}")
+    print("  학생 쪽지(번호·접속 키·주소)는 tools/키배포표.py 로 뽑습니다.")
+    print("  실습은 처음부터 끝까지 개인 단위입니다. 팀(T1~T8)은 쓰지 않습니다.")
 
     print("\n확인")
     show_status(base, token)
-    print("\n발표 때 — python tools/day4.py --inject T3   (팀이 서기 전에)")
+    print("\n실습 때 — python tools/day4.py --inject-all")
     return 0
 
 

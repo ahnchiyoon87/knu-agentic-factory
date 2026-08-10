@@ -75,6 +75,18 @@ class Settings:
 
         # --- 제어 API 개방 (교안: Day 4 최초 개방) ---------------------------
         self.control_api_enabled: bool = _env_bool("CONTROL_API_ENABLED", False)
+
+        # ── 진단 중계 — 학생 PC 에 LLM 키를 두지 않기 위한 것 ──────────────
+        #    키는 여기(.env)에만 있다. 학생은 자기 접속 키로 서버에 붙는다.
+        #  키를 여러 개 넣으면 돌아가며 쓴다. 하나가 막혀도 수업이 안 멈춘다.
+        #    OPENAI_API_KEY=sk-...,sk-...,sk-...
+        self.openai_api_keys: list[str] = [
+            k.strip() for k in _env("OPENAI_API_KEY", "").split(",") if k.strip()
+        ]
+        self.diagnose_enabled: bool = _env_bool("DIAGNOSE_ENABLED", True)
+        self.diagnose_model: str = _env("DIAGNOSE_MODEL", "gpt-5.4-mini")
+        self.diagnose_concurrency: int = _env_int("DIAGNOSE_CONCURRENCY", 6)
+        self.diagnose_per_min: int = _env_int("DIAGNOSE_PER_MIN", 12)
         # HITL: 승인 후에만 실행할 명령. 비우면 즉시 실행.
         # 교안 Day4 10~11장은 승인 관문을 학생 오케스트레이터(W6)에 두므로 기본은 비활성.
         self.hitl_commands: set[str] = {

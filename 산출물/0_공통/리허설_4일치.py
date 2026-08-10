@@ -28,6 +28,16 @@ W1 서버가 떠 있어야 한다. 서버 설정은 **건드리지 않는다** �
 
 from __future__ import annotations
 
+# ── 한글 윈도우(cp949)에서 출력이 깨져 죽는 것을 막는다 ──────────────────
+import sys as _sys
+for _s in (_sys.stdout, _sys.stderr):
+    if (getattr(_s, "encoding", "") or "").lower().replace("-", "") != "utf8":
+        try:
+            _s.reconfigure(encoding="utf-8", errors="replace")
+        except Exception:
+            pass
+# ─────────────────────────────────────────────────────────────────────────
+
 import argparse
 import hashlib
 import json

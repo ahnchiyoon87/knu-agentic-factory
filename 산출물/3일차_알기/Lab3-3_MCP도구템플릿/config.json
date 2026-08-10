@@ -7,10 +7,10 @@
     "host": "127.0.0.1",
     "port": 8765
   },
-  "data_source": "student",
-  "_data_source": "student = 내가 Day 2·Lab 3-1 에 만든 것 (기본) | fallback = 못 끝냈을 때 강사가 우회시키는 경로. 센서값은 나눠받은 W5 CSV 를 직접 읽고, 정비 이력은 강사 시뮬레이터의 공용 이력을 씁니다. 도구 이름과 응답 형태는 양쪽이 같습니다.",
+  "data_source": "fallback",
+  "_data_source": "fallback = 이번 특강의 정상 경로(기본). 센서값은 나눠받은 CSV, 정비 이력은 강사 서버에서 옵니다. | student = 개인 DB 를 따로 만든 경우에만. 이번 특강에서는 쓰지 않습니다.",
   "student_db": {
-    "_comment": "내 Supabase 프로젝트. Day 2 에서 만든 것입니다.",
+    "_comment": "이번 특강에서는 쓰지 않습니다. data_source 가 student 일 때만 필요합니다.",
     "url": "",
     "key": "",
     "readings_table": "sensor_readings",

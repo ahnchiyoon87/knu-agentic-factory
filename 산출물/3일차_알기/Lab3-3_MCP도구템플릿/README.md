@@ -13,7 +13,8 @@
 pip install -r requirements.txt
 ```
 
-`config.json` 의 `student_db` 에 내 Supabase 정보를 넣습니다(Day 2 에서 만든 것).
+`config.json` 의 `data_source` 가 `fallback` 인지 확인하고, `fallback` 안의
+`shared_api` 와 `tenant` 를 **쪽지의 서버 주소·내 번호**로 바꿉니다.
 
 ```bash
 python mcp_server.py --check     # 서버 없이 도구만 호출해 본다
@@ -40,9 +41,8 @@ python mcp_server.py             # MCP 서버 실행
 
 에이전트가 방금 만든 도구들을 줄줄이 이어서 호출하며 리포트를 뽑아냅니다.
 
-**Step 3 (15분)** — 그 리포트를 **Day 1 에 만든 대시보드**에 표시합니다.
-3일치 작업이 한 화면에 합쳐집니다. 단, **에이전트는 아직 '제안'만 합니다.**
-움직이는 건 내일입니다.
+**여기까지는 에이전트가 '제안'만 합니다.** 리포트가 “속도를 낮추라”고 권고해도
+공장은 그대로 돕니다. **움직이는 것은 오후 실습입니다.**
 
 ---
 
@@ -53,7 +53,7 @@ python mcp_server.py             # MCP 서버 실행
 | 항목 | 기본 | 바꾸면 |
 |---|---|---|
 | `transport` | `stdio` — 내 컴퓨터에서만. 네트워크를 안 타므로 방화벽과 무관 | `http` — 강사가 띄운 공용 서버로 우회 |
-| `data_source` | `student` — 내가 Day 2·Lab 3-1 에 만든 것 | `fallback` — 못 끝냈을 때 강사 우회 경로 |
+| `data_source` | **`fallback` — 이번 특강의 정상 경로(기본값)** | `student` — 개인 DB 를 따로 만든 경우에만 |
 
 **어느 쪽으로 두든 도구 이름과 응답 형태는 같습니다.** 분기는 `_fetch_*` 함수 안에만 있어서, 강사가 우회시켜도 내가 만든 에이전트 쪽은 고칠 게 없습니다.
 
@@ -95,7 +95,7 @@ python mcp_server.py             # MCP 서버 실행
 |---|---|---|
 | `detect.py 를 불러오지 못했습니다` | Lab 3-2 TODO 가 안 채워짐 | Lab 3-2 를 먼저 끝내세요 |
 | `NotImplementedError` | ★ 두 자리가 비어 있음 | `mcp_server.py` 를 채우세요 |
-| 401 / 빈 결과 | `student_db` 의 url·key 오타 | Supabase 대시보드에서 다시 복사 |
+| 401 / 빈 결과 | `shared_api` 주소 오타 | 쪽지와 한 글자씩 대조 |
 | 서버가 안 붙음 | 방화벽·포트 | `transport` 를 `http` 로 바꾸고 강사 주소를 넣으세요 |
 | Day 2 를 못 끝냄 | 정비 이력 테이블 없음 | `data_source` 를 `fallback` 으로 |
 

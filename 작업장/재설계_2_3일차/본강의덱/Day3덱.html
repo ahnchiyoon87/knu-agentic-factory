@@ -1,0 +1,375 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>Day 3 · 판단하고, 움직이게 한다</title><style>
+  /* ============================================================
+     경남대 8월 특강 · 슬라이드 디자인 기준판 v2
+     1600 × 900  (16:9)
+
+     v1에서 바뀐 것
+       · 숫자를 화면 절반만 하게 키우던 형식 폐지 → 3번 「큰 그림 + 짧은 글」
+       · 배경을 반으로 갈라 칠하던 형식 폐지 → 5번 「나란히 비교형」(가는 세로선)
+       · 구간 표지형 바탕을 순백으로
+       · 낱말 위 굵은 가로줄 제거 (그림만)
+       · 8장 중 7장에 삽화 (v1은 1장)
+       · 제목 42pt → 29pt 상당. 큰 낱말도 제목보다 조금만 크게
+       · 한 가지 사실은 화면에 한 번만 — 라벨이 본문을 되풀이하지 않는다
+     ============================================================ */
+  @page { size: 1600px 900px; margin: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root{
+    --navy:  #12305A;
+    --navy2: #1E4E8C;
+    --orange:#D4541E;
+    --gray:  #6B7280;
+    --wash:  #FBE3D6;   /* 강조 밑칠 — 이보다 진하면 안 된다 */
+    --tint:  #EEF3F9;   /* 표 안 한 행만 칠하는 색. 슬라이드 바탕에는 쓰지 않는다 */
+  }
+
+  html, body { background:#fff; }
+  body{
+    font-family:"Pretendard Variable",Pretendard,"Apple SD Gothic Neo",
+                "Malgun Gothic","맑은 고딕",system-ui,sans-serif;
+    letter-spacing:-.01em;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .s{
+    width:1600px; height:900px; background:#fff;
+    padding:72px 96px 68px;          /* 좌우 96 고정 — 모든 요소가 이 기준선에서 시작 */
+    display:flex; flex-direction:column;   /* 세로 flex — 겹침 구조적 차단 */
+    position:relative; overflow:hidden;
+    page-break-after:always; break-after:page;
+  }
+  .s:last-child{ page-break-after:auto; break-after:auto; }
+
+  /* ---- 머리 (제목 + 설명문) ----
+     제목은 「크게」가 아니라 「굵게」로 눈에 띈다. 화면을 잡아먹지 않는다.
+     제목 아래는 짧은 부제가 아니라 완결된 설명문 1~2줄이다. */
+  .head{ flex:none; }
+  h1{ font-size:48px; font-weight:800; line-height:1.26; color:#111; }
+  h1 em{ font-style:normal; color:var(--orange); }
+  .sub{ font-size:30px; font-weight:400; color:#3B4350; margin-top:16px; line-height:1.55; }
+
+  /* ---- 본문 영역 ----
+     본문은 남는 세로 공간을 전부 차지한다. 아래가 비면 삽화를 키운다.
+     기준판에 빈 하단을 보여 주면 생성물도 하단이 빈다. */
+  .body{ flex:1; display:flex; min-height:0; padding-top:44px; align-items:center; }
+
+  /* ---- 마무리 — 결론 한 줄. 가는 윗선으로만 구분한다 ---- */
+  .foot{ flex:none; font-size:29px; line-height:1.5; color:#111;
+         padding-top:26px; margin-top:26px; border-top:1px solid #E2E6EB; }
+  .mark{ background:var(--wash); padding:4px 10px; font-weight:700; }
+
+  /* 문단 사이가 글자 크기의 2배를 넘으면 한 줄 띄운 것처럼 보인다.
+     줄 사이 1.55배 + 문단 사이 10px = 약 1.9배로 맞춘다. */
+  p{ font-size:29px; line-height:1.55; color:#222; }
+  p + p{ margin-top:10px; }
+
+  /* ---- 삽화 안에 박는 라벨 ----
+     그림만으로 알 수 없는 것에만 붙인다.
+     본문에 이미 있는 말을 라벨로 되풀이하면 같은 말을 두 번 하는 것이다. */
+  .lbl{ font-size:24px; font-weight:700; fill:var(--navy); }
+  .lbl-o{ font-size:24px; font-weight:700; fill:var(--orange); }
+  .lbl-g{ font-size:23px; font-weight:400; fill:var(--gray); }
+
+  /* ============ 1 · 표지형 ============ */
+  .cover{ background:var(--navy); color:#fff; justify-content:center; }
+  .cover .eyebrow{ font-size:26px; letter-spacing:.34em; font-weight:600; color:#9DB4D4; margin-bottom:30px; }
+  .cover h1{ color:#fff; font-size:62px; line-height:1.2; }
+  .cover .bar{ width:126px; height:9px; background:var(--orange); margin:32px 0 28px; }
+  .cover .sub{ color:#C3D2E6; font-size:29px; }
+  .cover .tail{ position:absolute; left:96px; bottom:78px; }
+  .cover .tail div{ font-size:28px; color:#9DB4D4; line-height:1.6; }
+  .cover .tail div:last-child{ color:#fff; font-weight:700; }
+  .rings{ position:absolute; right:-90px; top:50%; transform:translateY(-50%); opacity:.30; }
+
+  /* ============ 2 · 구간 표지형 (순백 + 큰 삽화) ============ */
+  .sect .body{ justify-content:flex-start; gap:76px; align-items:center; }
+  .sect .art{ flex:0 0 520px; display:flex; justify-content:center; }
+  .sect .txt{ flex:1; }
+  /* 큰 낱말은 제목보다 조금만 크다. 화면을 잡아먹으면 삽화 자리가 사라진다. */
+  .sect .word{ font-size:58px; font-weight:800; color:var(--navy); line-height:1.1; }
+  .sect .wsub{ font-size:29px; color:var(--gray); margin-top:12px; margin-bottom:30px; }
+
+  /* ============ 3 · 큰 그림 + 짧은 글 ============ */
+  .pic .body{ gap:56px; }
+  .pic .art{ flex:0 0 560px; display:flex; align-items:center; justify-content:flex-start; }
+  .pic .txt{ flex:1; }
+
+  /* ============ 4 · 번호 레일형 ============ */
+  .rail .body{ flex-direction:column; justify-content:space-between; gap:0; align-items:stretch; }
+  .row{ display:flex; align-items:center; gap:38px; flex:1; padding:14px 0;
+        border-bottom:1px solid #E2E6EB; }
+  .row:last-child{ border-bottom:0; }
+  .row .ico{ flex:0 0 92px; display:flex; align-items:center; justify-content:center; }
+  .row .no{ flex:0 0 74px; font-size:30px; font-weight:800; color:#B9C4D2; }
+  .row .rt strong{ display:block; font-size:32px; font-weight:800; color:#111; }
+  .row .rt span{ display:block; font-size:28px; color:var(--gray); margin-top:8px; }
+
+  /* ============ 5 · 나란히 비교형 (배경 분할 없음) ============
+     순서는 분류 → 그림 → 이름 → 동작. 분류가 먼저 와야 틀이 잡힌다.
+     좌우 두 단이라 세로로 쌓이는 양이 많다. 본문 위 여백을 줄여 영역을 넓힌다. */
+  .cmp .body{ align-items:stretch; gap:0; padding-top:22px; }
+  /* 세로 배분을 space-evenly로 하면 내용이 본문 영역을 넘어 마무리 줄을 덮는다.
+     center로 두고 내용을 줄여 맞춘다 — 영역을 넘기지 않는 것이 우선이다. */
+  .cmp .side{ flex:1; display:flex; flex-direction:column; align-items:center;
+              justify-content:center; text-align:center; padding:0 36px; }
+  .cmp .rule{ flex:0 0 1px; background:#D7DCE3; }
+  .cmp .tag{ font-size:24px; font-weight:800; letter-spacing:.14em; margin-bottom:28px; }
+  .cmp .t-on{ color:var(--orange); }
+  .cmp .t-off{ color:var(--gray); }
+  .cmp h3{ font-size:36px; font-weight:800; color:#111; line-height:1.3; margin:26px 0 20px; }
+  .cmp p{ font-size:27px; line-height:1.52; }
+
+  /* ============ 6 · 표형 ============ */
+  table{ border-collapse:collapse; width:100%; }
+  th,td{ text-align:left; padding:24px 30px; font-size:30px; }
+  thead th{ background:var(--navy); color:#fff; font-weight:700; font-size:28px; }
+  tbody tr{ border-bottom:1px solid #E2E6EB; }
+  tbody tr.on{ background:var(--tint); }      /* 표 안에서만. 슬라이드 바탕과 무관 */
+  tbody tr.on td{ color:var(--navy); font-weight:700; }
+  td.k{ font-weight:700; width:230px; }
+
+  /* ============ 7 · 낱말 나열형 (가로줄 없음 · 그림만) ============ */
+  .words .body{ gap:0; justify-content:space-between; }
+  .words .col{ flex:1; text-align:center; padding:0 34px; }
+  .words .art{ height:224px; display:flex; align-items:center; justify-content:center; margin-bottom:38px; }
+  .words .w{ font-size:42px; font-weight:800; color:var(--navy); }
+  .words .w.hot{ color:var(--orange); }
+  .words .d{ font-size:27px; color:var(--gray); margin-top:16px; line-height:1.5; }
+
+  /* ============ 8 · 가는 선 그래프형 ============ */
+  .graph .body{ gap:64px; }
+  .graph .txt{ flex:0 0 580px; }
+  .graph .art{ flex:1; }
+
+  /* 형식 이름표 — 기준판에만 표시된다. 실제 슬라이드에는 없다. */
+  .cover 
+body{background:#3a3a36}
+.s{margin:18px auto}
+@media print{body{background:#fff}.s{margin:0}}</style></head><body>
+<section class="s cover"><div class="head"><div class="eyebrow">DAY 3 · 움직이기</div><h1>판단하고,<br>움직이게 한다</h1><div class="bar"></div><div class="sub">경남대 RISE 피지컬AI 사관학교 · 8월 Agentic AI 특강</div></div><div class="tail"><div>에이전트란 무엇인가 · 도구를 쥐여주는 표준 · 사람이 지키는 관문</div><div>오늘, 여러분의 코드가 공장을 움직입니다.</div></div><svg class="rings" width="760" height="760" viewBox="0 0 760 760" fill="none" stroke="#fff" stroke-width="2"><circle cx="380" cy="380" r="110"/><circle cx="380" cy="380" r="180"/><circle cx="380" cy="380" r="250"/><circle cx="380" cy="380" r="320"/><circle cx="380" cy="380" r="375"/></svg></section>
+<section class="s pic"><div class="head"><h1>어제 여러분은 자를 하나 만들었습니다</h1><div class="sub">이동 윈도 z-score. 뼈대를 받아 세 군데를 직접 채웠습니다.</div></div><div class="body"><div class="art"><svg width="520" height="380" viewBox="0 0 520 380" fill="none" font-family="Malgun Gothic, sans-serif">
+<rect x="40" y="40" width="440" height="240" rx="12" stroke="#12305A" stroke-width="8"/>
+<path d="M40 96h440" stroke="#12305A" stroke-width="6"/>
+<g fill="#6B7280">
+<rect x="76" y="130" width="150" height="12" rx="6"/>
+<rect x="76" y="164" width="230" height="12" rx="6"/>
+<rect x="76" y="232" width="180" height="12" rx="6"/></g>
+<g fill="#D4541E"><rect x="100" y="198" width="120" height="12" rx="6"/></g>
+<path d="M340 190c26-18 52-4 52 18 0 26-34 40-58 56" stroke="#12305A" stroke-width="8" stroke-linecap="round"/>
+<path d="M334 264h44" stroke="#12305A" stroke-width="8" stroke-linecap="round"/>
+<text class="lbl-o" x="100" y="330">TODO 3</text>
+</svg></div><div class="txt"><p>최근 W개의 평균과 표준편차를 구하고, 지금 값이 k배를 넘는지 판정했다.</p><p>그리고 k를 바꿔 가며 무엇이 늘고 무엇이 주는지 숫자로 봤다.</p></div></div><div class="foot">오탐과 미탐은 맞바꿈 — <span class="mark">어제의 한 문장</span>이다.</div></section>
+<section class="s cmp"><div class="head"><h1>규칙은 미리 정한 것만 봅니다</h1><div class="sub">자를 정교하게 만들어도 성질은 같습니다.</div></div><div class="body"><div class="side"><div class="tag t-on">정해 둔 것</div><div class="art"><svg width="200" height="200" viewBox="0 0 76 76" fill="none" font-family="Malgun Gothic, sans-serif">
+<g stroke="#12305A" stroke-width="5" stroke-linecap="round">
+<rect x="8" y="26" width="60" height="24" rx="4"/>
+<path d="M20 26v10M32 26v14M44 26v10M56 26v14"/></g></svg></div><h3>여기까지는 잡는다</h3><p>우리가 미리 적어 둔 조건이라면<br>몇 번이든 정확히 잡아낸다.</p></div><div class="rule"></div><div class="side"><div class="tag t-off">정하지 못한 것</div><div class="art"><svg width="360" height="210" viewBox="0 0 360 210" fill="none" font-family="Malgun Gothic, sans-serif">
+<path d="M60 130a90 90 0 1 1 26 62" stroke="#6B7280" stroke-width="10" fill="none"
+      stroke-linecap="round" stroke-dasharray="14 12"/>
+<path d="M60 92v42h42" stroke="#6B7280" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M118 60l112 112M230 60L118 172" stroke="#D4541E" stroke-width="12" stroke-linecap="round"/>
+</svg></div><h3>여기서는 말이 없다</h3><p>미리 적어 두지 못한 상황 앞에서는<br><b>아무 말도 하지 못한다.</b></p></div></div><div class="foot">어제 남은 질문 — <span class="mark">그럼 누가 판단하나.</span></div></section>
+<section class="s"><div class="head"><h1>오늘은 세 도막입니다</h1><div class="sub">쥐여주고, 판단하게 하고, 움직이게 합니다.</div></div><div class="body"><table><thead><tr><th></th><th>무엇을 하나</th><th>쓰는 것</th></tr></thead><tbody><tr><td class="k">쥐여준다</td><td>내가 짠 코드를 AI가 부를 수 있게 내놓는다</td><td>mcp_server.py</td></tr><tr><td class="k">판단하게 한다</td><td>AI가 스스로 조회하고 원인을 추정한다</td><td>지시 한 문장</td></tr><tr><td class="k">움직이게 한다</td><td>판단대로 설비가 실제로 바뀐다</td><td>폐루프 템플릿</td></tr></tbody></table></div><div class="foot">마지막 20분은 <span class="mark">오늘 겪은 것을 노션에 정리</span>한다.</div></section>
+<section class="s pic"><div class="head"><h1>그냥 물어보면 이렇게 됩니다</h1><div class="sub">“EQ-03 지금 온도 어때?” — 답은 매끄럽고, 틀렸습니다.</div></div><div class="body"><div class="art"><svg width="520" height="400" viewBox="0 0 520 400" fill="none" font-family="Malgun Gothic, sans-serif">
+<path d="M60 60h380a20 20 0 0 1 20 20v160a20 20 0 0 1-20 20H210l-70 60v-60H60a20 20 0 0 1-20-20V80a20 20 0 0 1 20-20z"
+      stroke="#12305A" stroke-width="9" stroke-linejoin="round"/>
+<g fill="#6B7280" opacity=".45">
+  <rect x="86" y="112" width="240" height="14" rx="7"/>
+  <rect x="86" y="150" width="320" height="14" rx="7"/>
+  <rect x="86" y="188" width="180" height="14" rx="7"/>
+</g>
+<path d="M330 176l64 64M394 176l-64 64" stroke="#D4541E" stroke-width="10" stroke-linecap="round"/>
+<text class="lbl-o" x="446" y="330">지어낸 값</text>
+</svg></div><div class="txt"><p>LLM은 훈련이 끝난 시점까지의 글을 읽었을 뿐이다.</p><p>창원 공장에 오늘 새벽 무슨 일이 있었는지는 그 글에 없다.</p><p>더 나쁜 것은 모른다고 말하지 않는다는 점이다. 그럴듯한 숫자를 지어내 문장을 완성한다.</p></div></div><div class="foot">지어낸 답을 사실처럼 말하는 것을 <span class="mark">환각</span>이라 한다.</div></section>
+<section class="s pic"><div class="head"><h1>눈을 달아 줘도, 손이 없습니다</h1><div class="sub">그럼 온도 값을 복사해 붙여 넣으면 되지 않나 — 한 번은 됩니다.</div></div><div class="body"><div class="art"><svg width="520" height="400" viewBox="0 0 520 400" fill="none" font-family="Malgun Gothic, sans-serif">
+<path d="M160 120c0-46 40-78 90-78s90 32 90 78c22 14 34 36 34 62 0 30-20 56-50 66 0 38-34 66-74 66s-74-28-74-66c-30-10-50-36-50-66 0-26 12-48 34-62z"
+      stroke="#12305A" stroke-width="9" stroke-linejoin="round"/>
+<path d="M196 210h108M250 156v108" stroke="#1E4E8C" stroke-width="6" stroke-linecap="round"/>
+<circle cx="418" cy="120" r="34" stroke="#6B7280" stroke-width="6" stroke-dasharray="10 9"/>
+<path d="M396 98l44 44" stroke="#D4541E" stroke-width="7" stroke-linecap="round"/>
+<circle cx="418" cy="300" r="34" stroke="#6B7280" stroke-width="6" stroke-dasharray="10 9"/>
+<path d="M396 278l44 44" stroke="#D4541E" stroke-width="7" stroke-linecap="round"/>
+<text class="lbl-g" x="466" y="126">눈</text>
+<text class="lbl-g" x="466" y="306">손</text>
+</svg></div><div class="txt"><p>“속도를 낮춰” — 문장만 만든다. 설비는 그대로 돈다.</p><p>“지난 일주일 이력도 봐” — 매번 사람이 찾아서 붙여 넣어야 한다.</p><p>“이상하면 알려 줘” — 물어볼 때만 대답한다. 스스로 계속 보지 않는다.</p></div></div><div class="foot">판단은 하는데 <span class="mark">볼 눈도, 쓸 손도, 계속 돌 심장도 없다.</span></div></section>
+<section class="s rail"><div class="head"><h1>에이전트는 넷으로 이루어집니다</h1><div class="sub">에이전트(Agent) — 대리인. 사람을 대신해 일을 맡아서 끝내는 존재.</div></div><div class="body"><div class="row"><div class="ico"><svg width="76" height="76" viewBox="0 0 76 76" fill="none" font-family="Malgun Gothic, sans-serif"><g stroke="#12305A" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M24 20c-9 0-15 6-15 14 0 4 2 8 5 10-2 3-3 6-3 9 0 8 6 14 14 14h6V20z"/><path d="M52 20c9 0 15 6 15 14 0 4-2 8-5 10 2 3 3 6 3 9 0 8-6 14-14 14h-6V20z"/><path d="M38 14v50"/></g></svg></div><div class="no">01</div><div class="rt"><strong>뇌 — LLM</strong><span>판단을 맡는다.</span></div></div><div class="row"><div class="ico"><svg width="76" height="76" viewBox="0 0 76 76" fill="none" font-family="Malgun Gothic, sans-serif"><g stroke="#12305A" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M16 60l26-26"/><path d="M40 20a12 12 0 1 0 14 14l10 10-8 8-10-10a12 12 0 0 0-6-22z"/></g></svg></div><div class="no">02</div><div class="rt"><strong>도구 — 눈과 손</strong><span>조회하고 제어하는 실제 기능들.</span></div></div><div class="row"><div class="ico"><svg width="76" height="76" viewBox="0 0 76 76" fill="none" font-family="Malgun Gothic, sans-serif"><g stroke="#12305A" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M62 38a24 24 0 1 1-8-18"/><path d="M56 8v14H42"/></g></svg></div><div class="no">03</div><div class="rt"><strong>루프 — 반복</strong><span>결과를 보고 다시 판단한다.</span></div></div><div class="row"><div class="ico"><svg width="76" height="76" viewBox="0 0 76 76" fill="none" font-family="Malgun Gothic, sans-serif"><g stroke="#12305A" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="38" cy="38" r="24"/><path d="M38 22v16l12 8"/><path d="M38 8v6M38 62v6M8 38h6M62 38h6"/></g></svg></div><div class="no">04</div><div class="rt"><strong>자율성 — 스스로</strong><span>다음에 무엇을 할지 자기가 정한다.</span></div></div></div><div class="foot">어제 그린 폐루프와 <span class="mark">모양이 같다.</span> 에이전트는 폐루프를 소프트웨어로 만든 것이다.</div></section>
+<section class="s"><div class="head"><h1>챗봇도 코파일럿도 아닙니다</h1><div class="sub">차이는 하나뿐입니다 — 다음에 무엇을 할지 누가 정하는가.</div></div><div class="body"><table><thead><tr><th></th><th>챗봇</th><th>코파일럿</th><th>에이전트</th></tr></thead><tbody><tr><td class="k">하는 일</td><td>묻는 말에 답한다</td><td>사람 옆에서 거든다</td><td>일을 맡아서 끝낸다</td></tr><tr><td class="k">도구 사용</td><td>안 쓴다</td><td>사람이 시킬 때만</td><td>스스로 골라 쓴다</td></tr><tr><td class="k">작동 횟수</td><td>한 번</td><td>한 번씩 여러 번</td><td>끝날 때까지 반복</td></tr><tr class="on"><td class="k">다음을 정하는 건</td><td>사람</td><td>사람</td><td>자기가 정한다</td></tr><tr><td class="k">공장에 비유하면</td><td>안내원</td><td>보조원</td><td>야간 당직자</td></tr></tbody></table></div><div class="foot"><span class="mark">야간 당직자</span>는 물어보지 않아도 순찰을 돈다.</div></section>
+<section class="s sect"><div class="head"><h1>추론과 행동을 번갈아 합니다</h1><div class="sub">ReAct — Reasoning(추론)과 Acting(행동)을 번갈아 한다는 뜻입니다.</div></div><div class="body"><div class="art"><svg width="520" height="420" viewBox="0 0 520 420" fill="none" font-family="Malgun Gothic, sans-serif">
+<g stroke="#12305A" stroke-width="10" fill="none" stroke-linecap="round">
+  <path d="M260 60a150 150 0 0 1 130 226"/>
+  <path d="M370 306a150 150 0 0 1-260-40" stroke="#D4541E"/>
+  <path d="M104 246A150 150 0 0 1 240 62"/>
+</g>
+<path d="M256 44l22 16-22 16" stroke="#12305A" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+<text class="lbl" x="260" y="196" text-anchor="middle">생각</text>
+<text class="lbl-o" x="392" y="352">행동</text>
+<text class="lbl-g" x="46" y="216">관찰</text>
+</svg></div><div class="txt"><div class="word">ReAct</div><div class="wsub">생각 → 행동 → 관찰 → 다시 생각</div><p>한 번에 답을 내지 않는다. 한 걸음 가고, 결과를 보고, 다음을 정한다.</p><p>그래서 도중에 예상과 다른 것이 나와도 방향을 바꿀 수 있다.</p></div></div><div class="foot">새벽 3시의 EQ-03에 돌리면 <span class="mark">아홉 걸음</span>이 된다.</div></section>
+<section class="s"><div class="head"><h1>새벽 3시 EQ-03에 돌리면</h1><div class="sub">아홉 걸음입니다. 사람은 아무것도 하지 않습니다.</div></div><div class="body"><table><thead><tr><th></th><th>무엇을</th><th>결과</th></tr></thead><tbody><tr><td class="k">생각 → 행동</td><td>온도가 이상한지 보려면 최근 값을 알아야겠다 → 온도 조회</td><td>계속 오른다</td></tr><tr><td class="k">생각 → 행동</td><td>네 시간째 안 내려갔다. 정상 변동이 아니다 → 정비 이력 조회</td><td>마지막 정비가 90일 전</td></tr><tr><td class="k">생각 → 행동</td><td>냉각 쪽 문제로 보인다. 속도를 낮추자 → 속도 조절</td><td>온도가 내려가기 시작한다</td></tr></tbody></table></div><div class="foot"><span class="mark">고리가 닫혔다.</span> 오늘 여러분이 만들 것이 정확히 이 아홉 걸음이다.</div></section>
+<section class="s pic"><div class="head"><h1>하나에게 다 시키면 이렇게 됩니다</h1><div class="sub">앞 장의 아홉 걸음을 지시 하나에 몰아넣으면 벌어지는 일입니다.</div></div><div class="body"><div class="art"><svg width="540" height="400" viewBox="0 0 540 400" fill="none" font-family="Malgun Gothic, sans-serif">
+<circle cx="150" cy="200" r="82" stroke="#12305A" stroke-width="9"/>
+<path d="M124 178h52M124 200h52M124 222h30" stroke="#1E4E8C" stroke-width="6" stroke-linecap="round"/>
+<g fill="#6B7280" opacity=".5"><rect x="270" y="88" width="240" height="14" rx="7"/><rect x="270" y="126" width="226" height="14" rx="7"/><rect x="270" y="164" width="212" height="14" rx="7"/><rect x="270" y="202" width="198" height="14" rx="7"/><rect x="270" y="240" width="184" height="14" rx="7"/><rect x="270" y="278" width="170" height="14" rx="7"/></g>
+<path d="M270 320h150" stroke="#D4541E" stroke-width="6" stroke-dasharray="12 10" stroke-linecap="round"/>
+<text class="lbl-o" x="270" y="372">뒤쪽은 흘린다</text>
+</svg></div><div class="txt"><p>지시가 길어질수록 뒤쪽 요구를 흘린다. 다섯을 시키면 셋만 하고 끝난다.</p><p>어디서 틀렸는지 짚을 수가 없다. 통째로 한 번에 하니 중간이 안 보인다.</p><p>하나만 고치고 싶어도 전체를 다시 시켜야 한다.</p></div></div><div class="foot">일을 나누고 이어 붙일 방법을 정해 두는 것 — 이것이 <span class="mark">에이전틱 디자인 패턴</span>이다.</div></section>
+<section class="s"><div class="head"><h1>패턴은 다섯입니다</h1><div class="sub">외울 필요는 없습니다. 오늘 이 가운데 하나를 손으로 짭니다.</div></div><div class="body"><table><thead><tr><th>패턴</th><th>한 줄 뜻</th><th>공장에서</th></tr></thead><tbody><tr><td class="k">프롬프트 체이닝</td><td>쪼개서 줄줄이 잇는다</td><td>탐색 → 이력 조회 → 원인 추정 → 조치안</td></tr><tr><td class="k">라우팅</td><td>성격을 보고 알맞은 곳으로 보낸다</td><td>알람 등급별 대응 분기</td></tr><tr><td class="k">병렬 처리</td><td>상관없는 일은 동시에</td><td>CNC 6대 동시 점검</td></tr><tr class="on"><td class="k">총괄과 담당</td><td>총괄이 나누고 담당이 처리한다</td><td>감지·진단·조치 담당 + 총괄</td></tr><tr><td class="k">검증과 되짚기</td><td>검사하는 쪽을 따로 둔다</td><td>근거 없는 리포트를 돌려보낸다</td></tr></tbody></table></div><div class="foot">굵게 칠한 <span class="mark">총괄과 담당</span>을 오늘 오후에 짠다.</div></section>
+<section class="s sect"><div class="head"><h1>도구를 쥐여주는 표준이 있습니다</h1><div class="sub">함수는 이미 있습니다. 에이전트가 부를 방법이 없을 뿐입니다.</div></div><div class="body"><div class="art"><svg width="520" height="400" viewBox="0 0 520 400" fill="none" font-family="Malgun Gothic, sans-serif">
+<rect x="40" y="120" width="180" height="160" rx="16" stroke="#12305A" stroke-width="9"/>
+<path d="M86 200h88" stroke="#1E4E8C" stroke-width="6" stroke-linecap="round"/>
+<path d="M220 168h70M220 232h70" stroke="#12305A" stroke-width="9" stroke-linecap="round"/>
+<g stroke="#D4541E" stroke-width="9" stroke-linejoin="round">
+  <path d="M290 140h130v120H290z"/>
+  <path d="M290 168h-24M290 232h-24"/>
+</g>
+<path d="M330 176h50M330 208h34" stroke="#D4541E" stroke-width="6" stroke-linecap="round"/>
+<text class="lbl-g" x="40" y="330">에이전트</text>
+<text class="lbl-o" x="300" y="330">내 도구</text>
+</svg></div><div class="txt"><div class="word">MCP</div><div class="wsub">Model Context Protocol</div><p>표준이 없으면 에이전트마다 붙이는 방법이 달라, 도구 하나에 매번 다시 짜야 한다.</p><p>한 번 내놓으면 어느 에이전트든 갖다 쓴다.</p></div></div><div class="foot">오늘은 <span class="mark">읽는 손</span>이다. 움직이는 손은 오후에 연다.</div></section>
+<section class="s pic"><div class="head"><h1>오늘 만드는 도구는 두 개입니다</h1><div class="sub">서버 뼈대와 데이터 가져오기는 이미 되어 있습니다.</div></div><div class="body"><div class="art"><svg width="520" height="380" viewBox="0 0 520 380" fill="none" font-family="Malgun Gothic, sans-serif">
+<g stroke="#12305A" stroke-width="9" stroke-linejoin="round">
+  <rect x="40" y="80" width="190" height="150" rx="14"/>
+  <rect x="290" y="80" width="190" height="150" rx="14"/>
+</g>
+<path d="M78 190l30-40 26 28 24-46 32 58" stroke="#D4541E" stroke-width="7"
+      stroke-linecap="round" stroke-linejoin="round"/>
+<g fill="#6B7280" opacity=".5">
+  <rect x="326" y="126" width="110" height="12" rx="6"/>
+  <rect x="326" y="158" width="80" height="12" rx="6"/>
+  <rect x="326" y="190" width="120" height="12" rx="6"/>
+</g>
+<text class="lbl" x="40" y="278">detect_anomaly</text>
+<text class="lbl" x="290" y="278">query_equipment</text>
+</svg></div><div class="txt"><p><b>detect_anomaly</b> — 어제 내가 짠 detect() 를 에이전트가 부를 수 있게 내놓는다.</p><p><b>query_equipment</b> — 설비 하나의 최근 센서 요약과 정비 이력을 모아 돌려준다.</p></div></div><div class="foot">★ 표시된 <span class="mark">두 자리</span>만 채우면 된다.</div></section>
+<section class="s"><div class="head"><h1>도구가 돌려주는 것</h1><div class="sub">이 모양으로 에이전트에게 건네집니다.</div></div><div class="body"><table><thead><tr><th>도구</th><th>돌려주는 것</th></tr></thead><tbody><tr><td class="k">detect_anomaly</td><td>equipment_id · sample_count · anomaly_count · k · window · anomalies</td></tr><tr><td class="k">query_equipment</td><td>recent(온도 평균·최대·결측) · maintenance(작업지시 목록)</td></tr></tbody></table></div><div class="foot">정비 이력의 <span class="mark">note</span> 가 진단의 실마리다. 빠뜨리면 원인을 추정할 재료가 없다.</div></section>
+<section class="s pic"><div class="head"><h1>오늘은 전원 fallback 으로 돕니다</h1><div class="sub">개인 데이터베이스는 오늘 쓰지 않습니다.</div></div><div class="body"><div class="art"><svg width="520" height="400" viewBox="0 0 520 400" fill="none" font-family="Malgun Gothic, sans-serif">
+<rect x="40" y="120" width="180" height="160" rx="16" stroke="#12305A" stroke-width="9"/>
+<path d="M86 200h88" stroke="#1E4E8C" stroke-width="6" stroke-linecap="round"/>
+<path d="M220 168h70M220 232h70" stroke="#12305A" stroke-width="9" stroke-linecap="round"/>
+<g stroke="#D4541E" stroke-width="9" stroke-linejoin="round">
+  <path d="M290 140h130v120H290z"/>
+  <path d="M290 168h-24M290 232h-24"/>
+</g>
+<path d="M330 176h50M330 208h34" stroke="#D4541E" stroke-width="6" stroke-linecap="round"/>
+<text class="lbl-g" x="40" y="330">에이전트</text>
+<text class="lbl-o" x="300" y="330">내 도구</text>
+</svg></div><div class="txt"><p>config.json 의 data_source 를 <b>fallback</b> 으로 둔다.</p><p>센서값은 나눠받은 7일치 CSV를 직접 읽고, 정비 이력은 강사 서버에서 온다.</p><p>도구 이름과 응답 형태는 어느 쪽으로 두든 같다. 여러분 코드는 고칠 게 없다.</p></div></div><div class="foot">방화벽에 막히면 transport 를 <span class="mark">http</span> 로 바꾸고 강사 주소를 넣는다.</div></section>
+<section class="s sect"><div class="head"><h1>도구 두 개를 채웁니다</h1><div class="sub">3일차 폴더의 Lab3-3 을 엽니다.</div></div><div class="body"><div class="art"><svg width="520" height="380" viewBox="0 0 520 380" fill="none" font-family="Malgun Gothic, sans-serif">
+<g stroke="#12305A" stroke-width="9" stroke-linejoin="round">
+  <rect x="40" y="80" width="190" height="150" rx="14"/>
+  <rect x="290" y="80" width="190" height="150" rx="14"/>
+</g>
+<path d="M78 190l30-40 26 28 24-46 32 58" stroke="#D4541E" stroke-width="7"
+      stroke-linecap="round" stroke-linejoin="round"/>
+<g fill="#6B7280" opacity=".5">
+  <rect x="326" y="126" width="110" height="12" rx="6"/>
+  <rect x="326" y="158" width="80" height="12" rx="6"/>
+  <rect x="326" y="190" width="120" height="12" rx="6"/>
+</g>
+<text class="lbl" x="40" y="278">detect_anomaly</text>
+<text class="lbl" x="290" y="278">query_equipment</text>
+</svg></div><div class="txt"><div class="word">실습 1</div><div class="wsub">55분 · 각자</div><p>고칠 파일은 mcp_server.py 하나다. ★ 두 자리를 채운다.</p><p>막히면 Claude에게 물어보세요. 오늘은 AI와 같이 짜는 것이 정상입니다.</p></div></div><div class="foot">먼저 <span class="mark">python mcp_server.py --check</span> 로 서버 없이 도구만 호출해 본다.</div></section>
+<section class="s pic"><div class="head"><h1>지시는 한 문장입니다</h1><div class="sub">도구를 언제 어떤 순서로 부를지는 말하지 않습니다.</div></div><div class="body"><div class="art"><svg width="320" height="320" viewBox="0 0 76 76" fill="none" font-family="Malgun Gothic, sans-serif"><g stroke="#12305A" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h30l12 12v44H18z"/><path d="M48 10v12h12"/><path d="M26 38h24M26 50h16"/></g></svg></div><div class="txt"><p>“지난 주 설비 이상을 점검하고, 이상이 있으면 해당 설비의 정비 이력을 조회해 원인 추정과 권고 조치를 담은 진단 리포트를 작성하라.”</p><p>에이전트가 도구를 줄줄이 이어서 호출하며 리포트를 뽑아낸다.</p></div></div><div class="foot">순서를 <span class="mark">에이전트가 정한다.</span> 이것이 아까 본 ReAct다.</div></section>
+<section class="s rail"><div class="head"><h1>무슨 일이 일어나는지 봅니다</h1><div class="sub">지시 하나에 세 걸음이 이어집니다.</div></div><div class="body"><div class="row"><div class="ico"><svg width="76" height="76" viewBox="0 0 76 76" fill="none" font-family="Malgun Gothic, sans-serif"><g stroke="#12305A" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="32" cy="32" r="20"/><path d="M46 46l18 18"/></g></svg></div><div class="no">01</div><div class="rt"><strong>이상을 찾는다</strong><span>내가 어제 짠 detect() 를 부른다.</span></div></div><div class="row"><div class="ico"><svg width="76" height="76" viewBox="0 0 76 76" fill="none" font-family="Malgun Gothic, sans-serif"><g stroke="#12305A" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12h36v52H20z"/><path d="M28 30h20M28 42h14"/><circle cx="52" cy="52" r="8" stroke="#D4541E"/></g></svg></div><div class="no">02</div><div class="rt"><strong>이력을 뒤진다</strong><span>이상이 난 설비의 정비 기록을 조회한다.</span></div></div><div class="row"><div class="ico"><svg width="76" height="76" viewBox="0 0 76 76" fill="none" font-family="Malgun Gothic, sans-serif"><g stroke="#12305A" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h30l12 12v44H18z"/><path d="M48 10v12h12"/><path d="M26 38h24M26 50h16"/></g></svg></div><div class="no">03</div><div class="rt"><strong>리포트를 쓴다</strong><span>근거가 되는 작업지시를 인용해 원인을 추정한다.</span></div></div></div><div class="foot">내가 짠 코드를 <span class="mark">AI가 도구로 쓴다.</span> 이것이 오늘의 첫 장면이다.</div></section>
+<section class="s"><div class="head"><h1>막혔을 때</h1><div class="sub">이 셋이 대부분입니다. 그 외에는 손 드세요.</div></div><div class="body"><table><thead><tr><th>증상</th><th>원인</th><th>조치</th></tr></thead><tbody><tr><td class="k">detect.py 를 불러오지 못했습니다</td><td>어제 TODO 세 곳이 비어 있다</td><td>Lab3-2 를 먼저 끝낸다</td></tr><tr><td class="k">NotImplementedError</td><td>★ 두 자리가 비어 있다</td><td>mcp_server.py 를 채운다</td></tr><tr><td class="k">서버가 안 붙는다</td><td>방화벽 · 포트</td><td>transport 를 http 로 바꾼다</td></tr></tbody></table></div><div class="foot">다 채웠으면 손 들지 말고 기다리세요. <span class="mark">다 같이 한 번에 실행합니다.</span></div></section>
+<section class="s pic"><div class="head"><h1>여기까지는 제안만 합니다</h1><div class="sub">리포트가 “속도를 낮추라”고 권고해도 공장은 그대로 돕니다.</div></div><div class="body"><div class="art"><svg width="540" height="380" viewBox="0 0 540 380" fill="none" font-family="Malgun Gothic, sans-serif">
+<g stroke="#12305A" stroke-width="6" fill="none"><rect x="40" y="60" width="104" height="80" rx="8"/><rect x="166" y="60" width="104" height="80" rx="8"/><rect x="292" y="60" width="104" height="80" rx="8"/><rect x="418" y="60" width="104" height="80" rx="8"/><rect x="40" y="190" width="104" height="80" rx="8"/><rect x="166" y="190" width="104" height="80" rx="8"/><rect x="292" y="190" width="104" height="80" rx="8"/><rect x="418" y="190" width="104" height="80" rx="8"/></g>
+<g fill="#D4541E"><rect x="58" y="158" width="40" height="9" rx="4"/><rect x="184" y="158" width="47" height="9" rx="4"/><rect x="310" y="158" width="54" height="9" rx="4"/><rect x="436" y="158" width="61" height="9" rx="4"/><rect x="58" y="288" width="68" height="9" rx="4"/><rect x="184" y="288" width="75" height="9" rx="4"/><rect x="310" y="288" width="46" height="9" rx="4"/><rect x="436" y="288" width="53" height="9" rx="4"/></g>
+<text class="lbl-o" x="270" y="356" text-anchor="middle">39개 화면</text>
+</svg></div><div class="txt"><p>읽는 손까지는 달았다. 움직이는 손이 아직 없다.</p><p>그리고 지금 이 에이전트에는 한 가지 문제가 더 있다.</p></div></div><div class="foot">지시 한 문장에 <span class="mark">역할이 몇 개나 들어 있었을까.</span></div></section>
+<section class="s pic"><div class="head"><h1>한 문장에 네 가지 일이 들어 있습니다</h1><div class="sub">점검하고, 뒤지고, 추정하고, 씁니다.</div></div><div class="body"><div class="art"><svg width="540" height="400" viewBox="0 0 540 400" fill="none" font-family="Malgun Gothic, sans-serif">
+<circle cx="150" cy="200" r="82" stroke="#12305A" stroke-width="9"/>
+<path d="M124 178h52M124 200h52M124 222h30" stroke="#1E4E8C" stroke-width="6" stroke-linecap="round"/>
+<g fill="#6B7280" opacity=".5"><rect x="270" y="88" width="240" height="14" rx="7"/><rect x="270" y="126" width="226" height="14" rx="7"/><rect x="270" y="164" width="212" height="14" rx="7"/><rect x="270" y="202" width="198" height="14" rx="7"/><rect x="270" y="240" width="184" height="14" rx="7"/><rect x="270" y="278" width="170" height="14" rx="7"/></g>
+<path d="M270 320h150" stroke="#D4541E" stroke-width="6" stroke-dasharray="12 10" stroke-linecap="round"/>
+<text class="lbl-o" x="270" y="372">뒤쪽은 흘린다</text>
+</svg></div><div class="txt"><p>아까는 잘 돌았다. 데이터가 얌전했고 할 일이 적었으니까.</p><p>그런데 여기에 「움직이기」까지 얹으면 어떻게 될까.</p><p>오늘 이 판단은 <b>진짜 설비를 움직인다.</b> 흔들리면 안 되는 이유가 하나 더 생겼다.</p></div></div><div class="foot">지시가 길어질수록 <span class="mark">뒤쪽 요구를 흘린다.</span></div></section>
+<section class="s sect"><div class="head"><h1>그래서 셋으로 쪼갭니다</h1><div class="sub">첫날 배운 「총괄이 나누고 담당이 처리한다」를 오늘 손으로 만듭니다.</div></div><div class="body"><div class="art"><svg width="540" height="420" viewBox="0 0 540 420" fill="none" font-family="Malgun Gothic, sans-serif">
+<circle cx="270" cy="76" r="48" stroke="#12305A" stroke-width="9"/>
+<path d="M246 76h48M270 52v48" stroke="#1E4E8C" stroke-width="6" stroke-linecap="round"/>
+<path d="M270 124v40M270 164H96v40M270 164h174v40M270 164v40" stroke="#6B7280" stroke-width="4"/>
+<g stroke="#12305A" stroke-width="8">
+  <rect x="36" y="204" width="120" height="92" rx="10"/>
+  <rect x="210" y="204" width="120" height="92" rx="10"/>
+  <rect x="384" y="204" width="120" height="92" rx="10"/>
+</g>
+<text class="lbl" x="96" y="258" text-anchor="middle">감지</text>
+<text class="lbl" x="270" y="258" text-anchor="middle">진단</text>
+<text class="lbl-o" x="444" y="258" text-anchor="middle">조치</text>
+<text class="lbl-g" x="270" y="352" text-anchor="middle">총괄이 나누고 담당이 처리한다</text>
+</svg></div><div class="txt"><div class="word">총괄과 담당</div><div class="wsub">오케스트레이터 + 담당 셋</div><p>감지는 이상 구간을 찾고, 진단은 원인을 추정하고, 조치는 무엇을 할지 정한다.</p><p>오케스트레이터는 직접 일하지 않는다. 결과를 받아 다음 담당에게 넘긴다.</p><p>조치한 뒤 다시 감지로 돌아가는 것이 폐루프다.</p></div></div><div class="foot">각자 하나씩만 맡으면 <span class="mark">틀린 자리가 보이고, 그 자리만 고칠 수 있다.</span></div></section>
+<section class="s pic"><div class="head"><h1>지금 제어 권한이 열렸습니다</h1><div class="sub">지금까지는 읽기만 됐습니다. 이제 코드가 공장에 명령을 내립니다.</div></div><div class="body"><div class="art"><svg width="520" height="400" viewBox="0 0 520 400" fill="none" font-family="Malgun Gothic, sans-serif">
+<rect x="40" y="120" width="180" height="160" rx="16" stroke="#12305A" stroke-width="9"/>
+<path d="M86 200h88" stroke="#1E4E8C" stroke-width="6" stroke-linecap="round"/>
+<path d="M220 168h70M220 232h70" stroke="#12305A" stroke-width="9" stroke-linecap="round"/>
+<g stroke="#D4541E" stroke-width="9" stroke-linejoin="round">
+  <path d="M290 140h130v120H290z"/>
+  <path d="M290 168h-24M290 232h-24"/>
+</g>
+<path d="M330 176h50M330 208h34" stroke="#D4541E" stroke-width="6" stroke-linecap="round"/>
+<text class="lbl-g" x="40" y="330">에이전트</text>
+<text class="lbl-o" x="300" y="330">내 도구</text>
+</svg></div><div class="txt"><p>첫날 무대에서 “명령을 넣는 통로가 네 개 준비돼 있다”고 했다.</p><p>그 네 개를 지금 연다.</p></div></div><div class="foot">읽는 손에서 <span class="mark">움직이는 손</span>으로. 무게가 달라진다.</div></section>
+<section class="s"><div class="head"><h1>열린 도구는 넷입니다</h1><div class="sub">무엇이 자동이고 무엇이 사람 승인인지, 여기서 갈립니다.</div></div><div class="body"><table><thead><tr><th>도구</th><th>무엇을 하나</th><th>승인</th></tr></thead><tbody><tr><td class="k">set_equipment_speed</td><td>설비 회전수를 바꾼다 (감속)</td><td>자동</td></tr><tr><td class="k">ack_alarm</td><td>알람을 확인 처리한다</td><td>자동</td></tr><tr class="on"><td class="k">stop_equipment</td><td>설비를 정지시킨다</td><td>사람 승인 필수</td></tr><tr><td class="k">dispatch_robot</td><td>정비 로봇(AMR)을 파견한다</td><td>사람 승인 필수</td></tr></tbody></table></div><div class="foot">왜 아래 둘만 승인이 필요할까.</div></section>
+<section class="s cmp"><div class="head"><h1>되돌릴 수 있는가 — 이것이 갈림선입니다</h1><div class="sub">물리 세계에는 한 번 하면 되돌릴 수 없는 행동이 있습니다.</div></div><div class="body"><div class="side"><div class="tag t-on">자동</div><div class="art"><svg width="400" height="210" viewBox="0 0 400 210" fill="none" font-family="Malgun Gothic, sans-serif">
+<path d="M60 130a90 90 0 1 1 26 62" stroke="#12305A" stroke-width="10" fill="none" stroke-linecap="round"/>
+<path d="M60 92v42h42" stroke="#12305A" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+</svg></div><h3>되돌릴 수 있다</h3><p>감속은 잘못돼도 다시 올리면 된다.<br>알람 확인도 다시 열면 된다.</p></div><div class="rule"></div><div class="side"><div class="tag t-off">승인 필수</div><div class="art"><svg width="400" height="210" viewBox="0 0 400 210" fill="none" font-family="Malgun Gothic, sans-serif">
+<path d="M60 130a90 90 0 1 1 26 62" stroke="#6B7280" stroke-width="10" fill="none"
+      stroke-linecap="round" stroke-dasharray="14 12"/>
+<path d="M60 92v42h42" stroke="#6B7280" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M118 60l112 112M230 60L118 172" stroke="#D4541E" stroke-width="12" stroke-linecap="round"/>
+</svg></div><h3>되돌릴 수 없다</h3><p>정지는 라인 전체를 멈춘다. <b>그 시간은 안 돌아온다.</b><br>로봇은 이미 움직였다.</p></div></div><div class="foot">되돌릴 수 없는 행동 앞에 사람을 세운다 — 이것이 <span class="mark">HITL</span>이다.</div></section>
+<section class="s sect"><div class="head"><h1>고리 안에 사람이 한 자리 있습니다</h1><div class="sub">HITL — Human In The Loop.</div></div><div class="body"><div class="art"><svg width="520" height="400" viewBox="0 0 520 400" fill="none" font-family="Malgun Gothic, sans-serif">
+<path d="M40 300h140" stroke="#12305A" stroke-width="10" stroke-linecap="round"/>
+<path d="M340 300h140" stroke="#12305A" stroke-width="10" stroke-linecap="round"/>
+<g stroke="#12305A" stroke-width="10">
+  <path d="M180 300V110M340 300V110"/>
+</g>
+<path d="M180 150h160" stroke="#D4541E" stroke-width="12" stroke-linecap="round"/>
+<circle cx="260" cy="222" r="46" stroke="#1E4E8C" stroke-width="9"/>
+<path d="M260 196v30l20 12" stroke="#1E4E8C" stroke-width="7" stroke-linecap="round"/>
+<text class="lbl-o" x="260" y="106" text-anchor="middle">사람</text>
+<text class="lbl-g" x="40" y="356">에이전트</text>
+<text class="lbl-g" x="392" y="356">설비</text>
+</svg></div><div class="txt"><div class="word">승인 관문</div><div class="wsub">실행 대신 물어본다</div><p>에이전트가 정지나 파견을 하려 하면, 실행 대신 승인 요청이 뜬다.</p><p>이 구분은 템플릿이 강제한다. 여러분 코드가 실수로 정지를 자동 실행하는 일은 구조적으로 불가능하다.</p><p>여러분이 못 건드리는 계층으로 만들어 둔 이유다.</p></div></div><div class="foot"><span class="mark">안전은 조심해서 지키는 게 아니라 구조로 지킨다.</span></div></section>
+<section class="s pic"><div class="head"><h1>AI에게 다 맡기는 것도, 사람이 다 하는 것도 아닙니다</h1><div class="sub">되돌릴 수 없는 곳에만 사람을 둡니다.</div></div><div class="body"><div class="art"><svg width="520" height="400" viewBox="0 0 520 400" fill="none" font-family="Malgun Gothic, sans-serif">
+<path d="M40 300h140" stroke="#12305A" stroke-width="10" stroke-linecap="round"/>
+<path d="M340 300h140" stroke="#12305A" stroke-width="10" stroke-linecap="round"/>
+<g stroke="#12305A" stroke-width="10">
+  <path d="M180 300V110M340 300V110"/>
+</g>
+<path d="M180 150h160" stroke="#D4541E" stroke-width="12" stroke-linecap="round"/>
+<circle cx="260" cy="222" r="46" stroke="#1E4E8C" stroke-width="9"/>
+<path d="M260 196v30l20 12" stroke="#1E4E8C" stroke-width="7" stroke-linecap="round"/>
+<text class="lbl-o" x="260" y="106" text-anchor="middle">사람</text>
+<text class="lbl-g" x="40" y="356">에이전트</text>
+<text class="lbl-g" x="392" y="356">설비</text>
+</svg></div><div class="txt"><p>전부 사람이 승인하면 야간 무인 운전이 성립하지 않는다.</p><p>전부 자동이면 오판 한 번에 라인이 선다.</p><p>그래서 되돌릴 수 있는 것은 자동, 없는 것만 승인으로 갈랐다.</p></div></div><div class="foot">이 선을 어디에 긋느냐가 <span class="mark">현장 설계의 핵심</span>이다.</div></section>
+<section class="s sect"><div class="head"><h1>폐루프를 닫습니다</h1><div class="sub">4일차 폴더의 폐루프 템플릿을 엽니다.</div></div><div class="body"><div class="art"><svg width="460" height="400" viewBox="0 0 460 400" fill="none" font-family="Malgun Gothic, sans-serif">
+<g stroke="#12305A" stroke-width="12" fill="none" stroke-linecap="round">
+  <path d="M230 62a138 138 0 1 1-.1 0"/>
+</g>
+<path d="M226 44l24 18-24 18" stroke="#D4541E" stroke-width="11" fill="none"
+      stroke-linecap="round" stroke-linejoin="round"/>
+<text class="lbl" x="230" y="30" text-anchor="middle">인지</text>
+<text class="lbl" x="392" y="212">판단</text>
+<text class="lbl-o" x="230" y="386" text-anchor="middle">행동</text>
+<text class="lbl-g" x="24" y="212">확인</text>
+</svg></div><div class="txt"><div class="word">실습 2</div><div class="wsub">70분 · 각자</div><p>오케스트레이터는 이미 완성돼 있다. 담당 셋의 속만 채운다.</p><p>config 에 쪽지의 접속 키를 넣는다.</p></div></div><div class="foot">채울 곳은 <span class="mark">감지 · 진단 · 조치</span> 세 군데다.</div></section>
+<section class="s rail"><div class="head"><h1>담당 셋이 하는 일</h1><div class="sub">각자 하나씩만 맡습니다. 지시가 짧아집니다.</div></div><div class="body"><div class="row"><div class="ico"><svg width="76" height="76" viewBox="0 0 76 76" fill="none" font-family="Malgun Gothic, sans-serif"><g stroke="#12305A" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="32" cy="32" r="20"/><path d="M46 46l18 18"/></g></svg></div><div class="no">01</div><div class="rt"><strong>감지 — 이상 구간을 찾는다</strong><span>온도 이력을 보고 이상이 시작된 지점을 집는다.</span></div></div><div class="row"><div class="ico"><svg width="76" height="76" viewBox="0 0 76 76" fill="none" font-family="Malgun Gothic, sans-serif"><g stroke="#12305A" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12h36v52H20z"/><path d="M28 30h20M28 42h14"/><circle cx="52" cy="52" r="8" stroke="#D4541E"/></g></svg></div><div class="no">02</div><div class="rt"><strong>진단 — 원인을 추정한다</strong><span>정비 이력을 뒤져 근거가 될 작업지시를 찾는다.</span></div></div><div class="row"><div class="ico"><svg width="76" height="76" viewBox="0 0 76 76" fill="none" font-family="Malgun Gothic, sans-serif"><g stroke="#12305A" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12l32 26-32 26z"/></g></svg></div><div class="no">03</div><div class="rt"><strong>조치 — 무엇을 할지 정한다</strong><span>감속으로 될지, 로봇을 보내야 할지 정하고 도구를 부른다.</span></div></div></div><div class="foot">총괄은 <span class="mark">이미 완성돼 있다.</span> 셋의 속만 채우면 돈다.</div></section>
+<section class="s"><div class="head"><h1>폐루프는 일곱 걸음입니다</h1><div class="sub">승인 한 번을 빼고는 사람이 아무것도 하지 않습니다.</div></div><div class="body"><table><thead><tr><th></th><th>무엇이 일어나나</th><th>누가</th></tr></thead><tbody><tr><td class="k">01 주입</td><td>강사 콘솔에서 EQ-03에 온도 드리프트를 넣는다</td><td>강사</td></tr><tr><td class="k">02 감지</td><td>감지 담당이 포착한다</td><td>에이전트</td></tr><tr><td class="k">03 진단</td><td>정비 이력을 뒤져 원인을 추정한다</td><td>에이전트</td></tr><tr><td class="k">04 감속</td><td>회전수를 낮춘다 — 되돌릴 수 있으므로 자동</td><td>에이전트</td></tr><tr class="on"><td class="k">05 승인 요청</td><td>로봇 파견 — 되돌릴 수 없으므로 멈춰 선다</td><td>에이전트</td></tr><tr><td class="k">06 승인</td><td>y 를 누른다</td><td>사람</td></tr><tr><td class="k">07 파견</td><td>AMR 이 움직이고 값이 바뀐다</td><td>에이전트</td></tr></tbody></table></div><div class="foot"><span class="mark">05 에서 루프가 멈춰 기다린다.</span> 누르기 전까지 아무 일도 안 일어난다.</div></section>
+<section class="s pic"><div class="head"><h1>감지까지 1분에서 3분 걸립니다</h1><div class="sub">조용해도 고장 난 게 아닙니다.</div></div><div class="body"><div class="art"><svg width="300" height="300" viewBox="0 0 76 76" fill="none" font-family="Malgun Gothic, sans-serif"><g stroke="#12305A" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h32M22 64h32"/><path d="M26 12c0 16 12 20 12 26s-12 10-12 26"/><path d="M50 12c0 16-12 20-12 26s12 10 12 26"/></g></svg></div><div class="txt"><p>주입한 뒤 바로 잡히지 않는다. 값이 충분히 쌓여야 판정이 선다.</p><p>설계된 대기다. 기다리세요.</p></div></div><div class="foot">터미널에 아무것도 안 뜨는 동안이 <span class="mark">정상</span>이다.</div></section>
+<section class="s rail"><div class="head"><h1>화면에서 세 가지를 보세요</h1><div class="sub">숫자는 각자 다릅니다. 자기 화면의 숫자를 보세요.</div></div><div class="body"><div class="row"><div class="ico"><svg width="76" height="76" viewBox="0 0 76 76" fill="none" font-family="Malgun Gothic, sans-serif"><g stroke="#12305A" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h30l12 12v44H18z"/><path d="M48 10v12h12"/><path d="M26 38h24M26 50h16"/></g></svg></div><div class="no">01</div><div class="rt"><strong>리포트</strong><span>진단이 정비 이력의 어느 줄을 근거로 댔는지.</span></div></div><div class="row"><div class="ico"><svg width="76" height="76" viewBox="0 0 76 76" fill="none" font-family="Malgun Gothic, sans-serif"><g stroke="#12305A" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="38" cy="38" r="26"/><path d="M28 28h20v20H28z"/></g></svg></div><div class="no">02</div><div class="rt"><strong>승인 요청</strong><span>언제 멈춰 섰는지, 무엇을 하려고 물었는지.</span></div></div><div class="row"><div class="ico"><svg width="76" height="76" viewBox="0 0 76 76" fill="none" font-family="Malgun Gothic, sans-serif"><g stroke="#12305A" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="16" y="26" width="44" height="32" rx="6"/><path d="M38 16v10"/><circle cx="28" cy="42" r="4"/><circle cx="48" cy="42" r="4"/><path d="M24 58v8M52 58v8"/></g></svg></div><div class="no">03</div><div class="rt"><strong>공장 화면</strong><span>회전수 · AMR 위치 · 온도가 실제로 어떻게 바뀌는지.</span></div></div></div><div class="foot">끝나면 <span class="mark">진단 리포트를 캡처해</span> 두세요. 오늘 제일 남길 만한 화면입니다.</div></section>
+<section class="s"><div class="head"><h1>막혔을 때</h1><div class="sub">이 셋이 대부분입니다.</div></div><div class="body"><table><thead><tr><th>증상</th><th>조치</th></tr></thead><tbody><tr><td class="k">아무 일도 안 일어난다</td><td>1~3분 기다렸는지 확인. 그래도 안 되면 손 들기</td></tr><tr><td class="k">감지는 되는데 진단이 비어 있다</td><td>정비 이력을 안 부르고 있다. 진단 담당을 본다</td></tr><tr><td class="k">승인 요청이 안 뜬다</td><td>조치 담당이 파견까지 안 가고 있다</td></tr></tbody></table></div><div class="foot">다 채웠으면 기다리세요. <span class="mark">서른아홉 개 공장에 동시에 주입합니다.</span></div></section>
+<section class="s rail"><div class="head"><h1>오늘 세 가지를 했습니다</h1><div class="sub">정리하고 마무리하겠습니다.</div></div><div class="body"><div class="row"><div class="ico"><svg width="76" height="76" viewBox="0 0 76 76" fill="none" font-family="Malgun Gothic, sans-serif"><g stroke="#12305A" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M16 60l26-26"/><path d="M40 20a12 12 0 1 0 14 14l10 10-8 8-10-10a12 12 0 0 0-6-22z"/></g></svg></div><div class="no">01</div><div class="rt"><strong>쥐여줬다</strong><span>내가 짠 코드를 도구로 내놓고, AI가 갖다 썼다.</span></div></div><div class="row"><div class="ico"><svg width="76" height="76" viewBox="0 0 76 76" fill="none" font-family="Malgun Gothic, sans-serif"><g stroke="#12305A" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="38" cy="18" r="9"/><path d="M38 27v14M38 41H14v12M38 41h24v12M38 41v12"/></g></svg></div><div class="no">02</div><div class="rt"><strong>쪼갰다</strong><span>감지·진단·조치와 총괄. 첫날 배운 패턴을 손으로 짰다.</span></div></div><div class="row"><div class="ico"><svg width="76" height="76" viewBox="0 0 76 76" fill="none" font-family="Malgun Gothic, sans-serif"><g stroke="#12305A" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="16" y="26" width="44" height="32" rx="6"/><path d="M38 16v10"/><circle cx="28" cy="42" r="4"/><circle cx="48" cy="42" r="4"/><path d="M24 58v8M52 58v8"/></g></svg></div><div class="no">03</div><div class="rt"><strong>움직였다</strong><span>판단대로 설비가 바뀌었다. 승인 한 번을 빼고는 자동으로.</span></div></div></div><div class="foot"><span class="mark">고리가 닫혔다.</span> 인지 → 판단 → 행동 → 다시 인지.</div></section>
+<section class="s sect"><div class="head"><h1>그런데 이건 전부 소프트웨어입니다</h1><div class="sub">여러분이 세운 것은 화면 안의 공장입니다.</div></div><div class="body"><div class="art"><svg width="540" height="400" viewBox="0 0 540 400" fill="none" font-family="Malgun Gothic, sans-serif">
+<rect x="40" y="50" width="460" height="270" rx="14" stroke="#12305A" stroke-width="9"/>
+<path d="M40 104h460" stroke="#12305A" stroke-width="7"/>
+<g stroke="#1E4E8C" stroke-width="6"><rect x="80" y="140" width="96" height="56" rx="7"/><rect x="220" y="140" width="96" height="56" rx="7"/><rect x="360" y="140" width="96" height="56" rx="7"/><rect x="80" y="220" width="96" height="56" rx="7"/><rect x="220" y="220" width="96" height="56" rx="7"/><rect x="360" y="220" width="96" height="56" rx="7"/></g>
+<path d="M210 320v40h120v-40" stroke="#12305A" stroke-width="9" fill="none"/>
+<path d="M170 366h200" stroke="#12305A" stroke-width="9" stroke-linecap="round"/>
+<text class="lbl-o" x="270" y="86" text-anchor="middle">화면 안</text>
+</svg></div><div class="txt"><div class="word">마지막 1미터</div><div class="wsub">내일의 질문</div><p>진짜 공장에서는 그 명령이 PLC를 거쳐야 한다.</p><p>그리고 안전 인터록은 결국 하드웨어에 남는다.</p></div></div><div class="foot">내일 <span class="mark">그 마지막 1미터</span>를 봅니다.</div></section>
+<section class="s rail"><div class="head"><h1>남은 20분은 노션입니다</h1><div class="sub">오늘 겪은 것을 카드로 남깁니다.</div></div><div class="body"><div class="row"><div class="ico"><svg width="76" height="76" viewBox="0 0 76 76" fill="none" font-family="Malgun Gothic, sans-serif"><g stroke="#12305A" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M14 20h34l14 14v22H14z"/><path d="M48 20v14h14" stroke="#D4541E"/></g></svg></div><div class="no">01</div><div class="rt"><strong>고른다</strong><span>오늘 안 풀린 것 두세 개. 그게 카드 제목이 된다.</span></div></div><div class="row"><div class="ico"><svg width="76" height="76" viewBox="0 0 76 76" fill="none" font-family="Malgun Gothic, sans-serif"><g stroke="#12305A" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M12 58h52"/><path d="M20 46l4-12 22-22 8 8-22 22z"/></g></svg></div><div class="no">02</div><div class="rt"><strong>쓴다</strong><span>화면을 덮고 내 문장으로 쓴다. 안 써지면 그게 모르는 것이다.</span></div></div><div class="row"><div class="ico"><svg width="76" height="76" viewBox="0 0 76 76" fill="none" font-family="Malgun Gothic, sans-serif"><g stroke="#12305A" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="14" y="12" width="48" height="36" rx="4"/><path d="M22 40l12-12 8 8 8-10 8 14" stroke="#D4541E"/><path d="M38 48v16"/></g></svg></div><div class="no">03</div><div class="rt"><strong>붙인다</strong><span>진단 리포트를 캡처해 붙이고 이해도 태그를 찍는다.</span></div></div></div><div class="foot">내일이 마지막 날입니다. <span class="mark">노션 링크 제출이 수료</span>입니다.</div></section>
+</body></html>

@@ -8,6 +8,16 @@ Supabase 없이도 돌기 때문에 강의장에서 네트워크가 막혔을 �
 
 from __future__ import annotations
 
+# ── 한글 윈도우(cp949)에서 출력이 깨져 죽는 것을 막는다 ──────────────────
+import sys as _sys
+for _s in (_sys.stdout, _sys.stderr):
+    if (getattr(_s, "encoding", "") or "").lower().replace("-", "") != "utf8":
+        try:
+            _s.reconfigure(encoding="utf-8", errors="replace")
+        except Exception:
+            pass
+# ─────────────────────────────────────────────────────────────────────────
+
 import json
 import sys
 from datetime import datetime, timedelta, timezone

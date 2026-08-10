@@ -6,7 +6,7 @@
     제어   set_equipment_speed / stop_equipment
            dispatch_robot / ack_alarm                       X-Access-Key 가 필요하다
 
-경로에 우리 팀 네임스페이스가 들어갑니다. 키가 맞아도 다른 팀 공장은 건드릴 수 없습니다 —
+경로에 내 네임스페이스가 들어갑니다. 키가 맞아도 다른 사람 공장은 건드릴 수 없습니다 —
 경로가 곧 대상이기 때문입니다.
 """
 
@@ -23,7 +23,7 @@ CFG = json.loads((ROOT / "config.json").read_text(encoding="utf-8"))
 
 
 class ControlLocked(RuntimeError):
-    """제어 API 가 아직 잠겨 있습니다(403). 강사가 팀 네임스페이스를 개방해야 합니다."""
+    """제어 API 가 아직 잠겨 있습니다(403). 강사가 제어를 개방해야 합니다."""
 
 
 class FactoryAPI:
@@ -53,7 +53,7 @@ class FactoryAPI:
         except (UnicodeEncodeError, AttributeError):
             raise ValueError(
                 f"config.json 의 access_key 를 아직 안 바꿨습니다 (현재: {self.key!r}). "
-                "강사에게 받은 우리 팀 키로 바꾸세요."
+                "쪽지에 적힌 내 접속 키로 바꾸세요."
             ) from None
 
     # ------------------------------------------------------------------ 읽기

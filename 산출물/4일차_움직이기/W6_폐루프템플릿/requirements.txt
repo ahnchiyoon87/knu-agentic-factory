@@ -1,7 +1,7 @@
 httpx>=0.27
 mcp>=2.0,<3
-anthropic>=0.60
 
-# Anthropic 키가 없을 때만 쓰는 대체 경로. 교안 기조는 Claude 입니다.
-openai>=1.60
-
+# 진단은 강사 서버를 거칩니다(config.json 의 diagnose.backend = server).
+# 학생 PC 에는 LLM 키도, openai 패키지도 필요 없습니다.
+# 직접 호출로 바꿔 쓸 때만 아래를 깝니다.
+# openai>=1.60

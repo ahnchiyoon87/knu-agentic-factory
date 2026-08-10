@@ -31,6 +31,18 @@ MCP 가 무엇인가
 
 from __future__ import annotations
 
+# ── 한글 윈도우(cp949)에서 출력이 깨져 죽는 것을 막는다 ──────────────────
+#    학생 PC 기본 콘솔은 cp949 라 `—` `→` 같은 글자에서 UnicodeEncodeError 가 난다.
+#    리허설은 PYTHONUTF8=1 로 돌아가 이 문제가 안 보인다. 학생은 그냥 실행한다.
+import sys as _sys
+for _s in (_sys.stdout, _sys.stderr):
+    if (getattr(_s, "encoding", "") or "").lower().replace("-", "") != "utf8":
+        try:
+            _s.reconfigure(encoding="utf-8", errors="replace")
+        except Exception:
+            pass
+# ─────────────────────────────────────────────────────────────────────────
+
 import argparse
 import json
 import os
@@ -64,7 +76,7 @@ mcp = MCPServer(
 def _fetch_readings(equipment_id: str, hours: int) -> list[dict]:
     """최근 hours 시간의 센서값. 오래된 것부터 정렬해서 돌려준다.
 
-    student  → 내가 Lab 3-1 에서 적재한 Supabase 테이블
+    student  → 개인 DB (이번 특강에서는 쓰지 않습니다)
     fallback → 나눠받은 W5 CSV 를 파일에서 직접 읽는다
 
     강사 시뮬레이터에서 가져오지 않는 이유 — 시뮬레이터는 최근 1시간만 보관한다.
