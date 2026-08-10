@@ -52,11 +52,7 @@ def 검사_설정() -> tuple[bool, list[str]]:
         msg.append(f'data_source 가 "{c.get("data_source")}" 입니다. "fallback" 으로 두세요.')
     fb = c.get("fallback", {})
     api = str(fb.get("shared_api", ""))
-    if "127.0.0.1" in api or "localhost" in api:
-        ok = False
-        msg.append("fallback.shared_api 가 아직 내 컴퓨터를 가리킵니다. "
-                   "쪽지의 서버 주소로 바꾸세요 — 안 바꾸면 정비 이력이 비어 옵니다.")
-    elif not api.startswith("http"):
+    if not api.startswith("http"):
         ok = False
         msg.append(f"fallback.shared_api 가 이상합니다 ({api!r}). http:// 로 시작해야 합니다.")
     ten = str(fb.get("tenant", ""))
@@ -68,7 +64,22 @@ def 검사_설정() -> tuple[bool, list[str]]:
         ok = False
         msg.append(f"센서 CSV 를 못 찾았습니다: {csv}")
     if ok:
-        msg.append(f"서버 {api} · 내 번호 {ten}")
+        try:
+            import httpx
+            r = httpx.get(f"{api.rstrip('/')}/api/v1/{ten}/maintenance",
+                          params={"limit": 1}, timeout=8)
+            건수 = len(r.json().get("maintenance", r.json() if isinstance(r.json(), list) else []))
+            if r.status_code != 200 or 건수 == 0:
+                ok = False
+                msg.append(f"서버에 닿았지만 정비 이력이 안 옵니다 (HTTP {r.status_code}). "
+                           "shared_api 주소와 내 번호를 쪽지와 대조하세요 — "
+                           "여기가 비면 원인 추정이 안 나옵니다.")
+            else:
+                msg.append(f"서버 {api} · 내 번호 {ten} · 정비 이력 확인")
+        except Exception as exc:                                 # noqa: BLE001
+            ok = False
+            msg.append(f"서버에 못 닿습니다 — {type(exc).__name__}. "
+                       "shared_api 주소를 쪽지와 대조하세요. 그래도 안 되면 손 드세요.")
     return ok, msg
 
 
@@ -90,7 +101,7 @@ def 검사_어제코드() -> tuple[bool, list[str]]:
         return False, [f"detect() 가 터집니다 — {type(e).__name__}: {e}"]
     if not isinstance(out, list) or len(out) != 71:
         return False, [f"detect() 가 길이 71 리스트를 돌려줘야 하는데 {type(out).__name__} 이 왔습니다."]
-    return True, ["어제 만든 detect() 가 정상입니다."]
+    return True, ["1일차에 만든 detect() 가 정상입니다."]
 
 
 # ══════════════════════════════════════════════ 도구 검사
@@ -198,8 +209,20 @@ def 열기(n: int) -> int:
     if not m2:
         print(f"mcp_server.py 에서 {name} 의 TODO 자리를 못 찾았습니다.")
         return 1
-    본문 = "\n".join("    " + l if l.strip() else l
-                    for l in m.group(0).split("\n")[1:]).rstrip() + "\n"
+    # 완성본은 함수 통째로(def 부터)이고, 넣을 자리는 함수 **본문 안**이다.
+    # def 줄과 docstring 을 걷어내고, 남은 본문을 원래 들여쓰기(4칸)로 맞춘다.
+    줄 = m.group(0).split("\n")[1:]                     # def 줄 제거
+    따옴 = 줄[0].lstrip()[:3] if 줄 else ""
+    if 따옴 in ('"' * 3, "'" * 3):                       # docstring 제거
+        if 줄[0].lstrip().count(따옴) < 2:
+            끝 = next(i for i, l in enumerate(줄[1:], 1) if 따옴 in l)
+            줄 = 줄[끝 + 1:]
+        else:
+            줄 = 줄[1:]
+    while 줄 and not 줄[0].strip():
+        줄 = 줄[1:]
+    들여 = min((len(l) - len(l.lstrip()) for l in 줄 if l.strip()), default=4)
+    본문 = "\n".join(("    " + l[들여:]) if l.strip() else "" for l in 줄).rstrip() + "\n"
     tgt.write_text(cur[:m2.start()] + 본문 + cur[m2.end():], encoding="utf-8")
 
     print(f"\n  도구 {n} ({name}) 만 완성본으로 채웠습니다. 나머지는 그대로입니다.")
