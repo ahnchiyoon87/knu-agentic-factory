@@ -264,8 +264,16 @@ def build_row_labels(df: pd.DataFrame, labels: list[dict]) -> pd.DataFrame:
         "anomaly_kind": "",
     })
     for L in labels:
+        # 구간형(드리프트·결측)은 데이터를 만들 때 **반열린 구간** [start, end) 을 썼다.
+        #   드리프트  drift_from <= ts <  drift_to
+        #   결측      drop_from  <= ts <  drop_to
+        # 라벨을 닫힌 구간으로 찍으면 마지막 한 행이 실제로는 정상인데 이상으로 표시된다.
+        # (그래서 결측이 121행으로 잡혔지만 실제 NaN 은 120개였다 — config 도 "120개 샘플"이라 적는다)
+        # 스파이크만 구간이 아니라 **점**이라서 마지막 점을 포함해야 한다.
+        끝비교 = (df["timestamp"] <= L["end"] if L["kind"] == "vibration_spike"
+                  else df["timestamp"] < L["end"])
         mask = ((df["equipment_id"] == L["equipment_id"])
-                & (df["timestamp"] >= L["start"]) & (df["timestamp"] <= L["end"]))
+                & (df["timestamp"] >= L["start"]) & 끝비교)
         lab.loc[mask, "is_anomaly"] = 1
         lab.loc[mask, "anomaly_kind"] = L["kind"]
     # 스파이크는 구간이 아니라 점이라 사이 구간까지 1 이 되면 안 된다

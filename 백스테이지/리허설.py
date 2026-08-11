@@ -451,7 +451,7 @@ def 이일차_도구(s: Sim) -> None:
     check("MCP 도구 템플릿 검증 — 서버를 띄워 도구가 왕복한다", ok, msg)
 
 
-def 이일차_열기(s: Sim) -> None:
+def 이일차_열기(s: Sim, ns: str = "S01") -> None:
     phase("2일차 — 이탈 방지 마지막 수단 (--열기 를 실제로 써 본다)")
 
     detect_tgt, detect_bak = LAB1 / "detect.py", LAB1 / "detect_내가짠것.py"
@@ -473,6 +473,22 @@ def 이일차_열기(s: Sim) -> None:
               "sample_count" in out and "anomaly_count" in out)
         check("정비 이력의 미완 작업지시가 도구 응답에 드러난다",
               "WO-2026-0801" in out or "open_work_orders" in out)
+
+        # ★ 2일차 오전의 마지막 장면 — AI 가 **스스로** 도구를 골라 부른다.
+        #   실제 모델을 부른다(비용). 여기가 죽으면 오전 22분이 통째로 빈다.
+        #   `--check` 는 도구가 도는지만 보고, 이 검사는 **AI 가 부르는지**를 본다.
+        # 학생은 `내번호.py` 가 남긴 `.내번호` 에서 키를 읽는다. 리허설은 그 파일을
+        # 만들지 않으므로(당일 번호를 미리 소모하지 않는다) 환경변수로 같은 값을 준다.
+        키 = {t["tenant_id"]: t["access_key"]
+              for t in s.inst("GET", "/tenants")["tenants"]}
+        ok, msg, out = run_script(LAB2 / "agent.py", ["--설비", "EQ-03"], 300,
+                                  {"SHARED_API": s.base, "W6_TENANT": ns,
+                                   "W6_ACCESS_KEY": 키.get(ns, "")})
+        check("★ AI 가 내 도구를 스스로 골라 부른다 (2일차 오전 하이라이트)",
+              ok and "도구 호출  detect_anomaly" in out, msg)
+        check("AI 리포트가 작업지시 번호를 근거로 인용한다",
+              "WO-2026-0801" in out,
+              next((l.strip()[:70] for l in out.splitlines() if "WO-2026-0801" in l), msg))
     finally:
         detect_tgt.write_bytes(detect_원본)
         mcp_tgt.write_bytes(mcp_원본)
@@ -708,7 +724,7 @@ def main() -> int:
         일일차_이상감지()
         일일차_열기()
         이일차_도구(s)
-        이일차_열기(s)
+        이일차_열기(s, args.ns)
         soak = args.soak if args.soak is not None else (0 if args.quick else 180)
         wait(soak, "실습이 진행되는 동안 데이터가 쌓이도록 (여기가 결함이 드러나는 자리)")
         keys = 이일차_제어(s, args.base_url, args.ns, args.ns2)

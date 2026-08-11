@@ -52,21 +52,27 @@ class FactoryAPI:
         `UnicodeEncodeError` 로 죽으므로 그것도 여기서 잡는다.
         """
         빈칸 = []
+        if not str(self.base).strip():
+            빈칸.append('"base_url"    ← 강사 서버 주소')
         if not str(self.tenant).strip():
-            빈칸.append('"tenant"   ← 쪽지의 내 번호 (예: "S07", 대문자)')
+            빈칸.append('"tenant"      ← 내 공장 번호 (예: "S07")')
         if not str(self.key).strip():
-            빈칸.append('"access_key" ← 쪽지의 접속 키 (긴 문자열)')
+            빈칸.append('"access_key"  ← 내 접속 키 (긴 문자열)')
         if 빈칸:
             raise ValueError(
-                "config.json 을 아직 안 채웠습니다. 아래 줄을 쪽지 보고 채우세요.\n    "
+                "config.json 이 아직 비어 있습니다 —\n    "
                 + "\n    ".join(빈칸)
+                + "\n\n    손으로 적지 마세요. 아래 한 줄이면 자동으로 채워집니다.\n"
+                "        cd ../../../1일차/실습\n"
+                "        python 내번호.py\n"
+                "    (1일차에 이미 돌렸으면 그냥 다시 치면 됩니다 — 같은 번호가 나옵니다)"
             )
         try:
             self.key.encode("ascii")
         except (UnicodeEncodeError, AttributeError):
             raise ValueError(
                 f'config.json 의 access_key 가 예시 그대로입니다 (현재: {self.key!r}).\n'
-                "    쪽지에 적힌 내 접속 키(영문·숫자로 된 긴 문자열)로 바꾸세요."
+                "    1일차/실습 에서 python 내번호.py 를 돌리면 자동으로 채워집니다."
             ) from None
 
     # ------------------------------------------------------------------ 읽기

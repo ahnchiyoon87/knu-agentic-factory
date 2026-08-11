@@ -188,8 +188,7 @@ def 설정되돌리기(out: Path) -> None:
     폐루프 = out / "2일차" / "실습" / "폐루프" / "config.json"
     if 폐루프.is_file():
         c = _json.loads(폐루프.read_text(encoding="utf-8"))
-        c["tenant"], c["access_key"] = "", ""
-        c["base_url"] = "http://192.168.0.10:8000"
+        c["tenant"], c["access_key"], c["base_url"] = "", "", ""
         폐루프.write_text(_json.dumps(c, ensure_ascii=False, indent=2) + "\n",
                           encoding="utf-8")
 
@@ -197,8 +196,10 @@ def 설정되돌리기(out: Path) -> None:
     if 도구.is_file():
         c = _json.loads(도구.read_text(encoding="utf-8"))
         c.setdefault("fallback", {})
-        c["fallback"]["tenant"] = "S01"
-        c["fallback"]["shared_api"] = "http://127.0.0.1:8000"
+        # 셋 다 `내번호.py` 가 채운다. 예시 주소·남의 번호를 남기면
+        # 안 돌린 학생이 조용히 그 값으로 진행한다 (S01 은 실재하는 남의 번호다).
+        c["fallback"]["tenant"] = ""
+        c["fallback"]["shared_api"] = ""
         도구.write_text(_json.dumps(c, ensure_ascii=False, indent=2) + "\n",
                         encoding="utf-8")
 
@@ -322,6 +323,16 @@ def 검증(out: Path) -> int:
                    "완성본으로 채웠습니다")
         돌린다(lab2, ["mcp_server.py", "--check"], "★ --열기 뒤 도구 2개가 실제로 돈다",
                "sample_count")
+        # 2일차 오전의 마지막 장면 — AI 가 **스스로** 내 도구를 골라 부르는가.
+        # 실제 모델을 부른다(비용). 이게 안 되면 오전 22분이 통째로 빈다.
+        txt = 돌린다(lab2, ["agent.py", "--설비", "EQ-03"],
+                    "★ AI 가 내 도구를 스스로 부른다 (2일차 오전 하이라이트)",
+                    "도구 호출  detect_anomaly")
+        if "WO-2026-0801" not in txt:
+            print("  [실패] AI 리포트가 작업지시 번호를 인용하지 않았다")
+            실패.append("AI 리포트 WO 인용")
+        else:
+            print("  [통과] AI 리포트가 WO-2026-0801 을 근거로 인용한다")
     finally:
         (lab1 / "detect.py").write_bytes(detect_원본)
         (lab2 / "mcp_server.py").write_bytes(mcp_원본)
@@ -344,11 +355,13 @@ def 검증(out: Path) -> int:
         c["tenant"], c["access_key"] = "", ""
         폐루프cfg.write_text(_json.dumps(c, ensure_ascii=False, indent=2) + "\n",
                              encoding="utf-8")
+        # 빈 칸을 짚는 데서 그치면 안 된다 — 「무엇을 하라」까지 나와야 한다.
+        # 예전에는 「쪽지 보고 채우세요」였는데 쪽지는 없어졌다. 그 자리를 못 빠져나온다.
         돌린다(lab3, ["loop.py", "--check"], "설정이 비면 어느 줄이 비었는지 짚어 준다",
-               "config.json 을 아직 안 채웠습니다")
+               "python 내번호.py")
         돌린다(lab3, ["control_mcp.py", "--check"],
                "제어 도구도 같은 안내를 낸다 (cp949 포함)",
-               "config.json 을 아직 안 채웠습니다")
+               "python 내번호.py")
     finally:
         폐루프cfg.write_bytes(원래cfg)
 

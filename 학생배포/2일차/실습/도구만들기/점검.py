@@ -64,13 +64,22 @@ def 검사_설정() -> tuple[bool, list[str]]:
         msg.append(f'data_source 가 "{c.get("data_source")}" 입니다. "fallback" 으로 두세요.')
     fb = c.get("fallback", {})
     api = str(fb.get("shared_api", ""))
-    if not api.startswith("http"):
-        ok = False
-        msg.append(f"fallback.shared_api 가 이상합니다 ({api!r}). http:// 로 시작해야 합니다.")
     ten = str(fb.get("tenant", ""))
-    if not re.fullmatch(r"S\d{2}", ten):
+
+    # 둘 다 `내번호.py` 가 채웁니다. 학생이 손으로 적을 값이 아닙니다.
+    if not api.strip() or not ten.strip():
         ok = False
-        msg.append(f"fallback.tenant 가 {ten!r} 입니다. 쪽지의 내 번호(예: S07)로 바꾸세요.")
+        msg.append("서버 주소와 내 번호가 아직 비어 있습니다. 손으로 적지 마세요 —")
+        msg.append("    cd ../../../1일차/실습  →  python 내번호.py")
+        msg.append("    (1일차에 이미 돌렸으면 그냥 다시 치면 됩니다. 같은 번호가 나옵니다)")
+    else:
+        if not api.startswith("http"):
+            ok = False
+            msg.append(f"fallback.shared_api 가 이상합니다 ({api!r}). http:// 로 시작해야 합니다.")
+        if not re.fullmatch(r"S\d{2}", ten):
+            ok = False
+            msg.append(f"fallback.tenant 가 {ten!r} 입니다. "
+                       "1일차/실습 에서 python 내번호.py 를 돌리면 자동으로 채워집니다.")
     # csv_path 는 기본이 "auto" 다 — mcp_server.py 와 똑같이 찾아야 판정이 어긋나지 않는다
     csv = _csv_경로(fb)
     if not csv.is_file():
@@ -87,14 +96,15 @@ def 검사_설정() -> tuple[bool, list[str]]:
             if r.status_code != 200 or 건수 == 0:
                 ok = False
                 msg.append(f"서버에 닿았지만 정비 이력이 안 옵니다 (HTTP {r.status_code}). "
-                           "shared_api 주소와 내 번호를 쪽지와 대조하세요 — "
-                           "여기가 비면 원인 추정이 안 나옵니다.")
+                           "1일차/실습 에서 python 내번호.py 를 다시 돌려 주소와 번호를 "
+                           "새로 채우세요 — 여기가 비면 원인 추정이 안 나옵니다.")
             else:
                 msg.append(f"서버 {api} · 내 번호 {ten} · 정비 이력 확인")
         except Exception as exc:                                 # noqa: BLE001
             ok = False
             msg.append(f"서버에 못 닿습니다 — {type(exc).__name__}. "
-                       "shared_api 주소를 쪽지와 대조하세요. 그래도 안 되면 손 드세요.")
+                       "1일차/실습 에서 python 내번호.py 를 다시 돌려 주소를 새로 "
+                       "채우세요. 그래도 안 되면 손 드세요.")
     return ok, msg
 
 
@@ -303,8 +313,8 @@ def main() -> int:
 
     print(f"\n  도구 2개 중 {통과}개 통과")
     if 통과 == 2:
-        print("\n  둘 다 됐습니다.  이제 —  python mcp_server.py")
-        print("  그리고 에이전트에게 지시 한 문장을 주세요.")
+        print("\n  둘 다 됐습니다.  이제 —  python agent.py")
+        print("  AI 가 이 도구들을 스스로 골라 부르는 것을 보게 됩니다.")
         return 0
     if args.힌트:
         print(f"\n  힌트 {args.힌트} · 도구 {막힌곳}")

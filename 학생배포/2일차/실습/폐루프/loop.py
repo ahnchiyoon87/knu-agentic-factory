@@ -241,11 +241,12 @@ def main() -> int:
         print(f"공장에 닿지 못했습니다 — {type(exc).__name__}: {exc}", file=sys.stderr)
         print(f"  주소 {api.base} · 네임스페이스 {api.tenant}", file=sys.stderr)
         if "192.168.0.10" in api.base:
-            print("  ★ 주소가 예시(192.168.0.10) 그대로입니다. "
-                  "config.json 의 base_url 을 쪽지의 서버 주소로 바꾸세요.", file=sys.stderr)
-        else:
-            print("  config.json 의 base_url 과 tenant 를 쪽지와 한 글자씩 대조하세요.",
+            print("  ★ 주소가 예시(192.168.0.10) 그대로입니다 — 아직 안 채워졌습니다.",
                   file=sys.stderr)
+        print("  1일차/실습 에서 python 내번호.py 를 돌리면 이 설정이 자동으로 채워집니다.",
+              file=sys.stderr)
+        print("      cd ../../../1일차/실습  →  python 내번호.py", file=sys.stderr)
+        print("  그래도 안 되면 손 드세요.", file=sys.stderr)
         return 1
 
     print(f"연결  {info['base_url']} · {info['tenant']} · "
