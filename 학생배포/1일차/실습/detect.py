@@ -95,7 +95,7 @@ def handle_missing(values: list[float | None]) -> list[float | None]:
         · 결측 자체를 이상으로 본다
 
     무엇을 골랐든 **왜 그렇게 했는지** 말할 수 있어야 한다.
-    Step 3 에서 Claude 가 짠 것과 이 부분을 나란히 놓고 비교한다.
+    Step 3 에서 AI 가 짠 것과 이 부분을 나란히 놓고 비교한다.
 
     힌트
         값이 없는지 확인   →  if v is None:

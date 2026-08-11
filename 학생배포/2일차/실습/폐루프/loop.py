@@ -282,7 +282,7 @@ def main() -> int:
                 name = str(exc).split()[0]
                 path, role = agents.where(name)
                 print(f"\n아직 안 채운 자리가 있습니다 — {role} 에이전트", file=sys.stderr)
-                print(f"  {path} 의 {name}() 을 Claude 와 함께 채우세요.", file=sys.stderr)
+                print(f"  {path} 의 {name}() 을 채우세요.", file=sys.stderr)
                 print(f"  순서는 {agents.FILL_ORDER} 입니다.", file=sys.stderr)
                 return 3
             if limit and ctx.round_no >= limit:

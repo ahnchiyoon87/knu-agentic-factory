@@ -115,7 +115,7 @@ def main() -> int:
               f"{sum(blocked)}/2")
         check("1일차의 detect() 를 그대로 가져다 쓴다 — '내가 짠 알고리즘을 AI가 쓴다'",
               "from detect import detect" in (ROOT / "mcp_server.py").read_text(encoding="utf-8"))
-        check("서버 뼈대·전송 전환은 이미 되어 있다 (Claude 는 본문만 채우면 된다)",
+        check("서버 뼈대·전송 전환은 이미 되어 있다 (학생은 본문만 채우면 된다)",
               "mcp.run(transport=" in (ROOT / "mcp_server.py").read_text(encoding="utf-8"))
 
         # ------------------------------------------------- 2. MCP 로 실제 호출

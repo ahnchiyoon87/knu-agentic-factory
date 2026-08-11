@@ -25,7 +25,8 @@ python mcp_server.py             # MCP 서버 실행
 
 ## 3단계
 
-**Step 1 (25분)** — `mcp_server.py` 의 ★ **두 자리**를 Claude 와 함께 채웁니다.
+**Step 1 (25분)** — `mcp_server.py` 의 ★ **두 자리**를 채웁니다.
+막히면 `python 점검.py --힌트 1` → `--힌트 2` → `--열기 1`.
 
 | 도구 | 무엇 |
 |---|---|
@@ -111,5 +112,5 @@ config.json         ← 전환은 여기 한 곳
 ```
 
 > MCP SDK 는 **2.x 기준**으로 작성했습니다. 상위 버전에서 API 가 바뀔 수 있어
-> `requirements.txt` 에 고정했습니다. Claude 가 `mcp.server.fastmcp` 를 쓰라고 하면
-> 그건 1.x 문법입니다 — 템플릿의 `from mcp.server import MCPServer` 를 그대로 두세요.
+> `requirements.txt` 에 고정했습니다. `mcp.server.fastmcp` 는 1.x 문법이라 쓰지 않습니다 —
+> 템플릿의 `from mcp.server import MCPServer` 를 그대로 두세요.

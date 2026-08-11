@@ -4,7 +4,7 @@
     query_equipment   설비 조회 — 최근 센서값과 정비 이력
 
 이 파일은 **템플릿**입니다. 뼈대와 연결은 이미 되어 있고,
-표시된 두 자리를 Claude 와 함께 채우면 됩니다.
+표시된 두 자리만 채우면 됩니다. 막히면 `python 점검.py --힌트 1`.
 
     python mcp_server.py            서버 실행 (config.json 의 transport 를 따름)
     python mcp_server.py --check    도구가 실제로 도는지 서버 없이 확인
@@ -187,7 +187,7 @@ def detect_anomaly(equipment_id: str, hours: int = 168, k: float | None = None) 
         anomaly_count, anomalies[{timestamp, metric, value}]
 
     ──────────────────────────────────────────────────────────
-    ★ 여기를 채우세요 (Claude 와 함께)
+    ★ 여기를 채우세요
 
     할 일은 네 가지입니다.
       1. _fetch_readings(equipment_id, hours) 로 데이터를 가져온다
@@ -223,7 +223,7 @@ def query_equipment(equipment_id: str, hours: int = 24) -> dict:
         maintenance[{work_order_no, issued_at, status, action, note}]
 
     ──────────────────────────────────────────────────────────
-    ★ 여기를 채우세요 (Claude 와 함께)
+    ★ 여기를 채우세요
 
     할 일은 세 가지입니다.
       1. _fetch_readings 로 최근 구간 요약을 만든다 (평균·최대·결측 수)

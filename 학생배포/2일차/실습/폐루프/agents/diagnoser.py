@@ -88,7 +88,7 @@ def gather(ctx, finding: dict) -> dict:
 
 
 # =============================================================================
-# ★ 여기를 채우세요 (Claude 와 함께)
+# ★ 여기를 채우세요
 # =============================================================================
 def build_prompt(evidence: dict, cfg: dict) -> tuple[str, str]:
     """진단 에이전트에게 줄 지시문을 만든다.
@@ -136,33 +136,19 @@ def build_prompt(evidence: dict, cfg: dict) -> tuple[str, str]:
 # 호출 — 이미 되어 있습니다. 고치지 않아도 됩니다.
 # =============================================================================
 def credentials(dcfg: dict) -> tuple[str, str] | None:
-    """어느 모델로 진단할 수 있는지 찾는다.
+    """내 키로 직접 부를 수 있는지 본다 — 이번 특강에서는 쓰지 않는 예비 경로다.
 
-    교안 기조가 Claude 이므로 **Anthropic 키가 있으면 언제나 그쪽이 우선**입니다.
-    키 이름은 config.json 의 anthropic_key_env / openai_key_env 로 바꿀 수 있습니다.
+    진단은 **강사 서버 중계**로 확정돼 있습니다(`config.json` 의 `diagnose.backend`
+    기본값이 `"server"`). 학생 PC 에는 LLM 키를 두지 않습니다.
+    이 함수는 강사가 서버 없이 확인할 때만 쓰입니다.
+    키 이름은 config.json 의 openai_key_env 로 바꿀 수 있습니다.
     """
     load_env_file()
-    for provider, name in (("claude", dcfg.get("anthropic_key_env", "ANTHROPIC_API_KEY")),
-                           ("openai", dcfg.get("openai_key_env", "OPENAI_API_KEY"))):
-        value = os.environ.get(name, "").strip()
-        if value:
-            return provider, value
+    name = dcfg.get("openai_key_env", "OPENAI_API_KEY")
+    value = os.environ.get(name, "").strip()
+    if value:
+        return "openai", value
     return None
-
-
-def _ask_claude(key: str, system: str, user: str, dcfg: dict) -> dict:
-    import anthropic
-
-    res = anthropic.Anthropic(api_key=key).messages.create(
-        model=dcfg["model"],
-        max_tokens=int(dcfg["max_tokens"]),
-        system=system,
-        messages=[{"role": "user", "content": user}],
-        output_config={"format": {"type": "json_schema", "schema": SCHEMA}},
-    )
-    if res.stop_reason == "refusal":
-        raise RuntimeError("모델이 응답을 거부했습니다.")
-    return json.loads(next((b.text for b in res.content if b.type == "text"), ""))
 
 
 def _ask_openai(key: str, system: str, user: str, dcfg: dict) -> dict:
@@ -295,22 +281,17 @@ def run(ctx, finding: dict) -> dict:
                 ctx.log("  " + "=" * 56)
             raise                                     # 이 회차의 진단만 건너뛴다
 
-    found = credentials(dcfg)
-    if backend in ("claude", "openai"):
-        provider, key = backend, (found[1] if found and found[0] == backend else None)
-        if key is None:                       # 지정한 쪽 키가 없으면 찾은 것으로라도 돌린다
-            provider, key = found or (None, None)
-    elif backend == "auto":
-        provider, key = found or (None, None)
+    # 예비 경로 — 내 키로 직접. 이번 특강에서는 쓰지 않습니다(강사 확인용).
+    if backend in ("openai", "auto"):
+        provider, key = credentials(dcfg) or (None, None)
     else:                                     # "rules"
         provider, key = None, None
 
     if provider and key:
         try:
-            ask = _ask_claude if provider == "claude" else _ask_openai
-            out = ask(key, system, user, dcfg)
+            out = _ask_openai(key, system, user, dcfg)
             out["backend"] = provider
-            out["model"] = dcfg["model"] if provider == "claude" else dcfg["openai_model"]
+            out["model"] = dcfg["openai_model"]
             out["prompt"] = user
             return out
         except Exception as exc:                                   # noqa: BLE001

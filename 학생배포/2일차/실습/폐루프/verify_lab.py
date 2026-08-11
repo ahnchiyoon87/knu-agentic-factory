@@ -379,7 +379,7 @@ def part_live(base: str, tenant: str, token: str, timeout_s: float, scale: float
               all(c["command"] in actuator_module().COMMAND_OF.values() for c in cmds_llm),
               ", ".join(f"{c['command']}({c['target']})" for c in cmds_llm) or "명령 없음")
     else:
-        print("  [건너뜀] ANTHROPIC_API_KEY / OPENAI_API_KEY 가 없어 LLM 경로 미검증")
+        print("  [건너뜀] OPENAI_API_KEY 가 없어 LLM 경로 미검증")
         failures.append("실제 LLM 진단 미검증(키 없음)")
 
     # ---------------------------------------------------- 진단 (규칙 · 결정적)
