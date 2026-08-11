@@ -41,7 +41,8 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent          # 백스테이지/
-BASE = ROOT.parent                              # 경남대특강/
+REPO = ROOT.parent                              # 경남대특강/
+BASE = REPO / "학생배포"                          # 여기가 통째로 학생 저장소가 된다
 DATA = ROOT / "센서데이터" / "데이터"
 
 # 학생에게 안 나가는 것 — 이름이 아니라 이유로 적는다

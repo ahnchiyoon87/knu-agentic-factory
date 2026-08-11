@@ -54,7 +54,8 @@ from pathlib import Path
 import httpx
 
 ROOT = Path(__file__).resolve().parent          # 백스테이지/
-BASE = ROOT.parent                              # 경남대특강/
+REPO = ROOT.parent                              # 경남대특강/
+BASE = REPO / "학생배포"                          # 학생이 clone 하는 것
 SIM = ROOT / "시뮬레이터"
 DATA = ROOT / "센서데이터" / "데이터"
 LAB1 = BASE / "1일차" / "실습"                   # 이상감지

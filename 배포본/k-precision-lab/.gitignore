@@ -1,0 +1,8 @@
+__pycache__/
+*.py[cod]
+*.log
+실행기록.jsonl
+detect_내가짠것.py
+mcp_server_내가짠것.py
+# 내 번호와 접속 키가 들어 있다. 올리지 말 것
+.내번호
