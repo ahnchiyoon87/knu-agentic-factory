@@ -1,4 +1,4 @@
-"""W6 참고 답안 — 강사용. 학생에게 배포하지 않습니다.
+"""2일차 오후 참고 답안 — `--열기` 가 읽는 완성본.
 
 ★ 세 자리에 들어갈 **본문만** 담았습니다. 템플릿 전체를 복사해 두면
 원본과 어긋나므로 본문만 둡니다.
@@ -7,6 +7,17 @@
 """
 
 from __future__ import annotations
+
+# ── 한글 윈도우(cp949)에서 출력이 깨져 죽는 것을 막는다 ──────────────────
+import sys as _sys
+for _s in (_sys.stdout, _sys.stderr):
+    if (getattr(_s, "encoding", "") or "").lower().replace("-", "") != "utf8":
+        try:
+            _s.reconfigure(encoding="utf-8", errors="replace")
+        except Exception:
+            pass
+# ─────────────────────────────────────────────────────────────────────────
+
 
 import json
 import sys
@@ -33,7 +44,7 @@ def judge(values: list[float | None], cfg: dict) -> dict | None:
         return None
 
     # 창 안이 아니라 창 밖과 비교한다.
-    # 드리프트는 창까지 같이 올라가므로 z-score 로는 잡히지 않는다(1일차 의 결론).
+    # 드리프트는 창까지 같이 올라가므로 z-score 로는 잡히지 않는다(1일차의 결론).
     half = len(vals) // 2
     baseline = sum(vals[:half]) / half
     recent = sum(vals[half:]) / (len(vals) - half)
@@ -76,6 +87,12 @@ SYSTEM = """당신은 CNC 공장의 설비 진단자입니다.
   물려 있을 때 — 감속만으로는 원인이 해소되지 않습니다. 이때는 감속과 **함께**
   dispatch_robot 파견 요청까지 내십시오. 파견은 사람이 승인해야 실행되므로 요청을
   망설일 이유가 없습니다 — 요청하지 않으면 사람은 판단할 기회조차 얻지 못합니다.
+
+■ 근거를 적는 법
+
+  근거(evidence)에는 **작업지시 번호를 그대로 인용**할 것.
+  원인을 맞게 짚어도 번호를 안 적으면 사람이 어느 작업지시를 말하는지 찾아야 합니다.
+  (이 한 줄이 없으면 인용률이 약 95% 로 떨어진다는 것을 39명 실측에서 확인했습니다)
 
 ■ 당신이 낸 조치는 실제 설비에 실행됩니다
 
@@ -200,11 +217,30 @@ def to_commands(diagnosis: dict, finding: dict, cfg: dict) -> list[dict]:
 # 템플릿에 꽂아 넣기 — 검증·시연에서 씁니다
 # =============================================================================
 def install() -> None:
-    """참고 답안을 템플릿 모듈에 주입한다."""
+    """참고 답안을 템플릿 모듈에 주입한다 — 셋 다."""
     from agents import actuator, detector, diagnoser
     detector.judge = judge
     diagnoser.build_prompt = build_prompt
     actuator.to_commands = to_commands
+
+
+# 학생이 막혔을 때 여는 것 — 막힌 자리 **하나만** 채운다.
+# 나머지는 학생이 쓴 것 그대로 돈다. 1일차 `점검.py --열기` 와 같은 규칙이다.
+ONE = {
+    1: ("judge", "agents/detector.py", "감지"),
+    2: ("build_prompt", "agents/diagnoser.py", "진단"),
+    3: ("to_commands", "agents/actuator.py", "조치"),
+}
+
+
+def install_one(n: int) -> tuple[str, str, str]:
+    """n 번 자리 하나만 참고 답안으로 채운다. (함수, 파일, 역할) 을 돌려준다."""
+    from agents import actuator, detector, diagnoser
+    이름, 파일, 역할 = ONE[n]
+    {1: lambda: setattr(detector, "judge", judge),
+     2: lambda: setattr(diagnoser, "build_prompt", build_prompt),
+     3: lambda: setattr(actuator, "to_commands", to_commands)}[n]()
+    return 이름, 파일, 역할
 
 
 if __name__ == "__main__":

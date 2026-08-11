@@ -36,6 +36,18 @@ NAMES = {1: "detect_anomaly", 2: "query_equipment"}
 
 
 # ══════════════════════════════════════════════ 0. 준비 상태
+def _csv_경로(fb: dict) -> Path:
+    """mcp_server.py 의 _csv_경로() 와 같은 규칙. 두 곳이 어긋나면 판정이 거짓말이 된다."""
+    설정 = str(fb.get("csv_path", "auto")).strip()
+    if 설정 and 설정 != "auto":
+        return (ROOT / 설정).resolve()
+    for base in (ROOT, *list(ROOT.parents)[:4]):
+        for cand in (base / "데이터", base / "백스테이지" / "센서데이터" / "데이터"):
+            if (cand / "sensor_readings_7days.csv").is_file():
+                return cand / "sensor_readings_7days.csv"
+    return ROOT.parents[2] / "데이터" / "sensor_readings_7days.csv"
+
+
 def 검사_설정() -> tuple[bool, list[str]]:
     msg = []
     p = ROOT / "config.json"
@@ -59,10 +71,13 @@ def 검사_설정() -> tuple[bool, list[str]]:
     if not re.fullmatch(r"S\d{2}", ten):
         ok = False
         msg.append(f"fallback.tenant 가 {ten!r} 입니다. 쪽지의 내 번호(예: S07)로 바꾸세요.")
-    csv = (ROOT / str(fb.get("csv_path", ""))).resolve()
+    # csv_path 는 기본이 "auto" 다 — mcp_server.py 와 똑같이 찾아야 판정이 어긋나지 않는다
+    csv = _csv_경로(fb)
     if not csv.is_file():
         ok = False
-        msg.append(f"센서 CSV 를 못 찾았습니다: {csv}")
+        msg.append(f"센서 CSV 를 못 찾았습니다: {csv}\n"
+                   "       실습 저장소를 통째로 내려받았는지 확인하세요 "
+                   "(「데이터」 폴더가 같이 옵니다).")
     if ok:
         try:
             import httpx
@@ -84,13 +99,17 @@ def 검사_설정() -> tuple[bool, list[str]]:
 
 
 def 검사_어제코드() -> tuple[bool, list[str]]:
-    """1일차 이상감지 의 detect 가 실제로 도는가 — 오늘 도구가 이걸 그대로 쓴다."""
+    """1일차에 짠 detect 가 실제로 도는가 — 오늘 도구가 이걸 그대로 쓴다."""
+    어제 = ROOT.parents[2] / "1일차" / "실습"
     try:
-        sys.path.insert(0, str(ROOT.parents[2] / "1일차" / "실습"))
+        sys.path.insert(0, str(어제))
         import detect as d
     except Exception as e:                                       # noqa: BLE001
         return False, [f"1일차에 만든 detect.py 를 못 불러옵니다 — {type(e).__name__}: {e}",
-                       "1일차 이상감지 폴더가 옆에 있는지 확인하세요."]
+                       f"찾아본 곳: {어제}",
+                       "실습 저장소의 `1일차` 폴더가 그대로 있어야 합니다 "
+                       "(오늘 도구가 어제 코드를 그대로 불러 씁니다).",
+                       "폴더가 없으면 손 드세요 — 다시 받아 드립니다."]
     try:
         out = d.detect([1.0] * 70 + [99.0], window=60, k=3.0)
     except NotImplementedError:
@@ -207,7 +226,15 @@ def 열기(n: int) -> int:
     m2 = re.search(rf'(    # TODO: 여기를 채우세요\n    raise NotImplementedError\("{name} [^"]*"\)\n)',
                    cur)
     if not m2:
-        print(f"mcp_server.py 에서 {name} 의 TODO 자리를 못 찾았습니다.")
+        # 두 번 누르는 일이 흔하다. 그때 「못 찾았습니다」만 뜨면 파일이 깨진 줄 안다.
+        # 이미 채워진 것인지, 정말로 자리가 사라진 것인지를 갈라서 말해 준다.
+        if f"def {name}" in cur:
+            print(f"  {name} 은 이미 채워져 있습니다. 다시 열 것이 없습니다.")
+            print("  이어서 —  python 점검.py")
+            return 0
+        print(f"  mcp_server.py 안에서 {name} 을 못 찾았습니다.")
+        print("  파일을 크게 고쳤다면 mcp_server_내가짠것.py 로 되돌린 뒤 다시 해 보세요.")
+        print("  그래도 안 되면 손 드세요.")
         return 1
     # 완성본은 함수 통째로(def 부터)이고, 넣을 자리는 함수 **본문 안**이다.
     # def 줄과 docstring 을 걷어내고, 남은 본문을 원래 들여쓰기(4칸)로 맞춘다.

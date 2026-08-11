@@ -39,21 +39,34 @@ class FactoryAPI:
         self.base = (base_url or env.get("W6_BASE_URL") or CFG["base_url"]).rstrip("/")
         self.tenant = tenant or env.get("W6_TENANT") or CFG["tenant"]
         self.key = access_key or env.get("W6_ACCESS_KEY") or CFG["access_key"]
-        self._check_key()
+        self._설정확인()
         self.client = httpx.Client(timeout=timeout)
 
-    def _check_key(self) -> None:
-        """키를 안 바꾼 채 제어를 부르면 알아볼 수 없는 인코딩 오류가 납니다.
+    def _설정확인(self) -> None:
+        """네트워크를 부르기 전에 config.json 부터 본다.
 
-        HTTP 헤더는 ASCII 만 실을 수 있어서, 한글이 든 기본값이 그대로 있으면
-        `UnicodeEncodeError` 로 죽습니다. 그 전에 사람이 읽을 수 있는 말로 세웁니다.
+        안 채운 채로 부르면 30초를 기다렸다가 "닿지 못했습니다" 만 나온다.
+        학생은 주소가 틀린 줄 알고 엉뚱한 데를 고친다. 그 전에 여기서 세운다.
+
+        키는 HTTP 헤더에 실리는데 헤더는 ASCII 만 받는다 — 한글 예시가 그대로면
+        `UnicodeEncodeError` 로 죽으므로 그것도 여기서 잡는다.
         """
+        빈칸 = []
+        if not str(self.tenant).strip():
+            빈칸.append('"tenant"   ← 쪽지의 내 번호 (예: "S07", 대문자)')
+        if not str(self.key).strip():
+            빈칸.append('"access_key" ← 쪽지의 접속 키 (긴 문자열)')
+        if 빈칸:
+            raise ValueError(
+                "config.json 을 아직 안 채웠습니다. 아래 줄을 쪽지 보고 채우세요.\n    "
+                + "\n    ".join(빈칸)
+            )
         try:
             self.key.encode("ascii")
         except (UnicodeEncodeError, AttributeError):
             raise ValueError(
-                f"config.json 의 access_key 를 아직 안 바꿨습니다 (현재: {self.key!r}). "
-                "쪽지에 적힌 내 접속 키로 바꾸세요."
+                f'config.json 의 access_key 가 예시 그대로입니다 (현재: {self.key!r}).\n'
+                "    쪽지에 적힌 내 접속 키(영문·숫자로 된 긴 문자열)로 바꾸세요."
             ) from None
 
     # ------------------------------------------------------------------ 읽기

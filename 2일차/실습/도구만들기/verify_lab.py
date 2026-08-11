@@ -1,6 +1,6 @@
-"""2일차 도구만들기 템플릿 검증 — 코드 쪽 품질 게이트.
+"""2일차 오전 템플릿 검증 — 코드 쪽 품질 게이트.
 
-교안 2일차 도구만들기 이 요구하는 것이 이 템플릿 위에서 실제로 성립하는지 확인한다.
+2일차 오전이 요구하는 것이 이 템플릿 위에서 실제로 성립하는지 확인한다.
 
     Step 1 — MCP 도구 2개(detect_anomaly, query_equipment)로 내놓는다
     Step 2 — 에이전트가 도구를 줄줄이 호출해 원인 추정과 권고 조치를 담은 리포트를 쓴다
@@ -31,6 +31,8 @@ import json
 import os
 import sys
 from pathlib import Path
+
+import httpx
 
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT))
@@ -88,10 +90,12 @@ def _payload(res) -> dict:
 
 def main() -> int:
     print("=" * 74)
-    print("2일차 도구만들기 MCP 도구 템플릿 검증")
+    print("2일차 오전 MCP 도구 템플릿 검증")
     print("=" * 74)
 
-    original = json.loads((ROOT / "config.json").read_text(encoding="utf-8"))
+    # 원문 그대로 되돌린다. 다시 직렬화하면 들여쓰기·끝 개행이 달라져
+    # 검증을 돌릴 때마다 학생 파일이 바뀐 것처럼 보인다.
+    original = (ROOT / "config.json").read_text(encoding="utf-8")
     try:
         set_cfg(data_source="fallback", transport="stdio")
 
@@ -109,13 +113,25 @@ def main() -> int:
                 blocked.append(False)
         check("채울 자리 2곳이 NotImplementedError 로 막혀 있다", all(blocked),
               f"{sum(blocked)}/2")
-        check("1일차 이상감지 의 detect() 를 그대로 가져다 쓴다 — '내가 짠 알고리즘을 AI가 쓴다'",
+        check("1일차의 detect() 를 그대로 가져다 쓴다 — '내가 짠 알고리즘을 AI가 쓴다'",
               "from detect import detect" in (ROOT / "mcp_server.py").read_text(encoding="utf-8"))
         check("서버 뼈대·전송 전환은 이미 되어 있다 (Claude 는 본문만 채우면 된다)",
               "mcp.run(transport=" in (ROOT / "mcp_server.py").read_text(encoding="utf-8"))
 
         # ------------------------------------------------- 2. MCP 로 실제 호출
         print("\n2. MCP 서버를 띄우고 클라이언트로 붙어 본다 (참고 답안)")
+
+        # 정비 이력·작업지시는 강사 서버에서 온다. 서버가 꺼져 있으면 뒤 3항목이
+        # 「실패」로 뜨는데, 그때 강사는 템플릿이 깨진 줄 안다. 먼저 짚어 준다.
+        try:
+            httpx.get("http://127.0.0.1:8000/api/v1/health", timeout=3).raise_for_status()
+        except Exception:                                              # noqa: BLE001
+            서버 = os.environ.get("SHARED_API", "http://127.0.0.1:8000")
+            print(f"  ※ 강사 서버({서버})가 안 켜져 있습니다.")
+            print("     정비 이력·작업지시를 못 읽어 아래 3항목이 실패로 나옵니다.")
+            print("     템플릿 문제가 아닙니다 — 서버를 켜고 다시 돌리세요:")
+            print("       cd 백스테이지/시뮬레이터 && python -m server.run")
+
         answer = ROOT / "정답" / "mcp_server_answer.py"
         tools, d, q = asyncio.run(via_mcp(answer))
         check("도구 2개가 등록된다", sorted(tools) == ["detect_anomaly", "query_equipment"],
@@ -150,15 +166,14 @@ def main() -> int:
         set_cfg(transport="stdio")
 
     finally:
-        (ROOT / "config.json").write_text(
-            json.dumps(original, ensure_ascii=False, indent=2), encoding="utf-8")
+        (ROOT / "config.json").write_text(original, encoding="utf-8")
         (ROOT / "_verify_server.log").unlink(missing_ok=True)
 
     print("\n" + "=" * 74)
     if failures:
         print(f"실패 {len(failures)}건: " + ", ".join(failures))
         return 1
-    print("전 항목 통과 — 2일차 도구만들기 이 이 템플릿 위에서 성립합니다.")
+    print("전 항목 통과 — 2일차 오전이 이 템플릿 위에서 성립합니다.")
     return 0
 
 

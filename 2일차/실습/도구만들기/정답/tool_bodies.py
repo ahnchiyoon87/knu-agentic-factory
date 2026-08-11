@@ -1,4 +1,4 @@
-"""2일차 도구만들기 참고 답안 — 강사용.
+"""2일차 오전 참고 답안.
 
 `mcp_server.py` 의 두 자리(★)에 들어갈 **본문만** 담았습니다.
 템플릿 전체를 복사해 두면 원본과 어긋나므로 본문만 둡니다.
@@ -16,7 +16,7 @@ sys.path.insert(0, str(ROOT))
 
 from mcp_server import CFG, _fetch_maintenance, _fetch_readings  # noqa: E402
 
-sys.path.insert(0, str(ROOT.parent / "1일차/실습" / "정답"))
+sys.path.insert(0, str(ROOT.parents[2] / "1일차" / "실습" / "정답"))
 from detect_answer import detect  # noqa: E402  (학생은 자기 detect 를 씁니다)
 
 

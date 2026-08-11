@@ -1,4 +1,4 @@
-"""1일차 이상감지 Step 2 — 내 구현을 7일치 데이터에 돌려 본다.
+"""1일차 실습 Step 2 — 내 구현을 7일치 데이터에 돌려 본다.
 
     python run.py                 기본 (윈도 60분, 임계 k=3.0)
     python run.py --k 2.0         임계값을 낮춰서 — 오탐이 얼마나 느는가
@@ -32,21 +32,38 @@ from pathlib import Path
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parent
-DATA = ROOT.parents[1] / "강사용" / "센서데이터" / "데이터"
+
+
+def 데이터폴더() -> Path:
+    """센서 데이터 폴더를 찾는다 — 위로 올라가며 두 자리를 다 본다.
+
+    나눠 준 실습 저장소는 `데이터/`, 강사 저장소는 `백스테이지/센서데이터/데이터/` 에 둔다.
+    어느 쪽에서 실행하든 이 파일을 고치지 않아도 돌아가야 한다.
+    """
+    for base in (ROOT, *list(ROOT.parents)[:3]):
+        for cand in (base / "데이터", base / "백스테이지" / "센서데이터" / "데이터"):
+            if (cand / "sensor_readings_7days.csv").is_file():
+                return cand
+    return ROOT.parents[1] / "데이터"          # 못 찾았을 때 안내에 쓸 경로
+
+
+DATA = 데이터폴더()
 
 
 def load():
     csv = DATA / "sensor_readings_7days.csv"
     lab = DATA / "labels_rowwise.csv"
     if not csv.exists():
-        sys.exit(f"데이터가 없습니다: {csv}\n  공통/센서데이터 에서 python generate.py 를 먼저 실행하세요.")
+        sys.exit(f"센서 데이터를 못 찾았습니다.\n"
+                 f"  찾아본 곳: {DATA}\n"
+                 f"  실습 저장소를 통째로 내려받았는지 확인하세요 (「데이터」 폴더가 같이 옵니다).")
     df = pd.read_csv(csv, parse_dates=["timestamp"])
     labels = pd.read_csv(lab, parse_dates=["timestamp"])
     return df, labels
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="1일차 이상감지 이상감지 실행")
+    ap = argparse.ArgumentParser(description="이상감지 실행 — 내 구현을 7일치에 돌린다")
     ap.add_argument("--window", type=int, default=60, help="이동 윈도 크기(분)")
     ap.add_argument("--k", type=float, default=3.0, help="임계값")
     ap.add_argument("--impl", default="detect", help="detect | 정답")

@@ -1,0 +1,48 @@
+{
+  "_comment": "이 데이터셋 고유 설정. 물리 파라미터(온도·진동 모델, 노이즈, 드리프트 기울기)는 여기 없다 — 시뮬레이터의 config/sim_profile.json 과 layout.json 에서 읽는다. 두 벌로 나누면 반드시 어긋나기 때문이다.",
+  "seed": 42,
+  "start_date": "2026-08-01",
+  "days": 7,
+  "sample_interval_minutes": 1,
+  "_rows": "CNC 6대 x 7일 x 1440분 = 60,480행 (교안 부록 A: 약 6만 행)",
+  "diurnal": {
+    "_comment": "일주기 외기 변동. 7일치 데이터에 이게 없으면 비현실적이고, 무엇보다 드리프트가 너무 쉽게 눈에 띈다. 낮에 온도가 오르는 성질이 1일차 슬라이드의 '선을 66도로 낮추면 여름철 낮에 정상 설비들이 하루 종일 울린다'를 데이터로 성립시킨다.",
+    "enabled": true,
+    "amplitude_c": 1.0,
+    "peak_hour": 15
+  },
+  "stops": {
+    "_comment": "공구 교체·점검으로 인한 짧은 정지. 기본값 0 — 끄는 것이 기본이다. 실측 결과 정지/재가동 전이가 이동 윈도 z-score 에 |z|=7 수준의 아티팩트를 만들어 심어 둔 진동 스파이크(|z|~4)를 덮어버렸다. 교안 1일차 실습 의 TODO 3개(윈도 통계·임계 판정·결측 처리)에 run_state 필터가 없으므로 설계된 난이도를 넘는다. 필요하면 값을 올려 쓰되 정탐/오탐 수치를 다시 확인할 것.",
+    "per_machine_per_day": 0,
+    "duration_minutes_min": 20,
+    "duration_minutes_max": 40,
+    "hour_min": 6,
+    "hour_max": 22
+  },
+  "anomalies": {
+    "_comment": "교안 부록 A 가 지정한 3종. 위치·종류를 바꾸지 말 것.",
+    "temp_drift": {
+      "equipment_id": "EQ-03",
+      "day": 5,
+      "start_hour": 3,
+      "_note": "5일차 새벽 3시. 1일차 슬라이드 서사(새벽 3시 ~ 아침 7시, 62→64℃)와 같은 시각·같은 기울기. 기울기와 지속시간은 시뮬레이터 sim_profile.json 의 anomaly_defaults.temp_drift 에서 읽는다."
+    },
+    "vibration_spike": {
+      "equipment_id": "EQ-05",
+      "day": 3,
+      "start_hour": 14,
+      "start_minute": 22,
+      "count": 3,
+      "interval_minutes": 90,
+      "_note": "순간형 point anomaly 3회. 간격 90분은 이동 윈도(60분)보다 길어 서로의 표준편차를 부풀리지 않는다 — 7분 간격으로 두면 세 개가 같은 윈도에 들어가 자기들끼리 가려 |z| 가 4 아래로 떨어졌다. 크기 15σ(+1.8mm/s)는 고정 임계값 8.0mm/s 를 여전히 못 넘지만 z-score 로는 확실히 잡힌다. 시뮬레이터 라이브 프리셋의 6σ 보다 큰데, 10,080 샘플에서 6σ 는 노이즈 최댓값(|z|~3.9)과 구분이 안 되기 때문이다.",
+      "magnitude_sigma": 15
+    },
+    "sensor_dropout": {
+      "equipment_id": "EQ-01",
+      "day": 6,
+      "start_hour": 9,
+      "duration_hours": 2,
+      "_note": "6일차 2시간 = 120개 샘플. temperature·vibration·rpm 이 빈 값으로 나간다. run_state 는 남는다(시뮬레이터 실시간 스트림과 동일한 동작)."
+    }
+  }
+}

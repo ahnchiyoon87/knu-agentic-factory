@@ -3,7 +3,7 @@
     "물리 세계를 움직이는 도구 공개 — 시뮬레이터 제어용 MCP 도구 4개를 이제야 열어 줍니다:
      set_equipment_speed / stop_equipment / dispatch_robot / ack_alarm"
 
-1일차 2일차 도구만들기 에서 만든 도구는 **읽는 손**이었습니다. 조회만 했습니다.
+오전에 만든 도구는 **읽는 손**이었습니다. 조회만 했습니다.
 오늘 열리는 이 네 개가 **움직이는 손**입니다.
 
 이 파일은 **완성되어 있습니다.** 강사가 열어 주는 것이지 학생이 만드는 것이 아닙니다.
@@ -25,6 +25,18 @@
 """
 
 from __future__ import annotations
+
+# ── 한글 윈도우(cp949)에서 출력이 깨져 죽는 것을 막는다 ──────────────────
+#    학생 PC 기본 콘솔은 cp949 라 `—` `→` 같은 글자에서 UnicodeEncodeError 가 난다.
+#    이 파일은 stdio MCP 서버이기도 해서, 안내문은 전부 stderr 로만 낸다.
+import sys as _sys
+for _s in (_sys.stdout, _sys.stderr):
+    if (getattr(_s, "encoding", "") or "").lower().replace("-", "") != "utf8":
+        try:
+            _s.reconfigure(encoding="utf-8", errors="replace")
+        except Exception:
+            pass
+# ─────────────────────────────────────────────────────────────────────────
 
 import argparse
 import json
@@ -127,22 +139,35 @@ def ack_alarm(alarm_id: int, note: str | None = None) -> dict:
 
 
 # =============================================================================
-def main() -> None:
+def main() -> int:
     ap = argparse.ArgumentParser(description="2일차 제어 MCP 서버")
     ap.add_argument("--check", action="store_true", help="서버 없이 연결·도구 목록만 확인")
     args = ap.parse_args()
 
     if args.check:
-        info = api().preflight()
+        # 설정을 안 채웠으면 여기서 잡힌다 — 역추적 대신 사람이 읽을 말로 세운다
+        try:
+            info = api().preflight()
+        except ValueError as exc:
+            print(f"\n{exc}\n", file=sys.stderr)
+            return 1
+        except Exception as exc:                                   # noqa: BLE001
+            print(f"공장에 닿지 못했습니다 — {type(exc).__name__}: {exc}", file=sys.stderr)
+            print(f"  주소 {CFG['base_url']} · 네임스페이스 {CFG['tenant']}", file=sys.stderr)
+            if "192.168.0.10" in str(CFG["base_url"]):
+                print("  ★ 주소가 예시(192.168.0.10) 그대로입니다. "
+                      "config.json 의 base_url 을 쪽지의 서버 주소로 바꾸세요.", file=sys.stderr)
+            return 1
         print(json.dumps({
             "연결": info, "도구": ["set_equipment_speed", "stop_equipment",
                                   "dispatch_robot", "ack_alarm"],
         }, ensure_ascii=False, indent=2))
-        return
+        return 0
 
     print(f"제어 MCP 서버 (stdio) — {CFG['tenant']} @ {CFG['base_url']}", file=sys.stderr)
     mcp.run(transport="stdio")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

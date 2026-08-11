@@ -161,15 +161,64 @@ def main() -> int:
     ap.add_argument("--규칙으로", dest="rules", action="store_true",
                     help="AI 없이 규칙으로 돌린다. **강사 안내가 있을 때만 쓰세요.** "
                          "오늘의 핵심 장면(AI 가 정비 이력을 근거로 원인을 대는 것)을 못 봅니다")
-    ap.add_argument("--use-answers", action="store_true",
-                    help="강사용 — 정답/ 의 참고 답안으로 채워서 돌린다 (라이브 시연)")
+    ap.add_argument("--열기", nargs="+", metavar="번호",
+                    help="★ 시간이 다 됐을 때만 — 막힌 자리를 완성본으로 채워서 돌린다. "
+                         "1 감지 · 2 진단 · 3 조치. 여러 개를 한 번에: --열기 1 2 · "
+                         "세 자리 다 막혔으면: --열기 전부. 나머지는 내가 쓴 것 그대로 돕니다")
+    # 강사 시연용. --help 에 안 띄운다 — 학생이 보면 실습을 통째로 건너뛰게 된다.
+    # 막힌 학생에게 주는 것은 `--열기` 다 (막힌 자리 하나만).
+    ap.add_argument("--use-answers", action="store_true", help=argparse.SUPPRESS)
     args = ap.parse_args()
 
     if args.use_answers:
         sys.path.insert(0, str(ROOT / "정답"))
-        import agent_bodies
+        try:
+            import agent_bodies
+        except ModuleNotFoundError:
+            print("정답/agent_bodies.py 를 못 찾았습니다.", file=sys.stderr)
+            return 1
         agent_bodies.install()
         print("참고 답안으로 실행합니다 (강사 시연 모드)")
+    elif args.열기:
+        번호들 = []
+        for a in args.열기:
+            if str(a).strip() in ("전부", "다", "all"):
+                번호들 = [1, 2, 3]
+                break
+            if not str(a).isdigit() or int(a) not in (1, 2, 3):
+                print(f"--열기 에는 1 2 3 또는 '전부' 를 주세요 (받은 값: {a})", file=sys.stderr)
+                return 2
+            번호들.append(int(a))
+        번호들 = sorted(set(번호들))
+
+        sys.path.insert(0, str(ROOT / "정답"))
+        try:
+            import agent_bodies
+        except ModuleNotFoundError:
+            print("완성본(정답/agent_bodies.py)을 못 찾았습니다.", file=sys.stderr)
+            print("  실습 저장소를 통째로 내려받았는지 확인하세요. 안 되면 손 드세요.",
+                  file=sys.stderr)
+            return 1
+        열린것 = []
+        for n in 번호들:
+            try:
+                이름, 파일, 역할 = agent_bodies.install_one(n)
+            except Exception as exc:                               # noqa: BLE001
+                print(f"완성본을 열지 못했습니다 — {type(exc).__name__}: {exc}", file=sys.stderr)
+                return 1
+            열린것.append(f"{역할}({이름}) — {파일}")
+
+        남은것 = [agent_bodies.ONE[n][2] for n in (1, 2, 3) if n not in 번호들]
+        print("=" * 58)
+        for 줄 in 열린것:
+            print(f"  {줄} 를 완성본으로 채웠습니다")
+        if 남은것:
+            print(f"  {' · '.join(남은것)} 는 여러분이 쓴 것 그대로 돕니다.")
+        else:
+            print("  세 자리를 다 열었습니다. 오늘 볼 장면까지는 이걸로 갑니다.")
+        print("  파일은 안 고쳤습니다. 이 옵션을 빼면 다시 내 코드로 돕니다.")
+        print("  ※ 오늘 목표는 세 자리를 혼자 채우는 게 아니라, 공장이 움직이는 것을 보는 것입니다.")
+        print("=" * 58)
 
     if args.rules:
         CFG["diagnose"]["backend"] = "rules"
@@ -179,14 +228,24 @@ def main() -> int:
         print("  이 모드에서 나오지 않습니다. 강사 안내에 따라 쓰세요.")
         print("=" * 58)
 
-    api = FactoryAPI(base_url=args.base_url, tenant=args.tenant)
+    # 설정을 안 채웠으면 여기서 잡힌다 — 역추적 대신 사람이 읽을 말로 세운다
+    try:
+        api = FactoryAPI(base_url=args.base_url, tenant=args.tenant)
+    except ValueError as exc:
+        print(f"\n{exc}\n", file=sys.stderr)
+        return 1
 
     try:
         info = api.preflight()
     except Exception as exc:                                       # noqa: BLE001
         print(f"공장에 닿지 못했습니다 — {type(exc).__name__}: {exc}", file=sys.stderr)
         print(f"  주소 {api.base} · 네임스페이스 {api.tenant}", file=sys.stderr)
-        print("  config.json 의 base_url 과 tenant 를 확인하세요.", file=sys.stderr)
+        if "192.168.0.10" in api.base:
+            print("  ★ 주소가 예시(192.168.0.10) 그대로입니다. "
+                  "config.json 의 base_url 을 쪽지의 서버 주소로 바꾸세요.", file=sys.stderr)
+        else:
+            print("  config.json 의 base_url 과 tenant 를 쪽지와 한 글자씩 대조하세요.",
+                  file=sys.stderr)
         return 1
 
     print(f"연결  {info['base_url']} · {info['tenant']} · "

@@ -1,18 +1,17 @@
-"""W6 폐루프 템플릿 검증 — 코드 쪽 품질 게이트.
+"""2일차 오후 폐루프 템플릿 검증 — 코드 쪽 품질 게이트.
 
 교안 2일차 가 요구하는 것이 이 템플릿 위에서 실제로 성립하는지 확인한다.
 
     4~7장   감지 / 진단 / 조치 + 오케스트레이터 (Orchestrator-Worker 회수)
     10~11장 감속은 자동, 정지와 로봇 파견은 사람 승인
     12~14장 드리프트 주입 → 감지 → 진단 → 감속 실행 + 파견 승인 요청 → 승인 → AMR 이동
-    Lab 4-1 기본 미션 — 전 팀이 60분 안에 자기 공간에서 폐루프를 돌린다
-            확장 미션 — 에이전트를 하나 더 붙인다
+    기본 미션 — 학생 39명이 60분 안에 자기 공장에서 폐루프를 돌린다
 
 라이브 검증은 실제로 시뮬레이터에 붙어 드리프트를 주입하고, 폐루프가 그것을
 잡아 설비를 움직이는지까지 본다. "함수가 있다"와 "공장이 움직였다"는 다르다.
 
     python verify_lab.py                          템플릿·감지만 (서버 불필요)
-    python verify_lab.py --live --token <토큰>    전 항목 (W1 서버 필요)
+    python verify_lab.py --live --token <토큰>    전 항목 (시뮬레이터 필요)
 """
 
 from __future__ import annotations
@@ -65,7 +64,7 @@ def set_cfg(**kw) -> dict:
 
 
 # =============================================================================
-# 합성 시계열 — W5 와 같은 기울기로 만든다
+# 합성 시계열 — 7일치 CSV 와 같은 기울기로 만든다
 # =============================================================================
 def series(minutes: int, drift_c_per_hour: float = 0.0, base: float = 62.0,
            sigma: float = 0.35, seed: int = 7) -> list[float]:
@@ -129,7 +128,7 @@ def part_template() -> None:
 # 2. 감지 — 어제 것으로는 안 잡히고, 오늘 것으로는 잡히는가
 # =============================================================================
 def part_detect() -> None:
-    print("\n2. 감지 — 1일차 의 한계를 2일차 에서 넘는가 (W5 와 같은 0.5℃/h 기울기)")
+    print("\n2. 감지 — 1일차의 한계를 2일차에서 넘는가 (같은 0.5℃/h 기울기)")
 
     import agent_bodies
     agent_bodies.install()
@@ -187,7 +186,7 @@ def part_detect() -> None:
           f"드리프트 +{v_drift['delta']}℃ vs 평탄 미검출" if v_drift else "미탐")
 
     try:
-        sys.path.insert(0, str(ROOT.parents[1] / "1일차" / "실습" / "정답"))
+        sys.path.insert(0, str(ROOT.parents[2] / "1일차" / "실습" / "정답"))
         from detect_answer import detect as zscore
         n_drift = sum(1 for f in zscore(list(drift), window=cfg["spike_window"],
                                         k=cfg["spike_k"]) if f)
@@ -198,7 +197,7 @@ def part_detect() -> None:
               abs(n_drift - n_flat) <= 2,
               f"드리프트 {n_drift}건 vs 평탄 {n_flat}건 — 차이 없음(둘 다 노이즈 꼬리)")
     except Exception as exc:                                       # noqa: BLE001
-        print(f"  [건너뜀] 1일차 이상감지 정답을 못 읽어 대조 생략 — {type(exc).__name__}")
+        print(f"  [건너뜀] 1일차 정답을 못 읽어 대조 생략 — {type(exc).__name__}")
 
 
 # =============================================================================
@@ -273,6 +272,11 @@ def part_live(base: str, tenant: str, token: str, timeout_s: float, scale: float
     from factory_api import FactoryAPI
 
     agent_bodies.install()
+
+    # 검증이 끝나면 들어올 때의 배속으로 돌려놓는다.
+    # 1 로 떨궈 두고 나가면 학생 화면이 멈춰 보인다 — 강사가 수업 직전에 이걸 돌렸다면 최악이다.
+    처음배속 = float(httpx.get(f"{base.rstrip('/')}/api/v1/health",
+                               timeout=30).json()["clock"]["time_scale"])
 
     # 강사 콘솔이 하는 일을 그대로 한다 (교안 12~14장 시연 준비)
     key = next(t["access_key"] for t in
@@ -460,11 +464,25 @@ def part_live(base: str, tenant: str, token: str, timeout_s: float, scale: float
           ", ".join(f["equipment_id"] for f in again) or "이상 없음")
 
     # ---------------------------------------------------- 확장 지점
-    print("\n8. 확장 미션 — 에이전트를 하나 더 붙일 수 있는가")
+    #   확장미션/ 폴더는 개인 단위 전환 때 없앴다. 그래도 loop.py 의 EXTRA 기구는
+    #   남아 있으므로(README 「끝낸 뒤 더 해 볼 것」이 여기에 기댄다),
+    #   삭제된 파일을 불러오는 대신 최소 에이전트를 그 자리에서 만들어 기구를 검사한다.
+    print("\n8. 확장 지점 — 에이전트를 하나 더 붙일 수 있는가 (loop.py 무수정)")
+    import types
+
     import agents as reg
-    sys.path.insert(0, str(ROOT / "확장미션"))
-    import importlib
-    extra = importlib.import_module("예시_교대리포트")
+
+    def _확장_run(ctx, record: dict) -> dict:
+        """그 회차 기록을 그대로 받는지 확인한다 — 확장이 성립하는 조건."""
+        return {"이상_설비": {f["equipment_id"]: f.get("detail")
+                              for f in record.get("findings", [])},
+                "조치_건수": sum(len(c.get("actions", []))
+                                 for c in record.get("cases", []))}
+
+    # 학생이 하는 것과 같은 모양으로 만든다 — agents/my_agent.py 모듈 하나를 EXTRA 에 등록
+    extra = types.ModuleType("확장_점검용")
+    extra.ROLE = "확장_점검"
+    extra.run = _확장_run
     reg.EXTRA = [extra]
     try:
         rec = looper.one_round(ctx)
@@ -472,16 +490,17 @@ def part_live(base: str, tenant: str, token: str, timeout_s: float, scale: float
               "extra" in rec and extra.ROLE in rec["extra"],
               ", ".join(rec.get("extra", {}).keys()) or "안 불림")
         check("확장 에이전트가 그 회차의 감지·진단·조치를 다 본다",
-              isinstance(rec["extra"][extra.ROLE].get("이상_설비"), dict))
+              isinstance(rec.get("extra", {}).get(extra.ROLE, {}).get("이상_설비"), dict))
     finally:
         reg.EXTRA = []
 
     # ---------------------------------------------------- 정리
     httpx.delete(f"{base.rstrip('/')}/api/instructor/inject",
                  headers={"X-Instructor-Token": token}, timeout=30)
-    instructor(base, token, "POST", "/time-scale", scale=1)
+    instructor(base, token, "POST", "/time-scale", scale=처음배속)
     instructor(base, token, "POST", "/control-lock", unlocked=False, tenant_id=tenant)
     instructor(base, token, "POST", "/reset", tenant_id=tenant)
+    print(f"  (배속을 들어올 때 값 x{처음배속:g} 로 돌려놨습니다)")
     mcp_ctl.close()
     api.close()
 
@@ -489,16 +508,16 @@ def part_live(base: str, tenant: str, token: str, timeout_s: float, scale: float
 # =============================================================================
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--live", action="store_true", help="W1 서버에 실제로 붙어 검증한다")
+    ap.add_argument("--live", action="store_true", help="시뮬레이터에 실제로 붙어 검증한다")
     ap.add_argument("--base-url", default="http://127.0.0.1:8000")
-    ap.add_argument("--tenant", default="T1")
+    ap.add_argument("--tenant", default="S01", help="개인 네임스페이스 (팀은 쓰지 않는다)")
     ap.add_argument("--token", default=None, help="X-Instructor-Token")
     ap.add_argument("--scale", type=float, default=120.0)
     ap.add_argument("--timeout", type=float, default=300.0)
     args = ap.parse_args()
 
     print("=" * 74)
-    print("W6 폐루프 템플릿 검증")
+    print("2일차 오후 폐루프 템플릿 검증")
     print("=" * 74)
 
     original = (ROOT / "config.json").read_text(encoding="utf-8")

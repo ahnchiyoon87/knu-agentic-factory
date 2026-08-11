@@ -1,6 +1,6 @@
-"""2일차 도구만들기 Step 1 — MCP 도구 2개 만들기
+"""2일차 오전 Step 1 — MCP 도구 2개 만들기
 
-    detect_anomaly    1일차 이상감지 에서 내가 짠 이상감지를 에이전트가 부를 수 있게
+    detect_anomaly    1일차에 내가 짠 이상감지를 에이전트가 부를 수 있게
     query_equipment   설비 조회 — 최근 센서값과 정비 이력
 
 이 파일은 **템플릿**입니다. 뼈대와 연결은 이미 되어 있고,
@@ -56,13 +56,22 @@ from mcp.server import MCPServer
 ROOT = Path(__file__).resolve().parent
 CFG = json.loads((ROOT / "config.json").read_text(encoding="utf-8"))
 
-# 1일차 이상감지 에서 내가 짠 이상감지를 그대로 가져옵니다.
-sys.path.insert(0, str(ROOT.parents[2] / "1일차" / "실습"))
+# 1일차에 내가 짠 이상감지를 그대로 가져옵니다. **오늘의 핵심 장면입니다.**
+_어제 = ROOT.parents[2] / "1일차" / "실습"
+sys.path.insert(0, str(_어제))
 try:
     from detect import detect            # noqa: E402  ← 내가 채운 그 함수
+except ModuleNotFoundError:              # 1일차 폴더가 없어졌다
+    print("1일차에 만든 detect.py 를 못 찾았습니다.", file=sys.stderr)
+    print(f"  찾아본 곳: {_어제}", file=sys.stderr)
+    print("  실습 저장소의 `1일차` 폴더가 그대로 있어야 합니다 —", file=sys.stderr)
+    print("  오늘 도구는 어제 여러분이 짠 코드를 그대로 불러 씁니다.", file=sys.stderr)
+    print("  폴더가 없으면 손 드세요. 다시 받아 드립니다.", file=sys.stderr)
+    sys.exit(1)
 except Exception as exc:                 # noqa: BLE001
-    print(f"1일차 이상감지 의 detect.py 를 불러오지 못했습니다: {exc}", file=sys.stderr)
-    raise
+    print(f"1일차의 detect.py 를 불러오지 못했습니다: {exc}", file=sys.stderr)
+    print("  `1일차/실습` 에서 `python 점검.py` 로 먼저 확인해 보세요.", file=sys.stderr)
+    sys.exit(1)
 
 mcp = MCPServer(
     name="k-precision-tools",
@@ -73,18 +82,35 @@ mcp = MCPServer(
 # =============================================================================
 # 데이터 가져오기 — 여기는 이미 되어 있습니다. 고치지 않아도 됩니다.
 # =============================================================================
+def _csv_경로() -> Path:
+    """1일차에 쓴 그 CSV 를 찾는다.
+
+    config.json 의 csv_path 가 "auto"(기본)면 위로 올라가며 스스로 찾는다.
+    나눠 준 실습 저장소는 `데이터/`, 강사 저장소는 `백스테이지/센서데이터/데이터/` 에 둔다.
+    직접 경로를 적어 두었으면 그것을 그대로 쓴다.
+    """
+    설정 = str(CFG["fallback"].get("csv_path", "auto")).strip()
+    if 설정 and 설정 != "auto":
+        return (ROOT / 설정).resolve()
+    for base in (ROOT, *list(ROOT.parents)[:4]):
+        for cand in (base / "데이터", base / "백스테이지" / "센서데이터" / "데이터"):
+            if (cand / "sensor_readings_7days.csv").is_file():
+                return cand / "sensor_readings_7days.csv"
+    return ROOT.parents[2] / "데이터" / "sensor_readings_7days.csv"
+
+
 def _fetch_readings(equipment_id: str, hours: int) -> list[dict]:
     """최근 hours 시간의 센서값. 오래된 것부터 정렬해서 돌려준다.
 
     student  → 개인 DB (이번 특강에서는 쓰지 않습니다)
-    fallback → 나눠받은 W5 CSV 를 파일에서 직접 읽는다
+    fallback → 나눠받은 7일치 CSV 를 파일에서 직접 읽는다
 
     강사 시뮬레이터에서 가져오지 않는 이유 — 시뮬레이터는 최근 1시간만 보관한다.
     "지난 주"를 물으려면 7일치가 있는 쪽을 봐야 한다.
     """
     if CFG["data_source"] == "fallback":
         import csv
-        path = (ROOT / CFG["fallback"]["csv_path"]).resolve()
+        path = _csv_경로()
         cutoff = None
         rows = []
         with open(path, encoding="utf-8", newline="") as f:
@@ -120,7 +146,7 @@ def _fetch_readings(equipment_id: str, hours: int) -> list[dict]:
 def _fetch_maintenance(equipment_id: str) -> list[dict]:
     """정비 이력.
 
-    student  → 내가 Day 2 에 만든 정비 작업지시 테이블
+    student  → 개인 DB (이번 특강에서는 쓰지 않습니다)
     fallback → 강사 시뮬레이터의 공용 정비 이력
 
     어느 쪽이든 이 함수가 같은 모양으로 돌려주므로 도구 쪽은 신경 쓰지 않아도 된다.
@@ -166,8 +192,8 @@ def detect_anomaly(equipment_id: str, hours: int = 168, k: float | None = None) 
     할 일은 네 가지입니다.
       1. _fetch_readings(equipment_id, hours) 로 데이터를 가져온다
       2. temperature 와 vibration 각각을 리스트로 뽑는다
-         (값이 없는 자리는 None 으로 둔다 — 1일차 이상감지 의 결측 처리가 받아 준다)
-      3. 1일차 이상감지 의 detect(values, window, k) 를 각각 돌린다
+         (값이 없는 자리는 None 으로 둔다 — 1일차의 결측 처리가 받아 준다)
+      3. 1일차의 detect(values, window, k) 를 각각 돌린다
       4. True 로 나온 자리를 위 Returns 모양으로 정리해 돌려준다
 
     주의 — 에이전트가 읽을 결과입니다.
@@ -218,7 +244,7 @@ def query_equipment(equipment_id: str, hours: int = 24) -> dict:
 # 실행 — 여기는 고치지 않아도 됩니다.
 # =============================================================================
 def main() -> None:
-    ap = argparse.ArgumentParser(description="2일차 도구만들기 MCP 도구 서버")
+    ap = argparse.ArgumentParser(description="MCP 도구 서버 — 2일차 오전")
     ap.add_argument("--check", action="store_true", help="서버 없이 도구만 호출해 본다")
     ap.add_argument("--equipment", default="EQ-03", help="--check 에서 쓸 설비")
     args = ap.parse_args()

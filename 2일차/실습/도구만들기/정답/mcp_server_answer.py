@@ -1,4 +1,4 @@
-"""2일차 도구만들기 참고 답안 서버 — 강사용.
+"""2일차 오전 참고 답안 서버.
 
 템플릿의 두 자리를 tool_bodies.py 의 본문으로 채운 것과 같습니다.
 Step 2 가 막힌 팀에 강사가 대신 띄워 주거나, 공용 서버로 쓸 때 사용합니다.
@@ -6,6 +6,17 @@ Step 2 가 막힌 팀에 강사가 대신 띄워 주거나, 공용 서버로 쓸
     python 정답/mcp_server_answer.py            config.json 의 transport 를 따름
 """
 from __future__ import annotations
+
+# ── 한글 윈도우(cp949)에서 출력이 깨져 죽는 것을 막는다 ──────────────────
+import sys as _sys
+for _s in (_sys.stdout, _sys.stderr):
+    if (getattr(_s, "encoding", "") or "").lower().replace("-", "") != "utf8":
+        try:
+            _s.reconfigure(encoding="utf-8", errors="replace")
+        except Exception:
+            pass
+# ─────────────────────────────────────────────────────────────────────────
+
 
 import json, sys
 from pathlib import Path

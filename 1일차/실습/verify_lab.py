@@ -1,7 +1,7 @@
-"""1일차 이상감지 뼈대 검증 — 코드 쪽 품질 게이트.
+"""1일차 실습 뼈대 검증 — 코드 쪽 품질 게이트.
 
 "파일이 있다"와 "50분 실습이 성립한다"는 다르다.
-교안 1일차 이상감지 가 가르치려는 것이 이 뼈대 + W5 데이터 위에서 실제로 재현되는지 확인한다.
+1일차가 가르치려는 것이 이 뼈대 + 7일치 데이터 위에서 실제로 재현되는지 확인한다.
 
 교안 Step 2 — "심어둔 이상 3곳 중 몇 개를 잡아내는지 확인하고,
               임계값을 이리저리 조정해 보면서 정탐과 오탐을 직접 겪습니다."
@@ -33,7 +33,18 @@ from pathlib import Path
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parent
-DATA = ROOT.parent / "강사용" / "센서데이터" / "데이터"
+
+
+def 데이터폴더() -> Path:
+    """run.py 와 같은 규칙으로 찾는다 — 배포본(`데이터/`)과 강사본 둘 다."""
+    for base in (ROOT, *list(ROOT.parents)[:3]):
+        for cand in (base / "데이터", base / "백스테이지" / "센서데이터" / "데이터"):
+            if (cand / "sensor_readings_7days.csv").is_file():
+                return cand
+    return ROOT.parents[1] / "데이터"
+
+
+DATA = 데이터폴더()
 sys.path.insert(0, str(ROOT))
 
 failures: list[str] = []
@@ -70,7 +81,7 @@ def run_impl(mod, k: float, window: int = 60):
 
 def main() -> int:
     print("=" * 74)
-    print("1일차 이상감지 뼈대 검증")
+    print("1일차 실습 뼈대 검증")
     print("=" * 74)
 
     # ------------------------------------------------------------ 1. 뼈대
@@ -169,7 +180,7 @@ def main() -> int:
     if failures:
         print(f"실패 {len(failures)}건: " + ", ".join(failures))
         return 1
-    print("전 항목 통과 — 1일차 이상감지 가 이 뼈대와 W5 데이터 위에서 성립합니다.")
+    print("전 항목 통과 — 1일차 실습이 이 뼈대와 7일치 데이터 위에서 성립합니다.")
     return 0
 
 
