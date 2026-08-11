@@ -444,7 +444,7 @@ def 검증(out: Path) -> int:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="학생 배포본 만들기")
-    ap.add_argument("--out", default=str(BASE.parent / "배포본" / "k-precision-lab"))
+    ap.add_argument("--out", default=str(REPO / "배포본" / "k-precision-lab"))
     ap.add_argument("--검증", action="store_true", help="만든 뒤 학생 조건으로 돌려 본다")
     args = ap.parse_args()
 
