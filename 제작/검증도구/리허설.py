@@ -55,12 +55,12 @@ import httpx
 
 ROOT = Path(__file__).resolve().parent          # 제작/검증도구/
 REPO = ROOT.parents[1]                          # 경남대특강/ (저장소 루트)
-BASE = REPO / "특강" / "학생배포"                  # 학생이 clone 하는 것
+특강 = REPO / "특강"                             # 일차별 원본: 특강/{일차}/실습
 SIM = REPO / "특강" / "시뮬레이터"
 DATA = ROOT / "센서데이터" / "데이터"
-LAB1 = BASE / "1일차" / "실습"                   # 이상감지
-LAB2 = BASE / "2일차" / "실습" / "도구만들기"      # MCP 도구
-LAB3 = BASE / "2일차" / "실습" / "폐루프"          # 오케스트레이터
+LAB1 = 특강 / "2일차" / "실습"                   # 이상감지
+LAB2 = 특강 / "3일차" / "실습" / "도구만들기"      # MCP 도구
+LAB3 = 특강 / "3일차" / "실습" / "폐루프"          # 오케스트레이터
 
 START = time.time()
 results: list[tuple[str, str, bool, str]] = []   # (구간, 항목, 통과, 상세)
@@ -192,9 +192,9 @@ def 준비(s: Sim, ns: str) -> dict:
           "T* 0개")
     check("배속이 기본값으로 켜져 있다 (강사가 아무것도 안 눌렀다)", c["time_scale"] >= 2,
           f"x{c['time_scale']:g}")
-    # 1일차 아침의 출하 상태는 배속 60(tick 1초)이다. 120 이면 어제 수업이나
-    # 앞선 테스트가 남긴 상태다 — 그대로 두면 1일차 화면이 너무 빨리 흐른다.
-    check("1일차 아침 상태다 (1초에 한 번씩 바뀐다)", c["real_tick_seconds"] == 1.0,
+    # 2일차 아침의 출하 상태는 배속 60(tick 1초)이다. 120 이면 어제 수업이나
+    # 앞선 테스트가 남긴 상태다 — 그대로 두면 2일차 화면이 너무 빨리 흐른다.
+    check("2일차 아침 상태다 (1초에 한 번씩 바뀐다)", c["real_tick_seconds"] == 1.0,
           f"실제 tick {c['real_tick_seconds']}초 · 배속 x{c['time_scale']:g}"
           + ("" if c["real_tick_seconds"] == 1.0 else
              "  → 이전 상태가 남았습니다. `python tools/제어개방.py --end` 로 되돌리세요"))
@@ -241,11 +241,11 @@ def _내_LAN주소() -> str | None:
 
 
 # =============================================================================
-# 1일차 오전 — 학생이 자기 공장을 연다
+# 2일차 오전 — 학생이 자기 공장을 연다
 # =============================================================================
 def 자리배정(s: Sim, ns: str) -> None:
     """학생 여정의 첫 단계 — 여기서 막히면 나머지가 전부 의미 없다."""
-    phase("1일차 맨 처음 — 학생이 자기 공장을 받는다 (python 내번호.py)")
+    phase("2일차 맨 처음 — 학생이 자기 공장을 받는다 (python 내번호.py)")
 
     import secrets
 
@@ -293,7 +293,7 @@ def 자리배정(s: Sim, ns: str) -> None:
 
 
 def 일일차_공장(s: Sim, ns: str, quick: bool) -> None:
-    phase("1일차 오전 — 학생이 브라우저로 자기 공장을 연다")
+    phase("2일차 오전 — 학생이 브라우저로 자기 공장을 연다")
 
     st = s.get(f"/api/v1/{ns}/state")
     check("설비 6대 · 로봇 2대가 한 번에 온다",
@@ -346,10 +346,10 @@ def 일일차_공장(s: Sim, ns: str, quick: bool) -> None:
 
 
 # =============================================================================
-# 1일차 오후 — 이상감지를 직접 짠다
+# 2일차 오후 — 이상감지를 직접 짠다
 # =============================================================================
 def 일일차_이상감지() -> None:
-    phase("1일차 오후 — 이상감지를 직접 짠다 (학생 환경 그대로)")
+    phase("2일차 오후 — 이상감지를 직접 짠다 (학생 환경 그대로)")
 
     csv = DATA / "sensor_readings_7days.csv"
     info = DATA / "생성정보.json"
@@ -393,7 +393,7 @@ def 일일차_이상감지() -> None:
 
 def 일일차_열기() -> None:
     """★ 마지막 수단이 정말로 마지막 수단인가 — 쓰고 나서 또 막히면 최악이다."""
-    phase("1일차 — 이탈 방지 마지막 수단 (--열기 를 실제로 써 본다)")
+    phase("2일차 — 이탈 방지 마지막 수단 (--열기 를 실제로 써 본다)")
 
     tgt = LAB1 / "detect.py"
     bak = LAB1 / "detect_내가짠것.py"
@@ -419,10 +419,10 @@ def 일일차_열기() -> None:
 
 
 # =============================================================================
-# 2일차 오전 — 내 코드를 AI 의 도구로 내놓는다
+# 3일차 오전 — 내 코드를 AI 의 도구로 내놓는다
 # =============================================================================
 def 이일차_도구(s: Sim) -> None:
-    phase("2일차 오전 — 내 알고리즘을 MCP 도구로 내놓는다 (학생 환경 그대로)")
+    phase("3일차 오전 — 내 알고리즘을 MCP 도구로 내놓는다 (학생 환경 그대로)")
 
     cfg = json.loads((LAB2 / "config.json").read_text(encoding="utf-8"))
     check("도구 설정이 개인 네임스페이스를 본다 (팀이 아니다)",
@@ -444,21 +444,21 @@ def 이일차_도구(s: Sim) -> None:
           "정비 이력 확인" in out, [line for line in out.splitlines()
                                     if "config.json" in line][-1][:70]
           if any("config.json" in line for line in out.splitlines()) else msg)
-    check("1일차 detect.py 가 비면 그 사실을 먼저 알려 준다 (엉뚱한 데서 헤매지 않게)",
-          "1일차" in out and "detect.py" in out, msg)
+    check("2일차 detect.py 가 비면 그 사실을 먼저 알려 준다 (엉뚱한 데서 헤매지 않게)",
+          "2일차" in out and "detect.py" in out, msg)
 
     ok, msg, _ = run_script(LAB2 / "verify_lab.py", [], 600, {"SHARED_API": s.base})
     check("MCP 도구 템플릿 검증 — 서버를 띄워 도구가 왕복한다", ok, msg)
 
 
 def 이일차_열기(s: Sim, ns: str = "S01") -> None:
-    phase("2일차 — 이탈 방지 마지막 수단 (--열기 를 실제로 써 본다)")
+    phase("3일차 — 이탈 방지 마지막 수단 (--열기 를 실제로 써 본다)")
 
     detect_tgt, detect_bak = LAB1 / "detect.py", LAB1 / "detect_내가짠것.py"
     mcp_tgt, mcp_bak = LAB2 / "mcp_server.py", LAB2 / "mcp_server_내가짠것.py"
     detect_원본, mcp_원본 = detect_tgt.read_bytes(), mcp_tgt.read_bytes()
     try:
-        # 도구는 1일차 detect.py 를 그대로 불러 쓴다 — 그쪽이 비어 있으면 도구도 못 돈다
+        # 도구는 2일차 detect.py 를 그대로 불러 쓴다 — 그쪽이 비어 있으면 도구도 못 돈다
         for n in (1, 2, 3):
             run_script(LAB1 / "점검.py", ["--열기", str(n)], 120)
         for n in (1, 2):
@@ -469,12 +469,12 @@ def 이일차_열기(s: Sim, ns: str = "S01") -> None:
                                   {"SHARED_API": s.base})
         check("★ --열기 를 쓴 뒤 도구 2개가 실제로 돈다 (또 막히지 않는다)",
               ok and "아직 안 채움" not in out and "오류" not in out, msg)
-        check("도구가 1일차에 짠 detect() 를 그대로 쓴다 — 오늘의 핵심 장면",
+        check("도구가 2일차에 짠 detect() 를 그대로 쓴다 — 오늘의 핵심 장면",
               "sample_count" in out and "anomaly_count" in out)
         check("정비 이력의 미완 작업지시가 도구 응답에 드러난다",
               "WO-2026-0801" in out or "open_work_orders" in out)
 
-        # ★ 2일차 오전의 마지막 장면 — AI 가 **스스로** 도구를 골라 부른다.
+        # ★ 3일차 오전의 마지막 장면 — AI 가 **스스로** 도구를 골라 부른다.
         #   실제 모델을 부른다(비용). 여기가 죽으면 오전 22분이 통째로 빈다.
         #   `--check` 는 도구가 도는지만 보고, 이 검사는 **AI 가 부르는지**를 본다.
         # 학생은 `내번호.py` 가 남긴 `.내번호` 에서 키를 읽는다. 리허설은 그 파일을
@@ -484,7 +484,7 @@ def 이일차_열기(s: Sim, ns: str = "S01") -> None:
         ok, msg, out = run_script(LAB2 / "agent.py", ["--설비", "EQ-03"], 300,
                                   {"SHARED_API": s.base, "W6_TENANT": ns,
                                    "W6_ACCESS_KEY": 키.get(ns, "")})
-        check("★ AI 가 내 도구를 스스로 골라 부른다 (2일차 오전 하이라이트)",
+        check("★ AI 가 내 도구를 스스로 골라 부른다 (3일차 오전 하이라이트)",
               ok and "도구 호출  detect_anomaly" in out, msg)
         check("AI 리포트가 작업지시 번호를 근거로 인용한다",
               "WO-2026-0801" in out,
@@ -498,13 +498,13 @@ def 이일차_열기(s: Sim, ns: str = "S01") -> None:
 
 
 # =============================================================================
-# 2일차 오후 — 제어를 열고 폐루프를 돈다
+# 3일차 오후 — 제어를 열고 폐루프를 돈다
 # =============================================================================
 def 이일차_제어(s: Sim, base: str, ns: str, ns2: str) -> dict:
-    phase("2일차 오후 — 강사가 제어를 연다")
+    phase("3일차 오후 — 강사가 제어를 연다")
 
     ok, msg, _ = run_script(SIM / "tools" / "제어개방.py", ["--base", base], 180)
-    check("2일차 준비가 명령 하나로 끝난다 (tools/제어개방.py)", ok, msg)
+    check("3일차 준비가 명령 하나로 끝난다 (tools/제어개방.py)", ok, msg)
 
     st = s.get(f"/api/v1/{ns}/state")
     check("제어 통로가 열렸다", st["control"]["unlocked"] is True)
@@ -538,7 +538,7 @@ def 이일차_제어(s: Sim, base: str, ns: str, ns2: str) -> dict:
 
 def 이일차_폐루프(s: Sim, base: str, ns: str, keys: dict, quick: bool) -> None:
     """학생이 실제로 돌리는 그 코드를, 초기화하지 않은 공장 위에서 돌린다."""
-    phase("2일차 오후 — 폐루프 (초기화하지 않은 공장 위에서)")
+    phase("3일차 오후 — 폐루프 (초기화하지 않은 공장 위에서)")
 
     cfg0 = json.loads((LAB3 / "config.json").read_text(encoding="utf-8"))
     dcfg = cfg0["detect"]
@@ -683,7 +683,7 @@ def main() -> int:
     ap.add_argument("--ns2", default="S02", help="격리 검사에 쓸 옆자리 네임스페이스")
     ap.add_argument("--quick", action="store_true", help="누적 대기를 줄인다(결함을 놓칠 수 있음)")
     ap.add_argument("--soak", type=float, default=None,
-                    help="1일차~2일차 사이 추가 누적 시간(초). 기본은 창이 찰 만큼")
+                    help="2일차~3일차 사이 추가 누적 시간(초). 기본은 창이 찰 만큼")
     ap.add_argument("--부하", action="store_true",
                     help="39명 동시 진단까지 검사한다 (실제 모델 호출 · 비용 발생)")
     ap.add_argument("--부하인원", type=int, default=39)
@@ -734,7 +734,7 @@ def main() -> int:
         else:
             skip("39명 동시 진단", "--부하 를 안 켰다. 39/39·429 0건은 이 실행으로 확인되지 않았다")
     finally:
-        phase("정리 — 1일차 상태로 되돌린다")
+        phase("정리 — 2일차 상태로 되돌린다")
         run_script(SIM / "tools" / "제어개방.py", ["--end", "--base", args.base_url], 180)
         for t in (args.ns, args.ns2):
             try:

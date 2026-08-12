@@ -1,6 +1,6 @@
 """네임스페이스 분리 검증 — 완료기준 ⑤.
 
-2일차 오후에는 39명이 **동시에** 자기 공장을 제어한다.
+3일차 오후에는 39명이 **동시에** 자기 공장을 제어한다.
 한 명의 명령이 옆자리 공장을 건드리면 그 순간 수업이 무너진다 —
 학생은 자기 코드가 틀린 줄 알고, 강사는 무엇이 잘못됐는지 못 찾는다.
 
@@ -77,7 +77,7 @@ async def main() -> int:
         print("  " + ", ".join(t["tenant_id"] for t in pool))
         print("=" * 70)
 
-        print("\n0. 제어 API 개방 (2일차 조건 재현)")
+        print("\n0. 제어 API 개방 (3일차 조건 재현)")
         r = await c.post(f"{base}/api/instructor/control-lock?unlocked=true&tenant_id=*",
                          headers=ih)
         opened = await c.get(f"{base}/api/v1/{pool[0]['tenant_id']}/state")
@@ -86,7 +86,7 @@ async def main() -> int:
               f"HTTP {r.status_code} · {pool[0]['tenant_id']} 개방 확인")
 
         # --- 1. 잠금 상태 확인 --------------------------------------------
-        print("\n1. 잠금 동작 — 1일차 에는 제어가 막혀야 한다")
+        print("\n1. 잠금 동작 — 2일차 에는 제어가 막혀야 한다")
         victim = pool[0]
         await c.post(f"{base}/api/instructor/control-lock?unlocked=false"
                      f"&tenant_id={victim['tenant_id']}", headers=ih)

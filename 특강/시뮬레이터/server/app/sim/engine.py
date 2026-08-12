@@ -5,7 +5,7 @@
 
 설계상 중요한 점 하나 — 온도는 rpm 의 함수다.
 에이전트가 set_equipment_speed 로 감속하면 온도가 실제로 내려간다.
-이 결합이 없으면 2일차의 「행동 → 다시 인지」 폐루프가 닫히지 않는다.
+이 결합이 없으면 3일차의 「행동 → 다시 인지」 폐루프가 닫히지 않는다.
 
 상태는 서버 프로세스 메모리에 있고 Supabase 에는 배치로 적재한다(리서치 확정안 4).
 따라서 API 서버는 반드시 단일 프로세스로 띄운다(uvicorn --workers 1).
@@ -182,7 +182,7 @@ class Factory:
         샘플당 상승폭이 7일치 CSV 와 같게 유지된다.
 
         로봇 주행만 실제 시간을 따른다. 배속 ×60 에서 가상 시간으로 움직이면
-        공장을 가로지르는 데 0.2초가 걸려 눈에 안 보인다. 2일차 클라이맥스가
+        공장을 가로지르는 데 0.2초가 걸려 눈에 안 보인다. 3일차 클라이맥스가
         "화면에서 AMR 이 실제로 움직인다"이므로 이 하나는 예외로 둔다.
         """
         self._apply_injections(now, injections)
@@ -275,7 +275,7 @@ class Factory:
                 eq.drift_offset = max(eq.drift_target, eq.drift_offset - recov)
 
             # 4) 관측값 = 진짜값 + 이상주입 + 가우시안 노이즈
-            #    노이즈가 없으면 단순 임계값으로 전부 잡혀 1일차 실습이 성립하지 않는다.
+            #    노이즈가 없으면 단순 임계값으로 전부 잡혀 2일차 실습이 성립하지 않는다.
             if eq.sensor_online:
                 eq.temperature = round(
                     eq.core_temp + eq.drift_offset

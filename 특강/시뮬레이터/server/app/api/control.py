@@ -1,11 +1,11 @@
-"""제어 API 4종 — 교안 3절 명시. 2일차 에서 MCP 도구로 노출된다.
+"""제어 API 4종 — 교안 3절 명시. 3일차 에서 MCP 도구로 노출된다.
 
     set_equipment_speed(id, rpm)   설비 속도 조절
     stop_equipment(id)             설비 정지
     dispatch_robot(robot_id, target)  로봇 파견
     ack_alarm(id)                  알람 확인 처리
 
-교안상 1일차 에는 노출하지 않는다. 기본 잠금이며 강사 콘솔에서 개방한다.
+교안상 2일차 에는 노출하지 않는다. 기본 잠금이며 강사 콘솔에서 개방한다.
 
 격리: 경로의 tenant_id 와 X-Access-Key 헤더가 일치해야만 실행된다.
       키가 맞아도 다른 테넌트의 공장은 건드릴 수 없다(경로가 곧 대상).
@@ -24,7 +24,7 @@ from .. import db
 from ..config import get_settings
 from ..sim.runner import runner
 
-router = APIRouter(prefix="/api/v1", tags=["control (2일차)"])
+router = APIRouter(prefix="/api/v1", tags=["control (3일차)"])
 UTC = timezone.utc
 
 COMMANDS = ("set_equipment_speed", "stop_equipment", "dispatch_robot", "ack_alarm")
@@ -71,7 +71,7 @@ def _authorize(tenant_id: str, access_key: str | None) -> dict:
             # 이 문장은 **학생 화면**에 그대로 뜬다.
             # 학생이 스스로 할 수 있는 일만 적는다 — 개방은 강사만 할 수 있다.
             detail=(
-                "제어 통로가 아직 잠겨 있습니다. 2일차 오후에 강사가 엽니다. "
+                "제어 통로가 아직 잠겨 있습니다. 3일차 오후에 강사가 엽니다. "
                 "이미 열렸어야 하는 시간이면 손을 드세요."
             ),
         )
@@ -99,7 +99,7 @@ async def _log(tenant_id: str, command: str, target: str | None, params: dict,
 
 
 def _needs_approval(command: str) -> bool:
-    """HITL — 교안 2일차 10~11장.
+    """HITL — 교안 3일차 10~11장.
 
     되돌릴 수 없는 행동(정지·로봇 파견)에 승인 관문을 둘 수 있다.
     기본은 비활성이며, 승인 관문은 학생이 만드는 오케스트레이터(폐루프)에 두는 것이 교안의 설계다.

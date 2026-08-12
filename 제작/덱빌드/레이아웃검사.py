@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """덱 레이아웃 전수 검사 — 눈 대신 기계로 삐져나옴·겹침을 잡는다.
 
-    python 레이아웃검사.py              # 1일차덱·2일차덱 둘 다
-    python 레이아웃검사.py 2일차덱
+    python 레이아웃검사.py              # 2일차덱·3일차덱 둘 다
+    python 레이아웃검사.py 3일차덱
 
-왜 있나 — 「폐루프는 일곱 걸음」(구 2일차 31장)이 표가 슬라이드 높이를 넘쳐
+왜 있나 — 「폐루프는 일곱 걸음」(구 3일차 31장)이 표가 슬라이드 높이를 넘쳐
 제목을 가리고 각주와 겹친 채로 리허설·검증을 전부 통과했다. 실행 게이트는
 화면 겹침을 못 본다. 그래서 렌더링된 HTML 에서 장마다 두 가지를 잰다:
 
@@ -20,7 +20,7 @@ import sys
 from playwright.async_api import async_playwright
 
 HERE = pathlib.Path(__file__).parent
-names = sys.argv[1:] or ["1일차덱", "2일차덱"]
+names = sys.argv[1:] or ["2일차덱", "3일차덱"]
 
 JS = """
 () => {

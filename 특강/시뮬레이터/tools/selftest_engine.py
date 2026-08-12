@@ -108,7 +108,7 @@ for hours in (1, 2, 3, 4):
 check("1시간 후 +0.5℃", abs((marks[1] - base) - 0.5) < 0.8, f"{base:.2f} → {marks[1]:.2f}℃")
 check("4시간 후 +2.0℃ (62→64)", abs((marks[4] - base) - 2.0) < 0.9,
       f"{base:.2f} → {marks[4]:.2f}℃")
-check("고정 임계값 80℃ 를 넘지 않음 — 1일차 미탐 학습의 전제",
+check("고정 임계값 80℃ 를 넘지 않음 — 2일차 미탐 학습의 전제",
       marks[4] < PROFILE["alarm"]["temp_high_c"],
       f"최고 {marks[4]:.2f}℃ < 80℃")
 check("드리프트 중 TEMP_HIGH 알람 미발생",
@@ -185,7 +185,7 @@ check("결측 종료 후 값 복귀", f.equipment["EQ-01"].temperature is not No
       f"{f.equipment['EQ-01'].temperature:.2f}℃")
 
 # =============================================================================
-print("\n5. 제어 API — 폐루프가 닫히는가 (2일차 핵심)")
+print("\n5. 제어 API — 폐루프가 닫히는가 (3일차 핵심)")
 # =============================================================================
 eng, t0 = new_engine()
 f = eng.factories["S01"]
@@ -287,7 +287,7 @@ check("센서 행이 (equipment_id, timestamp, temperature, vibration, rpm, run_
 print("\n10. 가상 시계 — 배속을 올려도 샘플당 상승폭이 7일치 CSV 와 같은가")
 # =============================================================================
 # 라이브 시연은 기울기를 키우는 것이 아니라 시계를 가속해서 만든다.
-# 기울기를 키우면 샘플당 상승폭이 커져 1일차의 "드리프트는 미탐된다"가 깨진다.
+# 기울기를 키우면 샘플당 상승폭이 커져 2일차의 "드리프트는 미탐된다"가 깨진다.
 CSV_SAMPLE_MIN = 1.0
 SLOPE = PROFILE["anomaly_defaults"]["temp_drift"]["slope_c_per_hour"]
 csv_per_sample = SLOPE * CSV_SAMPLE_MIN / 60
@@ -341,7 +341,7 @@ peak = 0.0
 for _ in range(240):
     now += timedelta(seconds=60); eng.tick(now, 60.0, dt_real=1.0)
     peak = max(peak, f.equipment["EQ-03"].temperature)
-check("가속해도 고정 임계값 80℃ 를 넘지 않음 — 1일차 서사·1일차 미탐 학습 유지",
+check("가속해도 고정 임계값 80℃ 를 넘지 않음 — 2일차 서사·2일차 미탐 학습 유지",
       peak < PROFILE["alarm"]["temp_high_c"], f"최고 {peak:.2f}℃")
 check("가속해도 TEMP_HIGH 알람 미발생",
       not any(k[1] == "TEMP_HIGH" and a.state == "OPEN" for k, a in f.alarms.items()))

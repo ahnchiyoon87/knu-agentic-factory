@@ -7,7 +7,7 @@
     자료를 고친 뒤 다시 올릴 때 옛 파일이 섞인다. 항상 여기서 다시 뽑는다.
 
 무엇이 들어가나 — **학생이 읽을 것만**
-    강사 문서(진행표·핸드오프·서버운영·일차별안내)와 제작·검증 도구는 들어가지 않는다.
+    강사 문서(진행.md·핸드오프·운영.md)와 제작·검증 도구는 들어가지 않는다.
     슬라이드는 낱장 73개를 뿌리면 학생이 못 찾으므로 일차별 폴더로 묶는다.
 
 이름 앞의 번호
@@ -59,12 +59,12 @@ def main() -> int:
     #    `.md` 를 드라이브에 올리면 미리보기가 안 되고, 받아도 메모장에서
     #    `**굵게**` `|표|` 가 그대로 보인다. 학생이 이틀 내내 볼 문서다.
     문서 = [
-        (REPO / "특강" / "당일" / "안내문" / "사전안내문.md",
+        (REPO / "특강" / "사전안내문.md",
          "1. 실습 환경 준비 안내.pdf", "실습 환경 준비 안내"),
-        (REPO / "특강" / "학생배포" / "1일차" / "실습가이드.md",
-         "3. 실습 가이드 — 1일차.pdf", "실습 가이드 — 1일차"),
-        (REPO / "특강" / "학생배포" / "2일차" / "실습가이드.md",
-         "4. 실습 가이드 — 2일차.pdf", "실습 가이드 — 2일차"),
+        (REPO / "특강" / "2일차" / "실습가이드.md",
+         "3. 실습 가이드 — 2일차.pdf", "실습 가이드 — 2일차"),
+        (REPO / "특강" / "3일차" / "실습가이드.md",
+         "4. 실습 가이드 — 3일차.pdf", "실습 가이드 — 3일차"),
     ]
     for src, 새이름, 제목 in 문서:
         if not src.is_file():
@@ -82,21 +82,21 @@ def main() -> int:
     # ── 슬라이드는 pptx 로 준다 (PNG 낱장 73개를 뿌리면 학생이 못 찾는다) ──
     강의자료 = OUT / "5. 강의 자료"
     강의자료.mkdir()
-    for 일차 in ("1일차", "2일차"):
-        deck = REPO / "특강" / "당일" / f"{일차} 슬라이드.pptx"
+    for 일차 in ("2일차", "3일차"):
+        deck = REPO / "특강" / 일차 / "이론" / "슬라이드.pptx"
         if not deck.is_file():
-            print(f"  [빠짐] {deck.name} — 먼저  python pptx만들기.py", file=sys.stderr)
+            print(f"  [빠짐] {deck} — 먼저  python pptx만들기.py", file=sys.stderr)
             return 1
-        shutil.copyfile(deck, 강의자료 / deck.name)
-        print(f"  담음  5. 강의 자료/{deck.name}")
+        shutil.copyfile(deck, 강의자료 / f"{일차} 슬라이드.pptx")
+        print(f"  담음  5. 강의 자료/{일차} 슬라이드.pptx")
 
-    노션 = REPO / "특강" / "당일" / "노션_자산화_강의자료.pptx"
+    노션 = REPO / "특강" / "2일차" / "이론" / "노션_자산화_강의자료.pptx"
     if 노션.is_file():
-        shutil.copyfile(노션, 강의자료 / "노션 자산화 (1일차 1교시).pptx")
-        print("  담음  5. 강의 자료/노션 자산화 (1일차 1교시).pptx")
+        shutil.copyfile(노션, 강의자료 / "노션 자산화 (2일차 1교시).pptx")
+        print("  담음  5. 강의 자료/노션 자산화 (2일차 1교시).pptx")
 
     # ── 강사 것이 섞이지 않았는지 ────────────────────────────────────────
-    금지 = ("진행표", "핸드오프", "서버운영", "일차별안내", "강사", "정답",
+    금지 = ("진행", "핸드오프", "서버운영", "운영.md", "일차별안내", "강사", "정답",
             "리허설", "배포본만들기", "verify_lab", ".env")
     샌것 = [p for p in OUT.rglob("*") if p.is_file()
             and any(k in p.name for k in 금지)]
@@ -107,14 +107,21 @@ def main() -> int:
         return 1
 
     총 = sum(p.stat().st_size for p in OUT.rglob("*") if p.is_file())
+    개수 = sum(1 for p in OUT.rglob("*") if p.is_file())
     print(f"\n  강사 것·정답은 섞이지 않았습니다 (검사 통과)")
+
+    # ── ZIP 하나만 남긴다 — 폴더는 지운다 (강사가 풀어서 통째로 업로드) ────
+    zip_path = REPO / "제작" / "산출물" / "드라이브업로드"
+    shutil.make_archive(str(zip_path), "zip",
+                        root_dir=str(OUT.parent), base_dir=OUT.name)
+    shutil.rmtree(OUT.parent)
     print("=" * 66)
-    print(f"  {OUT}")
+    print(f"  {zip_path}.zip")
     print("=" * 66)
-    print(f"  파일 {sum(1 for p in OUT.rglob('*') if p.is_file())}개 · {총 / 1024 / 1024:.1f}MB")
-    print("\n  이 폴더를 **통째로** 구글드라이브에 끌어다 놓으세요.")
+    print(f"  안에 파일 {개수}개 · {총 / 1024 / 1024:.1f}MB")
+    print("\n  이 ZIP 을 풀어 나온 폴더를 **통째로** 구글드라이브에 끌어다 놓으세요.")
     print("  공유는 「링크가 있는 모든 사용자 — 뷰어」로 둡니다.")
-    print("\n  ※ ZIP 안에는 정답(`정답/`)이 일부러 들어 있습니다 — `--열기` 가 읽습니다.")
+    print("\n  ※ 실습 ZIP 안에는 정답(`정답/`)이 일부러 들어 있습니다 — `--열기` 가 읽습니다.")
     return 0
 
 

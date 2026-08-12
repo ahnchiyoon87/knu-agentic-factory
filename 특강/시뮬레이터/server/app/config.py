@@ -75,7 +75,7 @@ class Settings:
             t.strip() for t in _env("TENANT_FILTER", "").split(",") if t.strip()
         ]
 
-        # --- 제어 API 개방 (교안: 2일차 최초 개방) ---------------------------
+        # --- 제어 API 개방 (교안: 3일차 최초 개방) ---------------------------
         self.control_api_enabled: bool = _env_bool("CONTROL_API_ENABLED", False)
 
         # ── 진단 중계 — 학생 PC 에 LLM 키를 두지 않기 위한 것 ──────────────
@@ -90,7 +90,7 @@ class Settings:
         self.diagnose_concurrency: int = _env_int("DIAGNOSE_CONCURRENCY", 6)
         self.diagnose_per_min: int = _env_int("DIAGNOSE_PER_MIN", 12)
         # HITL: 승인 후에만 실행할 명령. 비우면 즉시 실행.
-        # 교안 2일차 10~11장은 승인 관문을 학생 오케스트레이터(폐루프)에 두므로 기본은 비활성.
+        # 교안 3일차 10~11장은 승인 관문을 학생 오케스트레이터(폐루프)에 두므로 기본은 비활성.
         self.hitl_commands: set[str] = {
             c.strip()
             for c in _env("HITL_REQUIRED_COMMANDS", "").split(",")

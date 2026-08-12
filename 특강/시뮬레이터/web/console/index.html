@@ -89,9 +89,9 @@
   <!-- ─────────────── 서버 경고 (있을 때만) ─────────────── -->
   <div class="card wide" id="serverWarnings" style="display:none;padding:10px 16px"></div>
 
-  <!-- ─────────────── 2일차 원클릭 ─────────────── -->
+  <!-- ─────────────── 3일차 원클릭 ─────────────── -->
   <div class="card wide">
-    <h2>2일차 준비 — 한 번에</h2>
+    <h2>3일차 준비 — 한 번에</h2>
     <p class="hint">
       제어 개방 + 배속 ×120 을 한 번에 겁니다. 이어서 오른쪽에서 대상을 고르고
       드리프트를 쏩니다 — 보통은 <b>* 전체</b>(39명이 같은 장면을 봅니다).
@@ -100,11 +100,11 @@
       (주입 → 감지 약 100초 · ×60 은 약 190초).
     </p>
     <div class="row">
-      <button class="primary" id="day2Prep">2일차 시작 (제어 개방 + 배속 ×120)</button>
+      <button class="primary" id="day2Prep">3일차 시작 (제어 개방 + 배속 ×120)</button>
       <select id="day2Target"></select>
       <button id="day2Inject">이 대상에 주입 (EQ-03 드리프트)</button>
       <span class="spacer"></span>
-      <button class="danger" id="day2End">2일차 종료 (제어 잠금)</button>
+      <button class="danger" id="day2End">3일차 종료 (제어 잠금)</button>
     </div>
   </div>
 
@@ -113,8 +113,8 @@
     <h2>가상 시계 — 배속</h2>
     <p class="hint">
       드리프트를 강의 시간 안에 보여줄 때 <b>기울기를 키우지 않는다.</b>
-      샘플당 상승폭이 커지면 1일차의 「드리프트는 이동평균이 적응해 미탐된다」와 모순되고,
-      1일차의 「사람이 못 알아챌 만큼 미묘하다」도 무너지기 때문이다.
+      샘플당 상승폭이 커지면 2일차의 「드리프트는 이동평균이 적응해 미탐된다」와 모순되고,
+      2일차의 「사람이 못 알아챌 만큼 미묘하다」도 무너지기 때문이다.
       대신 1분 간격 가상 샘플을 그대로 둔 채 그 샘플을 더 빨리 내보낸다 —
       샘플당 상승폭이 7일치 CSV 와 같게 유지된다.
     </p>
@@ -140,7 +140,7 @@
     </div>
     <div class="warnbox" style="margin:11px 0 0">
       <b>평소 ×60.</b> 실제 tick 이 정확히 1초라 교안의 「1초 주기 변동」이 그대로 유지되고 적재량도 ×1 과 같다(312행/초).<br>
-      <b>2일차 오후는 ×120.</b> 적재량이 2배(617행/초)지만 <b>39명으로 이미 실측 통과</b>했다
+      <b>3일차 오후는 ×120.</b> 적재량이 2배(617행/초)지만 <b>39명으로 이미 실측 통과</b>했다
       (실패 0건 · p95 41ms · DB 오류 0). 4시간 드리프트가 2분에 끝나야 90분 실습이 성립한다.<br>
       시연 순서 — <b>배속을 올려 드리프트를 만들고, 에이전트가 감지하면 ×1 로 되돌려</b>
       감속·로봇 파견을 실시간으로 보여준다. AMR 주행은 배속과 무관하게 항상 실시간이다.
@@ -191,9 +191,9 @@
 
   <!-- ─────────────── 제어 API 개방 ─────────────── -->
   <div class="card">
-    <h2>제어 API 개방 — 2일차</h2>
+    <h2>제어 API 개방 — 3일차</h2>
     <div class="warnbox">
-      제어 API 4종은 <b>2일차 오후에 처음 개방</b>한다. 그전까지는 잠가 둔다 —
+      제어 API 4종은 <b>3일차 오후에 처음 개방</b>한다. 그전까지는 잠가 둔다 —
       「어제까지는 못 움직였다」가 마지막 장면의 전제다.
       개방하면 해당 네임스페이스의 <code>X-Access-Key</code> 보유자가 설비를 정지·감속하고 로봇을 파견할 수 있다.
     </div>
@@ -223,7 +223,7 @@
   <!-- ─────────────── 네임스페이스 ─────────────── -->
   <div class="card wide">
     <h2>네임스페이스 · 접속 키</h2>
-    <p class="hint">access_key 는 2일차 제어 API 호출에 쓴다. 학생이 <code>내번호.py</code> 로 받아 가므로 강사가 나눠 줄 것은 없다.</p>
+    <p class="hint">access_key 는 3일차 제어 API 호출에 쓴다. 학생이 <code>내번호.py</code> 로 받아 가므로 강사가 나눠 줄 것은 없다.</p>
     <div style="max-height:260px;overflow:auto">
       <table><thead><tr><th>ID</th><th>구분</th><th>이름</th><th>제어</th><th>access_key</th></tr></thead>
         <tbody id="tenantBody"></tbody></table>
@@ -376,12 +376,12 @@ async function setLock(unlocked){
   }catch(err){ log('실패 — ' + err.message, 'e'); }
 }
 
-// ------------------------------------------------------------------- 2일차 원클릭
+// ------------------------------------------------------------------- 3일차 원클릭
 $('day2Prep').onclick = async () => {
   try{
     await call('/api/instructor/control-lock?unlocked=true&tenant_id=*', { method:'POST' });
     await call('/api/instructor/time-scale?scale=120', { method:'POST' });
-    log('2일차 시작 — 제어 전체 개방 · 배속 x120. 학생은 자기 번호로 붙습니다.');
+    log('3일차 시작 — 제어 전체 개방 · 배속 x120. 학생은 자기 번호로 붙습니다.');
     refreshTenants(); refreshStatus();
   }catch(err){ log('실패 — ' + err.message, 'e'); }
 };
@@ -400,7 +400,7 @@ $('day2End').onclick = async () => {
     await call('/api/instructor/inject', { method:'DELETE' });
     await call('/api/instructor/control-lock?unlocked=false&tenant_id=*', { method:'POST' });
     await call('/api/instructor/time-scale?scale=60', { method:'POST' });
-    log('2일차 종료 — 주입 중단 · 제어 잠금 · 배속 x60(기본값)');
+    log('3일차 종료 — 주입 중단 · 제어 잠금 · 배속 x60(기본값)');
     refreshTenants(); refreshStatus();
   }catch(err){ log('실패 — ' + err.message, 'e'); }
 };

@@ -67,7 +67,7 @@ app = FastAPI(
         "경남대 RISE 피지컬AI 사관학교 8월 Agentic AI 특강 · 시뮬레이터 산출물\n\n"
         "CNC 설비 6대(EQ-01~EQ-06)와 AMR 2대의 상태가 1초 주기로 변동하며 "
         "Supabase 에 적재됩니다. 학생은 자기 네임스페이스의 읽기 API 로 대시보드를 만듭니다.\n\n"
-        "제어 API 4종은 교안상 2일차에 개방됩니다."
+        "제어 API 4종은 교안상 3일차에 개방됩니다."
     ),
     lifespan=lifespan,
 )

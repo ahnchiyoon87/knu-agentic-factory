@@ -57,7 +57,7 @@
   main{display:grid; grid-template-columns:minmax(0,1fr) 330px; gap:14px; padding:14px 20px 24px}
   @media(max-width:1080px){ main{grid-template-columns:minmax(0,1fr)} }
   /* 무대 아래 — 오른쪽 열이 세로로 넘치지 않게 범례·시연을 이쪽으로 내린다.
-     1일차 「화면에 세 가지가 보여야 합니다」 장의 셋이 스크롤 없이 한 화면에 있어야 한다. */
+     2일차 「화면에 세 가지가 보여야 합니다」 장의 셋이 스크롤 없이 한 화면에 있어야 한다. */
   .stagecol{display:flex; flex-direction:column; gap:14px; min-width:0}
   .under{display:grid; grid-template-columns:1fr auto; gap:14px; align-items:start}
   .under > .card{margin:0}
@@ -84,12 +84,12 @@
   .alarm span{font-size:11px; color:var(--ink2)}
   .empty{color:var(--muted); font-size:12px; padding:6px 2px}
 
-  /* 이 공장이 누구 것인가 (1일차 「공장은 한 사람에 하나씩」과 호응) */
+  /* 이 공장이 누구 것인가 (2일차 「공장은 한 사람에 하나씩」과 호응) */
   #nsCard{border-color:#2A3A4C;background:#141C26}
   .nsName{font-size:19px;font-weight:800;letter-spacing:-.01em;margin-bottom:5px}
   .nsNote{margin:0;font-size:11.5px;color:var(--ink2);line-height:1.55}
 
-  /* 제어 통로 — 2일차 「지금 제어 권한이 열렸습니다」 전까지 잠긴 채 보인다 */
+  /* 제어 통로 — 3일차 「지금 제어 권한이 열렸습니다」 전까지 잠긴 채 보인다 */
   .lock{float:right;font-size:10px;font-weight:800;padding:2px 8px;border-radius:3px;
     letter-spacing:0;background:#2B313B;color:#9BA7B4}
   .lock.open{background:#12301C;color:#5FD37E}
@@ -168,7 +168,7 @@
     <div id="stageWrap"><div id="stage"></div></div>
     <div class="under">
       <!-- 강사 시연용. /view?demo=1 로 열었을 때만 나타난다.
-         1일차 「이 공장은 일부러 고장 낼 수 있습니다」 장의 주입을
+         2일차 「이 공장은 일부러 고장 낼 수 있습니다」 장의 주입을
          다른 탭으로 넘어가지 않고 하기 위한 것이다. -->
 
       <div class="card" id="demoCard">
@@ -202,7 +202,7 @@
   </div>
 
   <aside>
-    <!-- 1일차 「공장은 한 사람에 하나씩」 —
+    <!-- 2일차 「공장은 한 사람에 하나씩」 —
          "여러분 각자에게 자기 몫의 공장이 따로 주어진다.
           옆 사람이 내린 명령이 내 공장에 영향을 주지 않는다." -->
     <div class="card" id="nsCard">
@@ -232,9 +232,9 @@
       <div id="alarms"><div class="empty">없음</div></div>
     </div>
 
-    <!-- 1일차 공장 화면의 제어 통로 칸 —
+    <!-- 2일차 공장 화면의 제어 통로 칸 —
          "명령을 넣는 통로가 네 개 준비돼 있다 / 그 네 개는 오늘 열지 않는다".
-         2일차 「지금 제어 권한이 열렸습니다」가 이것을 연다. -->
+         3일차 「지금 제어 권한이 열렸습니다」가 이것을 연다. -->
     <div class="card" id="controlCard">
       <h2>제어 통로 <span id="lockBadge" class="lock">잠김</span></h2>
       <ul class="channels" id="channels"></ul>
@@ -246,7 +246,7 @@
 
 <footer>
   읽기 API — <code id="apiHint">GET /api/v1/{네임스페이스}/state</code> · 이 화면은 그 응답만으로 그려집니다.
-  제어 API 4종은 2일차 오후에 개방됩니다.
+  제어 API 4종은 3일차 오후에 개방됩니다.
 </footer>
 
 <script src="/static/vendor/konva.min.js"></script>
@@ -308,7 +308,7 @@ function showNamespace(sel){
 // ------------------------------------------------------------------ 무대 구성
 function buildStage(){
   // 폭뿐 아니라 남은 높이까지 보고 축척을 정한다.
-  // 1일차 「화면에 세 가지가 보여야 합니다」의 셋이 프로젝터에서 스크롤 없이 한 화면에 있어야 한다.
+  // 2일차 「화면에 세 가지가 보여야 합니다」의 셋이 프로젝터에서 스크롤 없이 한 화면에 있어야 한다.
   const wrap = document.getElementById('stageWrap');
   const availW = wrap.clientWidth;
   const top = wrap.getBoundingClientRect().top + window.scrollY;
@@ -481,7 +481,7 @@ function renderClock(c){
     : '실시간';
 }
 
-// ------------------------------------------- 제어 통로 (2일차 오후까지 잠긴 채 보인다)
+// ------------------------------------------- 제어 통로 (3일차 오후까지 잠긴 채 보인다)
 function renderControl(c){
   if (!c) return;
   const open = c.unlocked;

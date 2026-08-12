@@ -1,18 +1,18 @@
 """7일치 데이터셋 검증.
 
-만들어진 CSV 가 실제로 1일차 실습을 성립시키는지 확인한다.
+만들어진 CSV 가 실제로 2일차 실습을 성립시키는지 확인한다.
 파일이 있다는 것과 학습이 성립한다는 것은 다르다.
 
 설계 요건:
     "정상 구간에 가우시안 노이즈 포함 — 단순 임계값으로 전부 잡히면
-     1일차 실습 의 오탐·미탐 학습이 성립하지 않음"
+     2일차 실습 의 오탐·미탐 학습이 성립하지 않음"
 
 리서치 주제 3 의 가설:
     (a) 점진 드리프트 → 이동평균이 적응해 z-score 가 커지지 않아 미탐
     (b) 순간 스파이크 → point anomaly 로 z-score 에 쉽게 잡히나 임계를 낮추면 오탐 급증
     (c) 결측 → std 계산에서 NaN 전파로 통계 자체가 깨짐
 
-그래서 1일차 실습 학생이 짤 바로 그 알고리즘(이동 윈도 z-score)을 여기서 돌려
+그래서 2일차 실습 학생이 짤 바로 그 알고리즘(이동 윈도 z-score)을 여기서 돌려
 세 가설이 데이터에서 실제로 재현되는지 본다.
 
     python verify.py
@@ -76,7 +76,7 @@ def check(name: str, ok: bool, detail: str = "") -> None:
 
 
 def rolling_z(series: pd.Series, window: int) -> pd.Series:
-    """1일차 실습 학생이 구현할 이동 윈도 z-score. TODO 3곳이 채워진 형태."""
+    """2일차 실습 학생이 구현할 이동 윈도 z-score. TODO 3곳이 채워진 형태."""
     mean = series.rolling(window, min_periods=window).mean()
     std = series.rolling(window, min_periods=window).std()
     return (series - mean) / std.replace(0, np.nan)
@@ -153,8 +153,8 @@ def main() -> int:
     check("EQ-01 결측 120행", int(df["temperature"].isna().sum()) == 120,
           f"{int(df['temperature'].isna().sum())}행")
 
-    # -------------------------------------- 4. 고정 임계값으로는 못 잡는다 (1일차)
-    print("\n4. 고정 임계값의 한계 — 1일차 서사가 데이터에서 성립하는가")
+    # -------------------------------------- 4. 고정 임계값으로는 못 잡는다 (2일차)
+    print("\n4. 고정 임계값의 한계 — 2일차 서사가 데이터에서 성립하는가")
     over_t = int((df["temperature"] > t_hi).sum())
     check(f"온도가 {t_hi}℃ 를 넘은 적이 한 번도 없음", over_t == 0, f"{over_t}행")
     drift_max = seg["temperature"].max()
@@ -170,8 +170,8 @@ def main() -> int:
     check("임계를 66℃ 로 낮추면 다른 설비들이 대량 오탐 — 슬라이드 문장이 성립",
           lowered > 5000 and machines >= 2, f"{lowered:,}행 · 설비 {machines}대")
 
-    # ------------------------------ 5. 이동 윈도 z-score (1일차 실습 학생 알고리즘)
-    print("\n5. 이동 윈도 z-score 로 돌려본 결과 — 1일차 학습이 성립하는가")
+    # ------------------------------ 5. 이동 윈도 z-score (2일차 실습 학생 알고리즘)
+    print("\n5. 이동 윈도 z-score 로 돌려본 결과 — 2일차 학습이 성립하는가")
     W = 60          # 60분 윈도
     res = {}
     for eid, g in df.groupby("equipment_id"):
@@ -264,7 +264,7 @@ def main() -> int:
     if failures:
         print(f"실패 {len(failures)}건: " + ", ".join(failures))
         return 1
-    print("전 항목 통과 — 1일차 실습이 이 데이터 위에서 성립합니다.")
+    print("전 항목 통과 — 2일차 실습이 이 데이터 위에서 성립합니다.")
     return 0
 
 

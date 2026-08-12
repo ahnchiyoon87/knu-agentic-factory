@@ -26,8 +26,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent          # 제작/빌드도구/
 REPO = ROOT.parents[1]                          # 경남대특강/ (저장소 루트)
-슬라이드 = REPO / "특강" / "당일" / "슬라이드"
-OUT = REPO / "특강" / "당일"
+특강 = REPO / "특강"                             # 일차별: 특강/{일차}/이론/슬라이드/*.png
 
 
 def main() -> int:
@@ -43,8 +42,8 @@ def main() -> int:
         print("Pillow 가 없습니다 —  pip install Pillow", file=sys.stderr)
         return 1
 
-    for 일차 in ("1일차", "2일차"):
-        src = 슬라이드 / 일차
+    for 일차 in ("2일차", "3일차"):
+        src = 특강 / 일차 / "이론" / "슬라이드"
         pngs = sorted(src.glob("*.png"), key=lambda p: int(p.stem))
         if not pngs:
             print(f"  [빠짐] {src} 에 PNG 가 없습니다", file=sys.stderr)
@@ -62,7 +61,7 @@ def main() -> int:
             s.shapes.add_picture(str(p), 0, 0,
                                  width=prs.slide_width, height=prs.slide_height)
 
-        dst = OUT / f"{일차} 슬라이드.pptx"
+        dst = 특강 / 일차 / "이론" / "슬라이드.pptx"
         prs.save(str(dst))
         print(f"  만듦  {dst.name}  ({len(pngs)}장 · {dst.stat().st_size // 1024}KB)")
 

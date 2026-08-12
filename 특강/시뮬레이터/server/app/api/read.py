@@ -1,6 +1,6 @@
-"""읽기 API — 1일차부터 학생이 쓰는 면.
+"""읽기 API — 2일차부터 학생이 쓰는 면.
 
-1일차 §1 에서 학생이 브라우저로 자기 공장을 여는 것이 여기다.
+2일차 §1 에서 학생이 브라우저로 자기 공장을 여는 것이 여기다.
 전원이 첫 20분 안에 성공해야 하므로 **인증을 요구하지 않는다** —
 tenant_id 만으로 읽힌다. 제어 API 만 접속 키를 요구한다.
 """
@@ -81,8 +81,8 @@ CONTROL_CHANNELS = [
 def _control_info(tenant_id: str) -> dict:
     """제어 통로 4개의 존재와 잠금 상태.
 
-    1일차 공장 화면이 "명령을 넣는 통로가 네 개 준비돼 있다 / 그 네 개는
-    오늘 열지 않는다"를 보여줘야 해서 읽기 응답에 포함한다. 2일차
+    2일차 공장 화면이 "명령을 넣는 통로가 네 개 준비돼 있다 / 그 네 개는
+    오늘 열지 않는다"를 보여줘야 해서 읽기 응답에 포함한다. 3일차
     「지금 제어 권한이 열렸습니다」 장이 이것을 연다.
     잠겨 있어도 무엇이 있는지는 보인다 — 그게 요지다.
     """
@@ -90,7 +90,7 @@ def _control_info(tenant_id: str) -> dict:
     unlocked = bool(get_settings().control_api_enabled or t.get("control_unlocked"))
     return {
         "unlocked": unlocked,
-        "opens_on": "2일차 오후",
+        "opens_on": "3일차 오후",
         "channels": CONTROL_CHANNELS,
     }
 
@@ -179,7 +179,7 @@ async def readings(
     }
 
 
-@router.get("/{tenant_id}/maintenance", summary="정비 이력 (2일차 오전 폴백용)")
+@router.get("/{tenant_id}/maintenance", summary="정비 이력 (3일차 오전 폴백용)")
 async def maintenance(
     tenant_id: str,
     equipment_id: str | None = Query(None, description="비우면 전체 설비"),
@@ -187,7 +187,7 @@ async def maintenance(
 ) -> dict:
     """공용 정비 이력.
 
-    2일차 오전 Step 2 의 "해당 설비의 정비 이력을 조회해" 에 쓰인다.
+    3일차 오전 Step 2 의 "해당 설비의 정비 이력을 조회해" 에 쓰인다.
     **이번 특강에서는 이것이 정본이다** — 학생이 자기 DB 를 만드는 단계는 없다.
     WO-2026-0801(냉각 점검 보류)이 오후 진단의 근거가 되는 바로 그 이력이다.
     """

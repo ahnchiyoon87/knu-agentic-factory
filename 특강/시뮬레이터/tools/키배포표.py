@@ -70,13 +70,13 @@ CARD = """
 <div class="card {cls}">
   <div class="head"><span class="id">{tid}</span><span class="name">{name}</span></div>
   <table>
-    <tr><th>① 공장 보기 주소<br><small>(1일차 · 크롬에 붙여넣기)</small></th>
+    <tr><th>① 공장 보기 주소<br><small>(2일차 · 크롬에 붙여넣기)</small></th>
         <td class="mono">{view}</td></tr>
-    <tr><th>② 내 번호<br><small>(2일차 · tenant)</small></th>
+    <tr><th>② 내 번호<br><small>(3일차 · tenant)</small></th>
         <td class="mono key">{tid}</td></tr>
-    <tr><th>③ 서버 주소<br><small>(2일차 · base_url / shared_api)</small></th>
+    <tr><th>③ 서버 주소<br><small>(3일차 · base_url / shared_api)</small></th>
         <td class="mono">{server}</td></tr>
-    <tr><th>④ 접속 키<br><small>(2일차 · access_key)</small></th>
+    <tr><th>④ 접속 키<br><small>(3일차 · access_key)</small></th>
         <td class="mono key">{key}</td></tr>
   </table>
   <div class="note">{note}</div>
@@ -119,8 +119,8 @@ th small{{font-weight:400;color:#888}}
 @media print{{.tips{{display:none}}}}
 </style></head><body>
 <p class="tips">인쇄 → 점선대로 잘라 자리에 배치. 학생 쪽지 {n_ind}장.
-학생 안내: 1일차는 ① 만 씁니다(크롬 주소창에 붙여넣기 → 내 공장이 뜸).
-2일차에 ②③④ 를 실습 코드의 config.json 에 그대로 옮겨 적습니다.</p>
+학생 안내: 2일차는 ① 만 씁니다(크롬 주소창에 붙여넣기 → 내 공장이 뜸).
+3일차에 ②③④ 를 실습 코드의 config.json 에 그대로 옮겨 적습니다.</p>
 <div class="grid">{''.join(cards)}</div>
 </body></html>"""
 
