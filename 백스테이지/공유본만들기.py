@@ -53,6 +53,18 @@ def md2docx(src: Path, dst: Path) -> None:
     i = 0
     while i < len(줄):
         line = 줄[i]
+        # 그림 — `![설명](경로)`. docx 에도 실제 이미지로 넣는다.
+        if m := re.match(r"^!\[([^\]]*)\]\(([^)]+)\)\s*$", line.strip()):
+            from docx.shared import Mm
+            그림 = (src.parent / m.group(1 + 1)).resolve()
+            if 그림.is_file():
+                doc.add_picture(str(그림), width=Mm(160))
+                if m.group(1):
+                    cap = doc.add_paragraph(m.group(1))
+                    for r in cap.runs:
+                        r.italic = True; r.font.size = Pt(9)
+            i += 1
+            continue
         if line.startswith("```"):
             i += 1
             buf = []

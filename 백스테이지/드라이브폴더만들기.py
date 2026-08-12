@@ -35,42 +35,25 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent          # 백스테이지/
 REPO = ROOT.parent                              # 경남대특강/
 OUT = REPO / "산출물" / "드라이브업로드" / "경남대 AI 특강 (8월)"
-ZIP = REPO / "산출물" / "k-precision-lab.zip"
-
-
-def 배포본_최신인가() -> bool:
-    """ZIP 이 배포본보다 오래됐으면 다시 뽑으라고 말한다."""
-    배포본 = REPO / "산출물" / "배포본" / "k-precision-lab"
-    if not 배포본.is_dir():
-        return False
-    if not ZIP.is_file():
-        return False
-    최신 = max((p.stat().st_mtime for p in 배포본.rglob("*") if p.is_file()), default=0)
-    return ZIP.stat().st_mtime >= 최신
 
 
 def main() -> int:
-    문제 = []
-
-    # ── 배포본 ZIP ────────────────────────────────────────────────────────
     if not (REPO / "산출물" / "배포본" / "k-precision-lab").is_dir():
-        문제.append("배포본이 없습니다 — 먼저  python 배포본만들기.py --검증")
-    elif not 배포본_최신인가():
-        print("  ZIP 이 배포본보다 오래됐습니다 — 다시 압축합니다.")
-        if ZIP.exists():
-            ZIP.unlink()
-        shutil.make_archive(str(ZIP.with_suffix("")), "zip",
-                            root_dir=str(REPO / "산출물" / "배포본"),
-                            base_dir="k-precision-lab")
-
-    if 문제:
-        for x in 문제:
-            print(f"  {x}", file=sys.stderr)
+        print("  배포본이 없습니다 — 먼저  python 배포본만들기.py --검증", file=sys.stderr)
         return 1
 
     if OUT.exists():
         shutil.rmtree(OUT)
     OUT.mkdir(parents=True)
+
+    # ── 실습 ZIP — 드라이브 폴더 안에 **직접** 만든다 ─────────────────────
+    #    전에는 산출물/ 루트에 만들어 복사했는데, 같은 ZIP 이 두 곳에 남아
+    #    「어느 것이 최신인가」가 생겼다. ZIP 은 여기 하나뿐이다.
+    zip_dst = OUT / "2. 실습 파일 (k-precision-lab)"
+    shutil.make_archive(str(zip_dst), "zip",
+                        root_dir=str(REPO / "산출물" / "배포본"),
+                        base_dir="k-precision-lab")
+    print("  담음  2. 실습 파일 (k-precision-lab).zip  (배포본에서 새로 압축)")
 
     # ── 학생이 읽는 것 — 문서는 PDF 로 낸다 ──────────────────────────────
     #    `.md` 를 드라이브에 올리면 미리보기가 안 되고, 받아도 메모장에서
@@ -95,9 +78,6 @@ def main() -> int:
             print(f"  [실패] PDF 변환 — {새이름}\n{r.stdout}{r.stderr}", file=sys.stderr)
             return 1
         print(f"  담음  {새이름}")
-
-    shutil.copyfile(ZIP, OUT / "2. 실습 파일 (k-precision-lab).zip")
-    print("  담음  2. 실습 파일 (k-precision-lab).zip")
 
     # ── 슬라이드는 pptx 로 준다 (PNG 낱장 73개를 뿌리면 학생이 못 찾는다) ──
     강의자료 = OUT / "5. 강의 자료"

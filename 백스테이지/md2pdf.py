@@ -52,6 +52,9 @@ th { background: #eef2f7; border: 1px solid #c9d2dc; padding: 7px 9px;
 td { border: 1px solid #d8dee6; padding: 6px 9px; vertical-align: top; }
 blockquote { border-left: 4px solid #f0a500; background: #fffaf0; margin: 12px 0;
              padding: 9px 14px; page-break-inside: avoid; }
+img { max-width: 100%; border: 1px solid #c9d2dc; border-radius: 5px;
+      margin: 10px 0; page-break-inside: avoid; }
+.cap { font-size: 9pt; color: #5a6672; margin: -6px 0 12px; }
 blockquote p { margin: 4px 0; }
 ul, ol { margin: 8px 0; padding-left: 24px; }
 li { margin: 4px 0; }
@@ -78,12 +81,23 @@ def 인라인(t: str) -> str:
     return t
 
 
-def md2html(md: str, 제목: str) -> str:
+def md2html(md: str, 제목: str, 기준폴더: Path | None = None) -> str:
     out: list[str] = []
     줄들 = md.splitlines()
     i = 0
     while i < len(줄들):
         line = 줄들[i]
+
+        # 그림 — `![설명](경로)`. 상대 경로는 md 파일 위치 기준으로 절대화한다.
+        if m := re.match(r"^!\[([^\]]*)\]\(([^)]+)\)\s*$", line.strip()):
+            설명, 경로 = m.group(1), Path(m.group(2))
+            if not 경로.is_absolute() and 기준폴더 is not None:
+                경로 = (기준폴더 / 경로).resolve()
+            out.append(f'<img src="{경로.as_uri()}" alt="{html.escape(설명)}">')
+            if 설명:
+                out.append(f'<div class="cap">{html.escape(설명)}</div>')
+            i += 1
+            continue
 
         if line.startswith("```"):                                  # 코드블록
             i += 1
@@ -159,7 +173,7 @@ def main() -> int:
         print(f"입력 파일이 없습니다: {src}", file=sys.stderr)
         return 1
 
-    html_str = md2html(src.read_text(encoding="utf-8"), 제목)
+    html_str = md2html(src.read_text(encoding="utf-8"), 제목, 기준폴더=src.parent)
     tmp = dst.with_suffix(".tmp.html")
     tmp.write_text(html_str, encoding="utf-8")
 
