@@ -129,6 +129,14 @@
   tbody tr.on td{ color:var(--navy); font-weight:700; }
   td.k{ font-weight:700; width:230px; }
 
+  /* ============ 6b · 촘촘한 표형 — 행이 여섯을 넘는 표만 쓴다 ============
+     기본 규격(24px 칸·30px 글자)으로 7행 표는 세로 495px 를 넘겨 제목·각주를 덮는다.
+     행 수를 줄일 수 없는 표(폐루프 일곱 걸음)만 이 변형을 쓴다. */
+  .dense th, .dense td{ padding:12px 26px; font-size:26px; }
+  .dense thead th{ font-size:24px; }
+  .dense td.k{ white-space:nowrap; }
+  .dense .foot{ padding-top:18px; margin-top:18px; }
+
   /* ============ 7 · 낱말 나열형 (가로줄 없음 · 그림만) ============ */
   .words .body{ gap:0; justify-content:space-between; }
   .words .col{ flex:1; text-align:center; padding:0 34px; }
