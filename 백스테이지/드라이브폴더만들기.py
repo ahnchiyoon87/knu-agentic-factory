@@ -98,17 +98,16 @@ def main() -> int:
     shutil.copyfile(ZIP, OUT / "2. 실습 파일 (k-precision-lab).zip")
     print("  담음  2. 실습 파일 (k-precision-lab).zip")
 
-    # ── 슬라이드는 일차별로 묶는다 (낱장 73개를 뿌리면 학생이 못 찾는다) ──
+    # ── 슬라이드는 pptx 로 준다 (PNG 낱장 73개를 뿌리면 학생이 못 찾는다) ──
     강의자료 = OUT / "5. 강의 자료"
     강의자료.mkdir()
     for 일차 in ("1일차", "2일차"):
-        src = REPO / "당일" / "슬라이드" / 일차
-        if not src.is_dir():
-            print(f"  [빠짐] {src}", file=sys.stderr)
+        deck = REPO / "당일" / f"{일차} 슬라이드.pptx"
+        if not deck.is_file():
+            print(f"  [빠짐] {deck.name} — 먼저  python pptx만들기.py", file=sys.stderr)
             return 1
-        dst = 강의자료 / f"{일차} 슬라이드"
-        shutil.copytree(src, dst)
-        print(f"  담음  5. 강의 자료/{일차} 슬라이드  ({len(list(dst.glob('*.png')))}장)")
+        shutil.copyfile(deck, 강의자료 / deck.name)
+        print(f"  담음  5. 강의 자료/{deck.name}")
 
     노션 = REPO / "당일" / "노션_자산화_강의자료.pptx"
     if 노션.is_file():
