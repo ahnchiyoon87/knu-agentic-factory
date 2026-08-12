@@ -34,13 +34,13 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent          # 백스테이지/
 REPO = ROOT.parent                              # 경남대특강/
-OUT = REPO / "드라이브업로드" / "경남대 AI 특강 (8월)"
-ZIP = REPO / "k-precision-lab.zip"
+OUT = REPO / "산출물" / "드라이브업로드" / "경남대 AI 특강 (8월)"
+ZIP = REPO / "산출물" / "k-precision-lab.zip"
 
 
 def 배포본_최신인가() -> bool:
     """ZIP 이 배포본보다 오래됐으면 다시 뽑으라고 말한다."""
-    배포본 = REPO / "배포본" / "k-precision-lab"
+    배포본 = REPO / "산출물" / "배포본" / "k-precision-lab"
     if not 배포본.is_dir():
         return False
     if not ZIP.is_file():
@@ -53,14 +53,15 @@ def main() -> int:
     문제 = []
 
     # ── 배포본 ZIP ────────────────────────────────────────────────────────
-    if not (REPO / "배포본" / "k-precision-lab").is_dir():
+    if not (REPO / "산출물" / "배포본" / "k-precision-lab").is_dir():
         문제.append("배포본이 없습니다 — 먼저  python 배포본만들기.py --검증")
     elif not 배포본_최신인가():
         print("  ZIP 이 배포본보다 오래됐습니다 — 다시 압축합니다.")
         if ZIP.exists():
             ZIP.unlink()
         shutil.make_archive(str(ZIP.with_suffix("")), "zip",
-                            root_dir=str(REPO / "배포본"), base_dir="k-precision-lab")
+                            root_dir=str(REPO / "산출물" / "배포본"),
+                            base_dir="k-precision-lab")
 
     if 문제:
         for x in 문제:
