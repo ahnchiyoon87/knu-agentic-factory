@@ -447,6 +447,32 @@ def 검증(out: Path) -> int:
     else:
         print("  [통과] 강사 것·비밀정보가 배포본에 섞이지 않았다")
 
+    # ── 폐지된 개념이 문장으로 남아 있지 않은가 ──────────────────────────
+    #    실행 게이트는 「돌아가는 것」만 보장한다. 「쪽지 보고 채우세요」 「막힘 티켓」
+    #    처럼 실행에 영향 없는 죽은 개념은 26항목·리허설 75항목을 다 통과하고도
+    #    살아남았다 — 실제로 최소경로 카드에서 그렇게 발견됐다. 설계 전환 때
+    #    폐지된 말이 학생 눈에 닿으면 존재하지 않는 것을 찾게 되므로 상시 검사한다.
+    금칙어 = ("쪽지", "막힘 티켓", "확장 미션", "확장미션", "인쇄", "덱B", "넷째 날")
+    죽은말 = []
+    for p in out.rglob("*"):
+        if not p.is_file() or ".git" in p.parts:
+            continue
+        if p.suffix in (".md", ".json", ".txt", ".py", ".html", ".bat", ".cfg", ".ini"):
+            try:
+                내용 = p.read_text(encoding="utf-8")
+            except Exception:                                      # noqa: BLE001
+                continue
+            for 낱말 in 금칙어:
+                if 낱말 in 내용:
+                    죽은말.append(f"{p.relative_to(out).as_posix()} 안에 「{낱말}」")
+    if 죽은말:
+        print(f"  [실패] ★ 폐지된 개념이 학생 자료에 남아 있다 — {len(죽은말)}건")
+        for s in 죽은말[:6]:
+            print(f"          {s}")
+        실패.append("폐지된 개념 잔존")
+    else:
+        print("  [통과] 폐지된 개념(쪽지·티켓·확장 미션·인쇄 등)이 학생 자료에 없다")
+
     print("-" * 70)
     if 실패:
         print(f"실패 {len(실패)}건 — " + ", ".join(실패))

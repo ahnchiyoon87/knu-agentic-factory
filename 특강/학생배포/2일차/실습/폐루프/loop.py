@@ -125,7 +125,8 @@ def one_round(ctx: Context) -> dict:
     record = {"round": ctx.round_no, "at": _now(),
               "findings": findings, "cases": cases}
 
-    # 4. 확장 미션 에이전트 — 등록돼 있으면 여기서 붙는다
+    # 4. 추가 에이전트 — agents/__init__.py 의 EXTRA 에 등록돼 있으면 여기서 붙는다
+    #    (README 「끝낸 뒤 — 더 해 볼 것」 4번이 쓰는 자리)
     extras = {}
     for agent in agents.EXTRA:
         name = getattr(agent, "ROLE", agent.__name__)
