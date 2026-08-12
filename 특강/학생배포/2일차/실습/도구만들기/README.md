@@ -108,6 +108,7 @@ python mcp_server.py             # MCP 서버 실행
 
 ```
 mcp_server.py       ← ★ 두 자리를 채웁니다
+agent.py            AI 에게 말로 지시한다 — Step 2 에서 실행
 점검.py              막혔을 때 — 어디까지 됐는지 짚어 줍니다
 config.json         ← 전환은 여기 한 곳
 정답/               시간이 다 됐을 때 `점검.py --열기` 가 읽는 완성본
