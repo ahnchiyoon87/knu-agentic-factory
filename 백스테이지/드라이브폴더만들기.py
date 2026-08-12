@@ -71,36 +71,49 @@ def main() -> int:
         shutil.rmtree(OUT)
     OUT.mkdir(parents=True)
 
-    # ── 학생이 읽는 것만 ─────────────────────────────────────────────────
-    옮길것 = [
-        (REPO / "당일" / "인쇄물" / "사전안내문.md", "00_먼저읽으세요_사전안내문.md"),
-        (ZIP,                                        "01_실습파일_k-precision-lab.zip"),
-        (REPO / "학생배포" / "1일차" / "실습가이드.md", "02_실습가이드_1일차.md"),
-        (REPO / "학생배포" / "2일차" / "실습가이드.md", "03_실습가이드_2일차.md"),
+    # ── 학생이 읽는 것 — 문서는 PDF 로 낸다 ──────────────────────────────
+    #    `.md` 를 드라이브에 올리면 미리보기가 안 되고, 받아도 메모장에서
+    #    `**굵게**` `|표|` 가 그대로 보인다. 학생이 이틀 내내 볼 문서다.
+    문서 = [
+        (REPO / "당일" / "인쇄물" / "사전안내문.md",
+         "1. 실습 환경 준비 안내.pdf", "실습 환경 준비 안내"),
+        (REPO / "학생배포" / "1일차" / "실습가이드.md",
+         "3. 실습 가이드 — 1일차.pdf", "실습 가이드 — 1일차"),
+        (REPO / "학생배포" / "2일차" / "실습가이드.md",
+         "4. 실습 가이드 — 2일차.pdf", "실습 가이드 — 2일차"),
     ]
-    for src, 새이름 in 옮길것:
+    for src, 새이름, 제목 in 문서:
         if not src.is_file():
             print(f"  [빠짐] {src}", file=sys.stderr)
             return 1
-        shutil.copyfile(src, OUT / 새이름)
+        r = subprocess.run([sys.executable, str(ROOT / "md2pdf.py"), str(src),
+                            str(OUT / 새이름), 제목],
+                           capture_output=True, text=True, encoding="utf-8",
+                           errors="replace")
+        if r.returncode != 0 or not (OUT / 새이름).is_file():
+            print(f"  [실패] PDF 변환 — {새이름}\n{r.stdout}{r.stderr}", file=sys.stderr)
+            return 1
         print(f"  담음  {새이름}")
 
-    # ── 슬라이드는 일차별로 묶는다 ───────────────────────────────────────
-    강의자료 = OUT / "04_강의자료"
+    shutil.copyfile(ZIP, OUT / "2. 실습 파일 (k-precision-lab).zip")
+    print("  담음  2. 실습 파일 (k-precision-lab).zip")
+
+    # ── 슬라이드는 일차별로 묶는다 (낱장 73개를 뿌리면 학생이 못 찾는다) ──
+    강의자료 = OUT / "5. 강의 자료"
     강의자료.mkdir()
     for 일차 in ("1일차", "2일차"):
         src = REPO / "당일" / "슬라이드" / 일차
         if not src.is_dir():
             print(f"  [빠짐] {src}", file=sys.stderr)
             return 1
-        dst = 강의자료 / f"{일차}_슬라이드"
+        dst = 강의자료 / f"{일차} 슬라이드"
         shutil.copytree(src, dst)
-        print(f"  담음  04_강의자료/{일차}_슬라이드  ({len(list(dst.glob('*.png')))}장)")
+        print(f"  담음  5. 강의 자료/{일차} 슬라이드  ({len(list(dst.glob('*.png')))}장)")
 
     노션 = REPO / "당일" / "노션_자산화_강의자료.pptx"
     if 노션.is_file():
-        shutil.copyfile(노션, 강의자료 / "1일차_1교시_노션자산화.pptx")
-        print("  담음  04_강의자료/1일차_1교시_노션자산화.pptx")
+        shutil.copyfile(노션, 강의자료 / "노션 자산화 (1일차 1교시).pptx")
+        print("  담음  5. 강의 자료/노션 자산화 (1일차 1교시).pptx")
 
     # ── 강사 것이 섞이지 않았는지 ────────────────────────────────────────
     금지 = ("진행표", "핸드오프", "서버운영", "일차별안내", "강사", "정답",
