@@ -15,6 +15,14 @@ from pathlib import Path
 ROLE = "진단"
 
 
+class DiagnoseFailed(RuntimeError):
+    """이번 회차의 AI 진단 호출이 실패했다 — 루프는 죽지 않고 다음 회차에 다시 건다.
+
+    실패 안내(사람 말)는 이 예외를 던지기 전에 이미 화면에 냈다.
+    loop.py 가 이 예외만 잡아서 회차를 넘긴다.
+    """
+
+
 def load_env_file() -> None:
     """`.env` 를 찾아 환경변수로 올린다 — 이미 설정된 값은 덮어쓰지 않는다.
 
@@ -279,7 +287,8 @@ def run(ctx, finding: dict) -> dict:
                 ctx.log("  (강사 안내가 있을 때만) 규칙으로 계속하려면 Ctrl+C 후:")
                 ctx.log("      python loop.py --규칙으로")
                 ctx.log("  " + "=" * 56)
-            raise                                     # 이 회차의 진단만 건너뛴다
+            # 이 회차의 진단만 건너뛴다 — loop.py 가 이 예외를 잡아 다음 회차로 간다.
+            raise DiagnoseFailed(f"{type(exc).__name__}: {exc}") from exc
 
     # 예비 경로 — 내 키로 직접. 이번 특강에서는 쓰지 않습니다(강사 확인용).
     if backend in ("openai", "auto"):

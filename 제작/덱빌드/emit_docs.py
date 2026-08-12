@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 """덱과 같은 데이터에서 [첨부]원고.md · [설명란].md 를 뽑는다.
    덱을 고치면 두 문서가 자동으로 따라 바뀐다 — 어긋날 수 없다.
-사용:  python emit_docs.py day2 | day3
+사용:  python emit_docs.py 1 | 2 | both   (기본 both)
 """
+import html
 import sys, re, pathlib, importlib
 import deckkit as D
 import svgs, svgs3
@@ -52,6 +53,8 @@ def strip(s):
     s = re.sub(r'<span class="mark">(.*?)</span>', r"\1", s)
     s = re.sub(r"<b>(.*?)</b>", r"**\1**", s)
     s = re.sub(r"<[^>]+>", "", s)
+    # &gt; &nbsp; 같은 엔티티가 문서에 그대로 노출됐던 적이 있다 — 사람 글자로 되돌린다.
+    s = html.unescape(s).replace("\xa0", " ")
     return s.strip()
 
 
@@ -63,11 +66,13 @@ def emit(tag, title, scope_note, forbid_common):
 
     # ── [첨부]원고.md
     o = [f"# {tag[-3:]} — 강의 원고 ({n}장)", "",
-         f"> **이 문서는 {n}장 범위만 담는다.** {scope_note}", "",
+         f"> **이 문서는 {n}장 범위만 담는다.**",
+         *("> " + ln for ln in scope_note.splitlines()), "",
          "## 지켜야 할 사실 (지어내지 말 것)", "",
          "- 무대는 경남 창원의 **가상** 정밀기계 부품 제조사 「K-정밀」. CNC 설비 6대(EQ-01~EQ-06), AMR 2대.",
          "- 값은 **1초마다** 갱신. CNC는 온도·진동·rpm·가동상태, AMR은 위치·배터리·적재상태.",
          "- 새벽 3시 EQ-03 사건 — 시간당 **0.5℃**, **62 → 64℃**, 고정 임계값 **80℃를 끝까지 넘지 않음**.",
+         "- 연습용 CSV 의 새벽 실측 — 3시 **61.0℃** → 4시 **61.6℃** (일주기 최저점이라 사건 서사보다 낮게 찍힌다. 6·8장이 이 값을 쓴다 — 둘 다 맞다).",
          "- 연습용 데이터는 CNC 6대 × 7일 × 1분 = **60,480행**. 이상 3종(드리프트·스파이크·결측)이 심어져 있다.",
          "- 오탐 실측 — 기본값에서 하루 **81건**, k를 2.0으로 낮추면 하루 **911건(11배)**.",
          "- 제어 도구 4개 — `set_equipment_speed` `ack_alarm` `stop_equipment` `dispatch_robot`.",
@@ -114,7 +119,7 @@ def emit(tag, title, scope_note, forbid_common):
     # ── [설명란].md
     e = [f"# {tag[-3:]} — 설명란 ({n}장)", "",
          "> **업로드할 파일 2개**",
-         "> ① `00_디자인기준판\\디자인기준판.pdf`",
+         "> ① `제작/기준판/디자인기준판.pdf`",
          f"> ② `{tag[-3:]}_[첨부]원고.md` ← **이 덱 범위만 담긴 원고. 다른 덱 원고를 같이 올리지 마라.**",
          ">",
          "> ※ **NotebookLM이 받는 형식** — PDF · txt · **Markdown(.md)**. HTML·PNG는 안 된다.",

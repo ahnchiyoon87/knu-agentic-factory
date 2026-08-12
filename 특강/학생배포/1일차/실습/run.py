@@ -53,8 +53,9 @@ DATA = 데이터폴더()
 def load():
     csv = DATA / "sensor_readings_7days.csv"
     lab = DATA / "labels_rowwise.csv"
-    if not csv.exists():
-        sys.exit(f"센서 데이터를 못 찾았습니다.\n"
+    if not csv.exists() or not lab.exists():
+        빠진것 = csv.name if not csv.exists() else lab.name
+        sys.exit(f"센서 데이터를 못 찾았습니다 ({빠진것}).\n"
                  f"  찾아본 곳: {DATA}\n"
                  f"  실습 저장소를 통째로 내려받았는지 확인하세요 (「데이터」 폴더가 같이 옵니다).")
     df = pd.read_csv(csv, parse_dates=["timestamp"])
@@ -74,6 +75,10 @@ def main() -> int:
         mod = importlib.import_module(mod_name)
     except ModuleNotFoundError:
         sys.exit(f"{mod_name} 을(를) 찾지 못했습니다.")
+    except SyntaxError as e:
+        # 채우다 만 문법 오류 — 역추적 대신 자리를 짚어 준다.
+        sys.exit(f"detect.py {e.lineno}행에 문법 오류가 있습니다 — {e.msg}\n"
+                 f"  괄호·따옴표·들여쓰기를 그 줄에서 확인하세요. python 점검.py 도 같이 짚어 줍니다.")
 
     df, labels = load()
     truth = labels.set_index(["equipment_id", "timestamp"])["is_anomaly"]

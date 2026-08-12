@@ -510,7 +510,7 @@ def 이일차_제어(s: Sim, base: str, ns: str, ns2: str) -> dict:
     check("제어 통로가 열렸다", st["control"]["unlocked"] is True)
     warn = s.inst("GET", "/status")["warnings"]
     check("콘솔이 '주입이 없다'를 스스로 경고한다",
-          any(w["code"] == "DAY4_NO_INJECTION" for w in warn),
+          any(w["code"] == "DAY2_NO_INJECTION" for w in warn),
           ", ".join(w["code"] for w in warn) or "경고 없음")
 
     keys = {t["tenant_id"]: t["access_key"] for t in s.inst("GET", "/tenants")["tenants"]}

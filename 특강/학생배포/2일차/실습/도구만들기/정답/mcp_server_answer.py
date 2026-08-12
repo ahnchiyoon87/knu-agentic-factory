@@ -1,7 +1,7 @@
 """2일차 오전 참고 답안 서버.
 
 템플릿의 두 자리를 tool_bodies.py 의 본문으로 채운 것과 같습니다.
-Step 2 가 막힌 팀에 강사가 대신 띄워 주거나, 공용 서버로 쓸 때 사용합니다.
+Step 2 가 막힌 학생을 위해 강사가 대신 띄워 주거나, 공용 서버로 쓸 때 사용합니다.
 
     python 정답/mcp_server_answer.py            config.json 의 transport 를 따름
 """

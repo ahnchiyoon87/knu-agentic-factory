@@ -146,7 +146,7 @@ STAGE = _s(520, 420, "0 0 520 420", f"""
 """)
 
 # ── DB 행 8개 (전부 가짜)
-ROWS8 = _s(540, 400, "0 0 540 400", f"""
+ROWS8 = _s(540, 440, "0 0 540 440", f"""
 <rect x="40" y="40" width="460" height="46" fill="{N}"/>
 <g stroke="#E2E6EB" stroke-width="2">""" +
 "".join(f'<path d="M40 {86+ i*38}h460"/>' for i in range(9)) + f"""</g>
@@ -156,7 +156,7 @@ ROWS8 = _s(540, 400, "0 0 540 400", f"""
         f'<rect x="170" y="{100+ i*38}" width="86" height="10" rx="5"/>'
         f'<rect x="300" y="{100+ i*38}" width="70" height="10" rx="5"/>'
         f'<rect x="410" y="{100+ i*38}" width="54" height="10" rx="5"/>' for i in range(8)) + f"""</g>
-<text class="lbl-o" x="270" y="380" text-anchor="middle">행 여덟 개</text>
+<text class="lbl-o" x="270" y="426" text-anchor="middle">행 여덟 개</text>
 """)
 
 # ── 화면 3요소

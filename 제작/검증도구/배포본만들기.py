@@ -219,7 +219,7 @@ def 청소(out: Path) -> None:
 
 def _토큰() -> str:
     """강사 토큰은 시뮬레이터 .env 에만 있다."""
-    env = ROOT / "시뮬레이터" / ".env"
+    env = REPO / "특강" / "시뮬레이터" / ".env"
     if env.is_file():
         for line in env.read_text(encoding="utf-8").splitlines():
             if line.strip().startswith("INSTRUCTOR_TOKEN="):
@@ -241,7 +241,7 @@ def _서버주소() -> str:
 
 
 def _설정(이름: str) -> str:
-    env = ROOT / "시뮬레이터" / ".env"
+    env = REPO / "특강" / "시뮬레이터" / ".env"
     if env.is_file():
         for line in env.read_text(encoding="utf-8").splitlines():
             if line.strip().startswith(f"{이름}="):

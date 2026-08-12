@@ -66,8 +66,14 @@ def main() -> int:
             # 문서 네 곳이 「1일차 아침에만」이라고 적어 뒀지만 도구에는 잠금이 없었다.
             try:
                 현황 = httpx.get(f"{base}/api/v1/claim/status", timeout=20).json()
-            except Exception:                                      # noqa: BLE001
-                현황 = {"배정됨": 0}
+            except Exception as exc:                               # noqa: BLE001
+                # 현황을 모르면 잠금을 풀어 주면 안 된다 — 조용히 0명 취급하면
+                # 2일차 아침 사고 방지 게이트가 통째로 무력화된다. 멈추고 알린다.
+                print(f"배정 현황을 확인하지 못했습니다 — {type(exc).__name__}: {exc}",
+                      file=sys.stderr)
+                print("  서버가 떠 있는지 확인한 뒤 다시 실행하세요. 현황을 모르는 채로는"
+                      " 전부풀기를 진행하지 않습니다.", file=sys.stderr)
+                return 2
             나간것 = 현황.get("배정됨", 0)
             if 나간것 and not args.예:
                 print(f"⚠ 이미 {나간것}명이 번호를 받아 갔습니다.")

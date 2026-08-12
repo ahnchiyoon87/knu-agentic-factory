@@ -17,13 +17,13 @@ MCP 가 무엇인가
   필요할 때 스스로 부릅니다.
 
   오늘은 '읽는 손'입니다. 조회만 합니다.
-  '움직이는 손'(설비 제어)은 내일 열립니다.
+  '움직이는 손'(설비 제어)은 오늘 오후에 열립니다.
 ────────────────────────────────────────────────────────────────────
 
 바꿔 끼우기 — config.json 한 곳만 고칩니다
 
-  transport            stdio(내 컴퓨터) ↔ http(강사 공용 서버)
-  data_source          student(내가 만든 것) ↔ fallback(강사 우회 경로)
+  transport            stdio(내 컴퓨터 — 기본) ↔ http(강사 공용 서버로 우회)
+  data_source          fallback(이번 특강의 정상 경로 — 기본) ↔ student(개인 DB — 이번엔 안 씀)
 
   어느 쪽으로 두든 **도구 이름과 응답 형태는 같습니다.**
   그래서 강사가 우회시켜도 내가 만든 에이전트 쪽은 고칠 게 없습니다.
@@ -218,9 +218,10 @@ def query_equipment(equipment_id: str, hours: int = 24) -> dict:
 
     Returns:
         equipment_id,
-        recent{sample_count, temperature_avg, temperature_max,
-               vibration_avg, vibration_max, missing_count},
-        maintenance[{work_order_no, issued_at, status, action, note}]
+        recent{hours, sample_count, temperature{avg, max},
+               vibration{avg, max}, missing_count},
+        maintenance[{work_order_no, issued_at, status, action, note}],
+        open_work_orders[ … ]      ← status 가 DONE 이 아닌 작업지시만 추린 것
 
     ──────────────────────────────────────────────────────────
     ★ 여기를 채우세요

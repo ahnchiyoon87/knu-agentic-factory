@@ -37,7 +37,7 @@ class MCPControl:
         self.script = script or (ROOT / "control_mcp.py")
         self.timeout = timeout
         # 자식 프로세스에 접속 정보를 물려준다. config.json 을 다시 읽게 두면
-        # 부모가 런타임에 바꾼 값(팀·키·주소)이 반영되지 않는다.
+        # 부모가 런타임에 바꾼 값(번호·키·주소)이 반영되지 않는다.
         self.env = {**os.environ, "PYTHONIOENCODING": "utf-8", "PYTHONUTF8": "1"}
         if api is not None:
             self.env.update({"W6_BASE_URL": api.base, "W6_TENANT": api.tenant,

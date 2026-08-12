@@ -46,6 +46,6 @@
     "max_tokens": 1500,
     "openai_key_env": "OPENAI_API_KEY",
     "openai_model": "gpt-5.4-mini",
-    "_max_tokens": "부하테스트에서 실제 출력 길이를 보고 확정한다. 800은 너무 빠듯했다."
+    "_max_tokens": "부하테스트 실측(평균 출력 약 970자)에 맞춰 1500으로 확정. 줄이면 리포트가 중간에 잘립니다."
   }
 }

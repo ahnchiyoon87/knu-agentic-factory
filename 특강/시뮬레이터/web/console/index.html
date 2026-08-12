@@ -95,14 +95,16 @@
     <p class="hint">
       제어 개방 + 배속 ×120 을 한 번에 겁니다. 이어서 오른쪽에서 대상을 고르고
       드리프트를 쏩니다 — 보통은 <b>* 전체</b>(39명이 같은 장면을 봅니다).
-      <b>학생이 코드를 돌리기 전에</b> 쏘십시오 (주입 → 감지가 79~190초 걸립니다).
+      <b>전원이 loop.py 를 돌린 것을 확인한 뒤에</b> 쏘십시오 — 주입은 ×120 에서
+      150초면 끝나서, 먼저 쏘면 늦게 돌린 학생은 영영 못 봅니다
+      (주입 → 감지 약 100초 · ×60 은 약 190초).
     </p>
     <div class="row">
-      <button class="primary" id="day4Prep">2일차 시작 (제어 개방 + 배속 ×120)</button>
-      <select id="day4Team"></select>
-      <button id="day4Inject">이 대상에 주입 (EQ-03 드리프트)</button>
+      <button class="primary" id="day2Prep">2일차 시작 (제어 개방 + 배속 ×120)</button>
+      <select id="day2Target"></select>
+      <button id="day2Inject">이 대상에 주입 (EQ-03 드리프트)</button>
       <span class="spacer"></span>
-      <button class="danger" id="day4End">2일차 종료 (제어 잠금)</button>
+      <button class="danger" id="day2End">2일차 종료 (제어 잠금)</button>
     </div>
   </div>
 
@@ -375,7 +377,7 @@ async function setLock(unlocked){
 }
 
 // ------------------------------------------------------------------- 2일차 원클릭
-$('day4Prep').onclick = async () => {
+$('day2Prep').onclick = async () => {
   try{
     await call('/api/instructor/control-lock?unlocked=true&tenant_id=*', { method:'POST' });
     await call('/api/instructor/time-scale?scale=120', { method:'POST' });
@@ -383,9 +385,9 @@ $('day4Prep').onclick = async () => {
     refreshTenants(); refreshStatus();
   }catch(err){ log('실패 — ' + err.message, 'e'); }
 };
-$('day4Inject').onclick = async () => {
+$('day2Inject').onclick = async () => {
   try{
-    const t = $('day4Team').value;
+    const t = $('day2Target').value;
     if (!t) { log('대상을 고르세요', 'e'); return; }
     const r = await call('/api/instructor/inject', { method:'POST',
       body: JSON.stringify({ tenant_id: t, equipment_id: 'EQ-03', kind: 'temp_drift' }) });
@@ -393,7 +395,7 @@ $('day4Inject').onclick = async () => {
     refreshStatus();
   }catch(err){ log('실패 — ' + err.message, 'e'); }
 };
-$('day4End').onclick = async () => {
+$('day2End').onclick = async () => {
   try{
     await call('/api/instructor/inject', { method:'DELETE' });
     await call('/api/instructor/control-lock?unlocked=false&tenant_id=*', { method:'POST' });
@@ -502,7 +504,7 @@ async function refreshTenants(){
     $(id).innerHTML = '<option value="*">* 전체 네임스페이스</option>' + opts);
   $('resetTenant').innerHTML = opts;
   // 이번 특강은 개인 단위다. 팀으로 거르면 목록이 비어 버튼이 영영 안 눌린다.
-  $('day4Team').innerHTML = '<option value="*">* 전체 (39명 동시)</option>' + opts;
+  $('day2Target').innerHTML = '<option value="*">* 전체 (39명 동시)</option>' + opts;
 
   $('tenantBody').innerHTML = TENANTS.map(t => `<tr>
       <td>${t.tenant_id}</td>

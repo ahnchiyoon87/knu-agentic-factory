@@ -153,7 +153,7 @@ def part_detect() -> None:
     check("표본이 모자라면 판정하지 않는다", detector.judge(short, cfg) is None)
 
     # ── 실습 정상 상태 — 여기서 한 번 놓쳤다. 반드시 남겨 둘 것 ─────────────
-    # 팀은 loop.py 를 90분 내내 돌린다. 창은 계속 길어지고 드리프트는 그 안의
+    # 학생은 loop.py 를 실습 내내 돌린다. 창은 계속 길어지고 드리프트는 그 안의
     # 짧은 구간일 뿐이다. 창을 안 자르면 희석돼서 미탐이 된다.
     RAMP, HOLD, RISE = 240, 60, 2.0        # 가상 4h 램프 + 1h 유지, 62→64℃
 
@@ -174,8 +174,8 @@ def part_detect() -> None:
           v_long is not None,
           v_long["detail"] if v_long else "★ 미탐 — 창을 안 자르면 여기서 걸린다")
 
-    fresh = steady(400, 200)               # 갓 켠 팀 — 데이터가 얼마 없다
-    check("갓 켠 팀도 잡는다 (있는 만큼으로 판정)", detector.judge(fresh, cfg) is not None)
+    fresh = steady(400, 200)               # 갓 켠 학생 — 데이터가 얼마 없다
+    check("갓 켠 학생도 잡는다 (있는 만큼으로 판정)", detector.judge(fresh, cfg) is not None)
 
     quiet = [62.0 + random.Random(s).gauss(0, 0.35) for s in range(3000)]
     check("오래 돌려도 평온할 때는 안 울린다", detector.judge(quiet, cfg) is None)
@@ -293,7 +293,7 @@ def part_live(base: str, tenant: str, token: str, timeout_s: float, scale: float
           f"배속 x{slow['배속']:g}")
     warn = instructor(base, token, "GET", "/status")["warnings"]
     check("강사 콘솔도 같은 것을 경고한다 (고칠 수 있는 사람에게)",
-          any(w["code"] == "DAY4_SCALE_IS_1" for w in warn),
+          any(w["code"] == "DAY2_SCALE_IS_1" for w in warn),
           "; ".join(w["code"] for w in warn) or "경고 없음")
     instructor(base, token, "POST", "/time-scale", scale=scale)
 

@@ -38,9 +38,17 @@ NAMES = {1: "window_stats", 2: "is_anomaly", 3: "handle_missing"}
 
 # ══════════════════════════════════════════════ 검사
 def _load():
-    import detect
-    importlib.reload(detect)
-    return detect
+    try:
+        import detect
+        importlib.reload(detect)
+        return detect
+    except SyntaxError as e:
+        # 학생이 채우다 만 문법 오류 — 역추적 대신 자리를 짚어 준다.
+        print(f"detect.py {e.lineno}행에 문법 오류가 있습니다 — {e.msg}")
+        if e.text:
+            print(f"    {e.text.rstrip()}")
+        print("  괄호·따옴표·들여쓰기를 그 줄에서 확인하세요. 고치고 다시 돌리면 됩니다.")
+        raise SystemExit(1)
 
 
 def 검사_1(d) -> tuple[bool, list[str]]:

@@ -77,7 +77,7 @@ def _warnings() -> list[dict]:
     unlocked = [t for t in runner.tenants.values() if t.get("control_unlocked")]
     if unlocked and runner.time_scale < 2:
         out.append({
-            "code": "DAY4_SCALE_IS_1",
+            "code": "DAY2_SCALE_IS_1",
             "message": (
                 f"제어를 개방한 네임스페이스가 {len(unlocked)}개인데 배속이 x{runner.time_scale:g} 입니다. "
                 "이 상태로는 온도 드리프트가 실제로 4시간 걸려 학생 화면에 아무것도 안 뜹니다."
@@ -87,7 +87,7 @@ def _warnings() -> list[dict]:
     active = [i for i in runner.engine.injections.values() if i.active]
     if unlocked and not active:
         out.append({
-            "code": "DAY4_NO_INJECTION",
+            "code": "DAY2_NO_INJECTION",
             "message": "제어는 열렸는데 진행 중인 이상 주입이 없습니다. 학생은 감지할 대상이 없습니다.",
             "fix": "POST /api/instructor/inject  {\"kind\": \"temp_drift\", \"equipment_id\": \"EQ-03\"}",
         })

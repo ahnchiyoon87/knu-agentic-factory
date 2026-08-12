@@ -48,7 +48,12 @@ CFG = json.loads((ROOT / "config.json").read_text(encoding="utf-8"))
 # 내가 만든 도구를 그대로 가져온다. mcp_server.py 의 ★ 두 자리가 비어 있으면
 # 여기서 NotImplementedError 가 나고, 아래에서 사람 말로 세운다.
 sys.path.insert(0, str(ROOT))
-from mcp_server import detect_anomaly, query_equipment      # noqa: E402
+try:
+    from mcp_server import detect_anomaly, query_equipment  # noqa: E402
+except SyntaxError as e:
+    # 채우다 만 문법 오류 — 역추적 대신 자리를 짚어 준다.
+    sys.exit(f"mcp_server.py {e.lineno}행에 문법 오류가 있습니다 — {e.msg}\n"
+             f"  괄호·따옴표·들여쓰기를 그 줄에서 확인하세요. python 점검.py 도 같이 짚어 줍니다.")
 
 기본지시 = ("지난 주 설비 이상을 점검하고, 이상이 있으면 해당 설비의 정비 이력을 조회해 "
             "원인 추정과 권고 조치를 담은 진단 리포트를 작성하라.")

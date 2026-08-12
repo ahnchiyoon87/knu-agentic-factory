@@ -498,7 +498,7 @@ function renderControl(c){
   const note = document.getElementById('lockNote');
   note.textContent = open
     ? '열려 있습니다. 에이전트가 이 공장을 움직일 수 있습니다.'
-    : `${c.opens_on} 에 엽니다. 오늘은 보기만 합니다.`;
+    : `${c.opens_on}에 엽니다. 오늘은 보기만 합니다.`;
   note.className = 'lockNote' + (open ? ' open' : '');
 }
 

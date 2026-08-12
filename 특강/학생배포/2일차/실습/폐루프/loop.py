@@ -33,7 +33,14 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 
-import agents
+try:
+    import agents
+except SyntaxError as _e:
+    # 학생이 agents/*.py 를 채우다 만 문법 오류 — 역추적 대신 자리를 짚어 준다.
+    _f = Path(getattr(_e, "filename", "") or "agents/").name
+    raise SystemExit(f"{_f} {_e.lineno}행에 문법 오류가 있습니다 — {_e.msg}\n"
+                     f"  괄호·따옴표·들여쓰기를 그 줄에서 확인하세요.") from None
+from agents.diagnoser import DiagnoseFailed
 from control_client import DirectControl, open_control
 from factory_api import CFG, ControlLocked, FactoryAPI
 
@@ -278,6 +285,11 @@ def main() -> int:
             except ControlLocked as exc:
                 print(f"\n제어가 잠겨 있습니다 — {exc}", file=sys.stderr)
                 return 2
+            except DiagnoseFailed:
+                # 실패 안내는 진단 담당이 이미 사람 말로 냈다 (「N회 실패 · 다음 회차에
+                # 다시 겁니다」). 여기서 죽으면 그 안내가 거짓말이 된다 — 감지 상태를
+                # 유지한 채 다음 회차로 넘어간다.
+                pass
             except NotImplementedError as exc:
                 # 아직 안 채운 자리다. 학생에게 traceback 을 보여 줄 이유가 없다.
                 # 어느 파일인지는 등록표가 안다 — 여기는 모른다.

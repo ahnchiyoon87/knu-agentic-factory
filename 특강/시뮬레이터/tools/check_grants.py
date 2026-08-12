@@ -116,7 +116,7 @@ def main() -> int:
         print(f"실패 {len(failures)}건: " + ", ".join(failures))
         print("→ python tools/migrate.py up 을 다시 돌리세요 "
               "(db/always/900_grants.sql 이 매번 재적용됩니다).")
-        print("   마이그레이션을 새로 추가했다면 그 뒤에 004 를 다시 적용해야 할 수 있습니다.")
+        print("   권한 스크립트는 db/always/900_grants.sql 하나뿐입니다 — migrate up 이 매번 재적용합니다.")
         return 1
     print("전 항목 통과 — 공개 키로는 읽기만 됩니다.")
     return 0

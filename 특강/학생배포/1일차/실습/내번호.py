@@ -56,7 +56,9 @@ def 번호표() -> str:
             if d.get("번호표"):
                 return d["번호표"]
         except Exception:                                          # noqa: BLE001
-            pass
+            # 조용히 새 번호로 갈아타면 학생은 공장이 바뀐 것을 모른다 — 알리고 진행한다.
+            print("※ 번호표 파일이 깨져 있어 새로 만듭니다.")
+            print("   어제 받은 번호를 기억하면  python 내번호.py S07  처럼 붙여 되찾으세요.")
     새표 = secrets.token_urlsafe(24)
     _저장(번호표={"번호표": 새표})
     return 새표
