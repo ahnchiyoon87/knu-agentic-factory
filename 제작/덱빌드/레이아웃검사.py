@@ -110,6 +110,30 @@ JS = r"""
         if (w > 2 && h > 2) issues.push('강조 상자 겹침 ' + (a + 1) + '·' + (b + 1));
       }
 
+    // ⑥-2 강조 상자가 화면 밖으로 나갔는가 (잘려서 한쪽 변이 안 보인다)
+    s.querySelectorAll('.shotbox').forEach(box => {
+      const img = box.querySelector('img');
+      if (!img) return;
+      const ir = img.getBoundingClientRect();
+      box.querySelectorAll('i').forEach((el, n) => {
+        const r = el.getBoundingClientRect();
+        if (r.left < ir.left - 1 || r.top < ir.top - 1 ||
+            r.right > ir.right + 1 || r.bottom > ir.bottom + 1)
+          issues.push('강조 상자 ' + (n + 1) + ' 이 화면 밖으로 잘림');
+      });
+    });
+
+    // ⑥-3 번호가 원 정가운데인가 — 원과 글자의 중심이 어긋나면 눈에 띈다
+    s.querySelectorAll('.shotbox b').forEach((el, n) => {
+      const r = el.getBoundingClientRect();
+      const cs = getComputedStyle(el);
+      if (Math.abs(r.width - r.height) > 1.5)
+        issues.push('번호 ' + (n + 1) + ' 이 원이 아니다 ' +
+                    r.width.toFixed(1) + '×' + r.height.toFixed(1));
+      if (cs.alignItems !== 'center' || cs.justifyContent !== 'center')
+        issues.push('번호 ' + (n + 1) + ' 이 가운데 정렬이 아니다');
+    });
+
     // ⑦ 좌우 기준선 — 본문 직계 요소가 왼쪽 기준을 벗어났는가
     if (body) {
       const bl = body.getBoundingClientRect().left;
