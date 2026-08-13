@@ -66,10 +66,7 @@ done
 say "5. 프로비저닝 (패키지·코드·가상환경) — 재실행 안전"
 gcloud compute ssh "$NAME" --zone="$ZONE" --command='
   set -e
-  sudo apt-get update -qq && sudo apt-get install -y -qq git curl > /dev/null
-  # uv 가 파이썬까지 갖춘다 — 로컬과 같은 방식이라 환경이 갈리지 않는다
-  command -v uv > /dev/null || curl -LsSf https://astral.sh/uv/install.sh | sh > /dev/null
-  export PATH="$HOME/.local/bin:$PATH"
+  sudo apt-get update -qq && sudo apt-get install -y -qq python3.12-venv git > /dev/null
   if [ ! -d knu-agentic-factory ]; then
     git clone -q https://github.com/ahnchiyoon87/knu-agentic-factory.git
   else
@@ -77,7 +74,8 @@ gcloud compute ssh "$NAME" --zone="$ZONE" --command='
   fi
   APP=~/knu-agentic-factory/특강/시뮬레이터
   cd "$APP"
-  uv sync -q
+  [ -d .venv ] || python3.12 -m venv .venv
+  ./.venv/bin/pip install -q -r requirements.txt
 '
 
 say "6. .env 업로드"
@@ -102,7 +100,7 @@ After=network-online.target
 [Service]
 User=$USER
 WorkingDirectory=$APP
-ExecStart=$HOME/.local/bin/uv run python -m uvicorn server.app.main:app --host 0.0.0.0 --port 8000 --workers 1
+ExecStart=$APP/.venv/bin/python -m uvicorn server.app.main:app --host 0.0.0.0 --port 8000 --workers 1
 Restart=always
 Environment=PYTHONUTF8=1
 
