@@ -60,7 +60,19 @@ def shotfull(h1, sub, img, foot=""):
 
 def step(h1, sub, rows, img, foot=""):
     """왼쪽에 번호 붙은 조작 순서, 오른쪽에 그 조작이 일어나는 실제 화면.
-       화면에는 누를 자리를 붉게 표시한다 (shotkit.강조)."""
+       화면에는 누를 자리를 붉게 표시한다 (shotkit.화면).
+
+    왼쪽 번호와 화면 뱃지는 **1:1 이어야 한다.** 화면에 없는 번호가 있으면
+    학생이 「②는 어디?」 하고 찾다가 흐름이 끊긴다. 여기서 막는다.
+    """
+    import re as _re
+    뱃지 = set(_re.findall(r'<b class="(?:left|right)"[^>]*>(\d+)</b>', img))
+    번호 = {no for no, _, _ in rows}
+    if 뱃지 and 뱃지 != 번호:
+        raise SystemExit(
+            f"「{h1}」 — 왼쪽 번호와 화면 번호가 다릅니다\n"
+            f"    왼쪽 {sorted(번호)}   화면 {sorted(뱃지)}\n"
+            f"  설명 항목 수와 화면 상자 수를 맞추세요 (붙어 있는 것은 한 항목으로 묶습니다).")
     LOG.append(dict(t="step", n=11, h1=h1, sub=sub, rows=rows, foot=foot))
     r = "".join(f'<div class="srow"><div class="sno">{no}</div>'
                 f'<div class="st"><strong>{st}</strong>'
