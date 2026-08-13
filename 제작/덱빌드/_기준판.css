@@ -105,10 +105,17 @@
   .shotbox i{ position:absolute; border:2.5px solid var(--orange); border-radius:6px; }
   /* 번호는 상자 **안쪽** 위 왼쪽. 밖으로 빼면 화면 여백에 떠서 어느 상자 것인지 모른다.
      크면 화면 내용을 가린다 — 테두리보다 조금 큰 정도로만. */
-  .shotbox b{ position:absolute; font-size:15px; font-weight:800; color:#fff;
-              background:var(--orange); border-radius:50%; width:24px; height:24px;
+  /* 숫자는 원의 정가운데. 원의 중심을 상자 모서리에 놓는다 —
+     자기 크기의 절반만큼 margin 으로 당기면 transform 없이 정확히 맞는다.
+     (transform 으로 밀면 원까지 함께 옮겨져 숫자가 가운데를 벗어나 보인다) */
+  .shotbox b{ position:absolute; width:26px; height:26px; border-radius:50%;
+              background:var(--orange); color:#fff;
+              font-size:15px; font-weight:800; font-style:normal;
+              font-family:system-ui,"Malgun Gothic",sans-serif;
               display:flex; align-items:center; justify-content:center;
-              font-style:normal; line-height:1; }
+              line-height:26px; text-align:center; margin-top:-13px; }
+  .shotbox b.left { margin-left:-13px; }
+  .shotbox b.right{ margin-left:-13px; }
 
   /* 화면은 본문 상자를 절대 넘지 않는다 — .art 를 stretch 로 늘려 높이를 확정한 뒤
      그 100% 를 이미지 최대 높이로 삼는다. 픽셀로 못 박으면 장마다 넘친다. */

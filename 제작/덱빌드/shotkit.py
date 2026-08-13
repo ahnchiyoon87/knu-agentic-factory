@@ -131,6 +131,12 @@ def 화면(이름: str, *표시, 폴더: str = "노션", 확대: bool = False,
       뱃지는 상자 **안쪽** 위 왼쪽에 놓는다 — 밖에 두면 화면 여백에 떠 버린다.
     """
     항목 = [(t[0], t[1], t[2], t[3], t[4] if len(t) > 4 else None) for t in 표시]
+    # 뱃지에 ①②③ 같은 **원문자**를 넣으면 주황 원 안에 흰 동그라미가 또 생긴다.
+    # 실제로 그렇게 나갔다. 맨 숫자만 받는다.
+    for t in 항목:
+        if t[4] and any(c in "①②③④⑤⑥⑦⑧⑨❶❷❸" for c in t[4]):
+            raise SystemExit(f"뱃지에 원문자를 쓰지 마세요 ({이름}: {t[4]}) — "
+                             f'"1" 처럼 맨 숫자로 적습니다. 동그라미는 CSS 가 그립니다.')
     if 확대 and 항목:
         자료, 항목 = _잘라내기(f"{폴더}/{이름}.png", 항목, 여유, 최소세로)
     else:
@@ -142,11 +148,13 @@ def 화면(이름: str, *표시, 폴더: str = "노션", 확대: bool = False,
         if 뱃지:
             # 번호는 상자 **바깥**에 붙인다 — 안에 넣으면 화면의 글자를 가린다.
             # 왼쪽에 자리가 없으면(화면 가장자리에 붙은 상자) 오른쪽으로 보낸다.
-            if x >= 5:
-                자리 = f'left:{x}%;transform:translate(-118%,-14%)'
-            else:
-                자리 = f'left:{x + w}%;transform:translate(18%,-14%)'
-            상자 += f'<b style="{자리};top:{y}%">{뱃지}</b>'
+            #
+            # 원의 **중심**을 상자 모서리에 맞춘다. 예전에는 translate 로 밀었는데,
+            # 그 이동이 원까지 함께 옮겨서 숫자가 원 가운데를 벗어나 보였다.
+            # CSS 가 margin 으로 자기 크기의 절반을 빼 준다 (.shotbox b).
+            가장자리 = "left" if x >= 5 else "right"
+            좌표 = f"left:{x}%" if x >= 5 else f"left:{x + w}%"
+            상자 += f'<b class="{가장자리}" style="{좌표};top:{y}%">{뱃지}</b>'
     # 조망 = 전체 모양만 보는 장. 작은 글자를 읽을 필요가 없어 크기 검사에서 뺀다.
     표식 = ' data-view="1"' if 조망 else ""
     return f'<div class="shotbox"{표식}>{img}{상자}</div>'
