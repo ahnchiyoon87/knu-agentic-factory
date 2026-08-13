@@ -3,9 +3,9 @@
 각 가상 수강생이 자기 네임스페이스의 읽기 API 를 폴링한다.
 교안 5절이 요구하는 것은 "강의장에서 39명이 동시에 붙었을 때 견디는가"이다.
 
-    python tools/loadtest.py                          기본 39명 · 2초 폴링 · 120초
-    python tools/loadtest.py --users 39 --interval 1 --duration 300
-    python tools/loadtest.py --base-url http://192.168.0.10:8000   강의장 실제 주소
+    uv run tools/loadtest.py                          기본 39명 · 2초 폴링 · 120초
+    uv run tools/loadtest.py --users 39 --interval 1 --duration 300
+    uv run tools/loadtest.py --base-url http://192.168.0.10:8000   강의장 실제 주소
 
 판정 기준(리서치): 지연·에러가 없으면 유지, 병목이면 폴링 주기 3~5초 또는
 데이터 생성 주기 5초로 완화한다.

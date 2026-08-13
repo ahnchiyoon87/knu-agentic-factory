@@ -9,8 +9,8 @@
 이 파일은 **완성되어 있습니다.** 강사가 열어 주는 것이지 학생이 만드는 것이 아닙니다.
 학생이 채우는 자리는 agents/ 안의 ★ 세 곳입니다.
 
-    python control_mcp.py --check     서버 없이 도구 목록만 확인
-    python control_mcp.py             MCP 서버 실행 (오케스트레이터가 자동으로 띄웁니다)
+    uv run control_mcp.py --check     서버 없이 도구 목록만 확인
+    uv run control_mcp.py             MCP 서버 실행 (오케스트레이터가 자동으로 띄웁니다)
 
 ────────────────────────────────────────────────────────────────────
 승인 관문은 여기 없습니다 — 일부러입니다.
@@ -157,9 +157,9 @@ def main() -> int:
             if "192.168.0.10" in str(CFG["base_url"]):
                 print("  ★ 주소가 예시(192.168.0.10) 그대로입니다 — 아직 안 채워졌습니다.",
                       file=sys.stderr)
-            print("  2일차/실습 에서 python 내번호.py 를 돌리면 자동으로 채워집니다.",
+            print("  2일차/실습 에서 uv run 내번호.py 를 돌리면 자동으로 채워집니다.",
                   file=sys.stderr)
-            print("      cd ../../../2일차/실습  →  python 내번호.py", file=sys.stderr)
+            print("      cd ../../../2일차/실습  →  uv run 내번호.py", file=sys.stderr)
             return 1
         print(json.dumps({
             "연결": info, "도구": ["set_equipment_speed", "stop_equipment",

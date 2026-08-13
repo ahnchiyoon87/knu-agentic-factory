@@ -1,6 +1,6 @@
 """엔진 자체 검증 — DB 없이 시뮬레이션 로직만 확인한다.
 
-    python tools/selftest_engine.py
+    uv run tools/selftest_engine.py
 
 Supabase 없이도 돌기 때문에 강의장에서 네트워크가 막혔을 때
 "시뮬레이터 자체는 정상"임을 즉시 가릴 수 있다.

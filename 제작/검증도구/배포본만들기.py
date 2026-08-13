@@ -47,7 +47,7 @@ DATA = ROOT / "센서데이터" / "데이터"
 
 # 학생에게 안 나가는 것 — 이름이 아니라 이유로 적는다
 # 이론/ — 슬라이드 pptx·PNG. 무겁고 강사 것이다 (드라이브 「5. 강의 자료」로 따로 나간다).
-제외_폴더 = {"강의자료", "이론", "__pycache__", ".git"}
+제외_폴더 = {"강의자료", "이론", "__pycache__", ".git", ".venv"}
 # verify_lab.py — 코드 품질 게이트. 강사 것이다.
 # 진행.md — 일차별 강사 진행 문서. 주입 타이밍·힌트 공개 시점이 적혀 있어 학생에게 가면 안 된다.
 제외_파일 = {"verify_lab.py", "진행.md"}
@@ -205,6 +205,9 @@ def 설정되돌리기(out: Path) -> None:
 def 청소(out: Path) -> None:
     """실행이 남긴 것을 치운다. 배포본은 학생이 처음 여는 상태여야 한다."""
     설정되돌리기(out)
+    # 검증하며 uv 가 만든 작업대 — 학생은 자기 PC 에서 새로 만든다
+    shutil.rmtree(out / ".venv", ignore_errors=True)
+    (out / "uv.lock").unlink(missing_ok=True)
     for p in out.rglob("__pycache__"):
         shutil.rmtree(p, ignore_errors=True)
     for 이름 in 찌꺼기:
@@ -257,7 +260,8 @@ def 검증(out: Path) -> int:
     def 돌린다(cwd: Path, args: list[str], 이름: str, 있어야: str) -> str:
         """돌리고 판정한다. 뒤에서 쓸 수 있게 **출력을 돌려준다.**"""
         try:
-            p = subprocess.run([sys.executable, *args], cwd=str(cwd),
+            # 학생이 치는 것 그대로 — uv 가 파이썬·패키지를 갖춘다
+            p = subprocess.run(["uv", "run", *args], cwd=str(cwd),
                                capture_output=True, timeout=600, env=학생환경())
         except subprocess.TimeoutExpired:
             print(f"  [실패] {이름} — 10분 안에 안 끝남")
@@ -288,7 +292,7 @@ def 검증(out: Path) -> int:
 
     # ★ 학생 여정의 맨 처음 — 여기서 막히면 나머지가 전부 의미 없다
     out_내번호 = 돌린다(lab1, ["내번호.py", "--서버", SHARED],
-                       "★ python 내번호.py — 내 공장을 받는다", "당신의 공장은")
+                       "★ uv run 내번호.py — 내 공장을 받는다", "당신의 공장은")
     받은번호 = ""
     for 줄 in out_내번호.splitlines():
         if "당신의 공장은" in 줄:
@@ -356,10 +360,10 @@ def 검증(out: Path) -> int:
         # 빈 칸을 짚는 데서 그치면 안 된다 — 「무엇을 하라」까지 나와야 한다.
         # 예전에는 「쪽지 보고 채우세요」였는데 쪽지는 없어졌다. 그 자리를 못 빠져나온다.
         돌린다(lab3, ["loop.py", "--check"], "설정이 비면 어느 줄이 비었는지 짚어 준다",
-               "python 내번호.py")
+               "uv run 내번호.py")
         돌린다(lab3, ["control_mcp.py", "--check"],
                "제어 도구도 같은 안내를 낸다 (cp949 포함)",
-               "python 내번호.py")
+               "uv run 내번호.py")
     finally:
         폐루프cfg.write_bytes(원래cfg)
 
@@ -422,7 +426,8 @@ def 검증(out: Path) -> int:
 
     샌것 = []
     for p in out.rglob("*"):
-        if not p.is_file() or ".git" in p.parts:
+        # .venv 는 uv 가 검증 중에 만든 작업대다. 학생 저장소에 안 들어간다(.gitignore).
+        if not p.is_file() or ".git" in p.parts or ".venv" in p.parts:
             continue
         if any(g in p.name for g in 금지파일) or "강의자료" in str(p):
             샌것.append(f"파일 {p.relative_to(out)}")
@@ -506,10 +511,16 @@ def main() -> int:
         shutil.copy2(DATA / name, out / "데이터" / name)
         n3 += 1
 
+    # 실습 환경 정의 — uv 가 이 둘을 보고 파이썬 3.12 와 패키지를 스스로 갖춘다.
+    # 학생이 파이썬을 깔거나 pip install 을 할 일이 없다.
+    for name in ("pyproject.toml", ".python-version"):
+        shutil.copy2(특강 / name, out / name)
+
     (out / "README.md").write_text(README, encoding="utf-8")
     # 줄 끝 주석을 붙이지 말 것 — .gitignore 는 그것을 패턴의 일부로 읽는다
     (out / ".gitignore").write_text(
         "__pycache__/\n*.py[cod]\n*.log\n실행기록.jsonl\n"
+        "# uv 가 만드는 실습 전용 작업대\n.venv/\nuv.lock\n"
         "detect_내가짠것.py\nmcp_server_내가짠것.py\n"
         "# 내 번호와 접속 키가 들어 있다. 올리지 말 것\n.내번호\n", encoding="utf-8")
 

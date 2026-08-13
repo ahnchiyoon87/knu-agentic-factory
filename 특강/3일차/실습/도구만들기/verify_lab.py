@@ -9,7 +9,7 @@
 MCP 서버를 실제로 띄우고 클라이언트로 붙어 도구를 호출한다.
 "함수가 있다"와 "에이전트가 부를 수 있다"는 다르다.
 
-    python verify_lab.py
+    uv run verify_lab.py
 """
 
 from __future__ import annotations
@@ -130,7 +130,7 @@ def main() -> int:
             print(f"  ※ 강사 서버({서버})가 안 켜져 있습니다.")
             print("     정비 이력·작업지시를 못 읽어 아래 3항목이 실패로 나옵니다.")
             print("     템플릿 문제가 아닙니다 — 서버를 켜고 다시 돌리세요:")
-            print("       cd 특강/시뮬레이터 && python -m server.run")
+            print("       cd 특강/시뮬레이터 && uv run python -m server.run")
 
         answer = ROOT / "정답" / "mcp_server_answer.py"
         tools, d, q = asyncio.run(via_mcp(answer))

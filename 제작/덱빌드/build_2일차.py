@@ -133,7 +133,7 @@ S.append(D.rail("공장은 한 사람에 하나씩입니다",
 
 # ── C. 실습 1 (18~22)
 S.append(D.sect("먼저 내 공장을 엽니다",
-                "2일차 / 실습 에서 python 내번호.py 를 한 번 칩니다.", V.STAGE,
+                "2일차 / 실습 에서 uv run 내번호.py 를 한 번 칩니다.", V.STAGE,
                 "실습 1", "20분 · 각자",
                 ["받아 둔 폴더에서 2일차 / 실습가이드.md 를 열어 두고 따라온다.",
                  "내번호.py 가 내 공장 번호와 주소를 화면에 찍어 준다. 그 번호를 적어 둔다.",
@@ -246,7 +246,7 @@ S.append(D.sect("이상감지 알고리즘을 직접 짭니다",
                 "2일차 / 실습 폴더를 엽니다.", V.BYHAND,
                 "실습 2", "50분 · 각자",
                 ["고칠 파일은 detect.py 하나다. 다른 파일은 건드리지 않는다.",
-                 "막히면 python 점검.py — 어디가 왜 틀렸는지 짚어 준다. 답은 안 준다.",
+                 "막히면 uv run 점검.py — 어디가 왜 틀렸는지 짚어 준다. 답은 안 준다.",
                  "자세한 순서는 2일차 / 실습가이드.md 에 다 적혀 있다."],
                 '데이터는 <span class="mark">7일치 60,480행</span>. 이상 세 가지가 심어져 있다.'))
 
@@ -260,9 +260,9 @@ S.append(D.rail("채울 곳은 세 군데입니다",
 S.append(D.tbl("돌려 보는 법",
                "고칠 때마다 다시 돌립니다. 숫자가 어떻게 움직이는지 보는 것이 목적입니다.",
                ["명령", "무엇을 하나"],
-               [['<span style="white-space:nowrap">python run.py</span>', "내 구현을 7일치 데이터에 돌린다"],
-                ['<span style="white-space:nowrap">python run.py --k 2.0</span>', "임계값을 낮춰서 다시 돌린다"],
-                ['<span style="white-space:nowrap">python run.py --window 30</span>', "윈도를 짧게 해서 다시 돌린다"]],
+               [['<span style="white-space:nowrap">uv run run.py</span>', "내 구현을 7일치 데이터에 돌린다"],
+                ['<span style="white-space:nowrap">uv run run.py --k 2.0</span>', "임계값을 낮춰서 다시 돌린다"],
+                ['<span style="white-space:nowrap">uv run run.py --window 30</span>', "윈도를 짧게 해서 다시 돌린다"]],
                foot='한 번 돌리는 데 <span class="mark">몇 초</span>면 된다. 아끼지 말고 여러 번 돌리세요.'))
 
 S.append(D.rail("50분을 이렇게 씁니다",

@@ -3,12 +3,12 @@
 교안에 없는 조작(제어 개방·배속·주입)은 교안이 알려주지 않는다.
 그래서 사람 기억에 맡기지 않고 여기 한 곳에 모았다.
 
-    python tools/제어개방.py                 준비 (제어 개방 + 배속 + 개인 키 확인)
-    python tools/제어개방.py --inject S07    그 학생 공장에 드리프트 주입
-    python tools/제어개방.py --inject-all --stagger 2
+    uv run tools/제어개방.py                 준비 (제어 개방 + 배속 + 개인 키 확인)
+    uv run tools/제어개방.py --inject S07    그 학생 공장에 드리프트 주입
+    uv run tools/제어개방.py --inject-all --stagger 2
                                              전체에 주입  ← 수업 중 이걸 쓴다
-    python tools/제어개방.py --status        지금 상태와 경고 확인
-    python tools/제어개방.py --end           제어 잠금 · 주입 중단 · 배속 원복
+    uv run tools/제어개방.py --status        지금 상태와 경고 확인
+    uv run tools/제어개방.py --end           제어 잠금 · 주입 중단 · 배속 원복
 
 접속 정보는 .env 에서 읽는다. 서버가 떠 있어야 한다.
 
@@ -145,7 +145,7 @@ def main() -> int:
         print(f"\n완료 {len(people) - len(fail)} / {len(people)}")
         if fail:
             print("  실패:", " ".join(fail))
-            print("  → 실패한 것만 다시:  python tools/제어개방.py --inject <번호>")
+            print("  → 실패한 것만 다시:  uv run tools/제어개방.py --inject <번호>")
         print("\n  감지까지 배속 x120 기준 약 100초, x60 기준 약 190초 걸립니다.")
         print("  학생에게 '지금 넣었습니다. 1~3분 조용한 것이 정상입니다' 라고 말해 두십시오.")
         return 2 if fail else 0
@@ -164,13 +164,13 @@ def main() -> int:
 
     print(f"\n개인 공장 {len(people)}곳 준비됨 — {people[0]['tenant_id']} ~ {people[-1]['tenant_id']}")
     print(f"  base_url : {base}")
-    print("  학생은 python 내번호.py 로 각자 번호를 받습니다 — 종이 쪽지는 안 씁니다.")
-    print("  배정 현황 확인·회수 : python tools/자리배정.py")
+    print("  학생은 uv run 내번호.py 로 각자 번호를 받습니다 — 종이 쪽지는 안 씁니다.")
+    print("  배정 현황 확인·회수 : uv run tools/자리배정.py")
     print("  실습은 처음부터 끝까지 개인 단위입니다. 팀(T1~T8)은 쓰지 않습니다.")
 
     print("\n확인")
     show_status(base, token)
-    print("\n실습 때 — python tools/제어개방.py --inject-all --stagger 2")
+    print("\n실습 때 — uv run tools/제어개방.py --inject-all --stagger 2")
     print("         (--stagger 2 를 빼면 진단이 한꺼번에 몰려 느려집니다)")
     return 0
 

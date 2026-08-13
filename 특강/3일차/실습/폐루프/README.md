@@ -22,7 +22,7 @@ ack_alarm(id)                     알람 확인
 오늘 열리는 이 네 개가 **움직이는 손**입니다.
 
 이 도구들은 `control_mcp.py` 에 **완성되어 있습니다.** 강사가 열어 주는 것이라 채울 자리가 없습니다.
-`python control_mcp.py --check` 로 연결만 확인해 보세요.
+`uv run control_mcp.py --check` 로 연결만 확인해 보세요.
 
 2일차 까지 에이전트는 **제안만** 했습니다. 오늘은 움직입니다.
 
@@ -32,12 +32,6 @@ ack_alarm(id)                     알람 확인
 
 강사가 시연한 것과 똑같은 **감지 → 진단 → 조치** 폐루프를 내 공장에서 돌립니다.
 
-### 준비 (5분)
-
-```bash
-pip install -r requirements.txt
-```
-
 `config.json` 위쪽 세 줄은 **어제 `내번호.py` 가 채워 뒀습니다.** 확인만 하세요.
 
 ```json
@@ -46,10 +40,10 @@ pip install -r requirements.txt
 "base_url":   "http://192.168.0.10:8000"
 ```
 
-> 비어 있으면 `2일차/실습` 에서 `python 내번호.py` 를 한 번 치세요.
+> 비어 있으면 `2일차/실습` 에서 `uv run 내번호.py` 를 한 번 치세요.
 
 ```bash
-python loop.py --check
+uv run loop.py --check
 ```
 
 `제어 통로가 아직 잠겨 있습니다` 가 나오면 강사에게 제어 개방을 요청하세요.
@@ -65,8 +59,8 @@ python loop.py --check
 오케스트레이터(`loop.py`)·공장 창구(`factory_api.py`)·승인 관문(`hitl.py`)은 **이미 되어 있습니다.**
 
 ```bash
-python loop.py --once     한 바퀴
-python loop.py            계속
+uv run loop.py --once     한 바퀴
+uv run loop.py            계속
 ```
 
 > **`judge()` 부터 채우세요.** 감지가 아무것도 못 잡으면 뒤의 두 자리는 불리지도 않습니다.
@@ -177,7 +171,7 @@ z-score 는 드리프트가 있으나 없으나 같은 수를 냅니다 — **�
 |---|---|---|
 | `공장에 닿지 못했습니다` | 주소·네임스페이스 오타 | `config.json` 의 `base_url`·`tenant` |
 | `제어 통로가 아직 잠겨 있습니다` | 제어 미개방 | 강사에게 개방 요청 |
-| `401 X-Access-Key` | 키 오타 또는 다른 사람 키 | `2일차/실습` 에서 `python 내번호.py` 를 다시 치세요 |
+| `401 X-Access-Key` | 키 오타 또는 다른 사람 키 | `2일차/실습` 에서 `uv run 내번호.py` 를 다시 치세요 |
 | `NotImplementedError` | ★ 세 자리 중 하나가 비었음 | 화면에 어느 함수인지 나옵니다 |
 | 감지가 아무것도 못 잡음 | 강사가 아직 주입 안 함 / 임계 높음 | `detect.drift_delta_c` 를 내려 보세요 |
 | 6대가 전부 이상으로 나옴 | 임계가 너무 낮음 | `drift_delta_c` 를 올리세요 |
@@ -190,9 +184,9 @@ z-score 는 드리프트가 있으나 없으나 같은 수를 냅니다 — **�
 **시간이 다 됐는데도 막혀 있으면** — 막힌 자리 **하나만** 완성본으로 채워서 돌립니다.
 
 ```bash
-python loop.py --열기 1     감지(judge) 만
-python loop.py --열기 2     진단(build_prompt) 만
-python loop.py --열기 3     조치(to_commands) 만
+uv run loop.py --열기 1     감지(judge) 만
+uv run loop.py --열기 2     진단(build_prompt) 만
+uv run loop.py --열기 3     조치(to_commands) 만
 ```
 
 > 나머지 자리는 여러분이 쓴 것 그대로 돕니다. **파일은 안 고칩니다** —

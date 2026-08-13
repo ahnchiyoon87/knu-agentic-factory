@@ -1,6 +1,6 @@
 """K-정밀 팩토리 시뮬레이터 — API 서버.
 
-기동:  python -m server.run          (프로젝트 루트에서)
+기동:  uv run python -m server.run          (프로젝트 루트에서)
 문서:  http://localhost:8000/docs
 
 주의: 시뮬레이션 상태가 프로세스 메모리에 있으므로 반드시 단일 워커로 띄운다.

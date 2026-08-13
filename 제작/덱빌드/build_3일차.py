@@ -179,14 +179,14 @@ S.append(D.sect("도구 두 개를 채웁니다",
                 "실습 1", "55분 · 각자",
                 ["고칠 파일은 mcp_server.py 하나다. ★ 두 자리를 채운다.",
                  "자세한 순서는 3일차 / 실습가이드.md 에 다 있다.",
-                 "막히면 python 점검.py 를 연다. 그래도 막히면 --힌트 1 → --힌트 2 → --열기 1."],
-                '먼저 <span class="mark">python mcp_server.py --check</span> 로 서버 없이 도구만 호출해 본다.'))
+                 "막히면 uv run 점검.py 를 연다. 그래도 막히면 --힌트 1 → --힌트 2 → --열기 1."],
+                '먼저 <span class="mark">uv run mcp_server.py --check</span> 로 서버 없이 도구만 호출해 본다.'))
 
 S.append(D.pic("지시는 한 문장입니다",
                "도구를 언제 어떤 순서로 부를지는 말하지 않습니다.", W.ICO_REPORT.replace('"76"', '"320"'),
                ["“지난 주 설비 이상을 점검하고, 이상이 있으면 해당 설비의 정비 이력을 조회해 "
                 "원인 추정과 권고 조치를 담은 진단 리포트를 작성하라.”",
-                "python agent.py — 이 한 줄이 위 문장을 AI 에게 준다.",
+                "uv run agent.py — 이 한 줄이 위 문장을 AI 에게 준다.",
                 "AI 가 내가 만든 도구를 줄줄이 이어서 호출하며 리포트를 뽑아낸다."],
                '순서를 <span class="mark">AI 가 정한다.</span> 이것이 아까 본 ReAct다.'))
 
@@ -201,10 +201,10 @@ S.append(D.tbl("막혔을 때",
                "이 셋이 대부분입니다. 그 외에는 손 드세요.",
                ["증상", "원인", "조치"],
                [["detect.py 를 불러오지 못했습니다", "2일차 TODO 세 곳이 비어 있다",
-                 "2일차 / 실습 에서 python 점검.py"],
+                 "2일차 / 실습 에서 uv run 점검.py"],
                 ["NotImplementedError", "★ 두 자리가 비어 있다", "mcp_server.py 를 채운다"],
                 ["서버가 안 붙는다", "방화벽 · 포트",
-                "python mcp_server.py --check 로 도구만 확인 → 손 들기"]],
+                "uv run mcp_server.py --check 로 도구만 확인 → 손 들기"]],
                foot='다 채웠으면 손 들지 말고 기다리세요. <span class="mark">다 같이 한 번에 실행합니다.</span>'))
 
 S.append(D.pic("여기까지는 제안만 합니다",
@@ -280,7 +280,7 @@ S.append(D.sect("폐루프를 닫습니다",
                 "3일차 / 실습 / 폐루프 폴더를 엽니다.", W.CLOSED,
                 "실습 2", "70분 · 각자",
                 ["오케스트레이터는 이미 완성돼 있다. 담당 셋의 속만 채운다.",
-                 "config 는 어제 내번호.py 가 채워 뒀다. python loop.py --check 로 먼저 확인한다.",
+                 "config 는 어제 내번호.py 가 채워 뒀다. uv run loop.py --check 로 먼저 확인한다.",
                  "순서는 3일차 / 실습가이드.md §2 에 다 있다. 막히면 손 드세요."],
                 '채울 곳은 <span class="mark">감지 · 진단 · 조치</span> 세 군데다.'))
 

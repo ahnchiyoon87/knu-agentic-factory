@@ -7,9 +7,9 @@
 여러 네임스페이스가 동시에 서로 다른 제어 명령을 쏘고, 각자 자기 공장만
 바뀌었는지 확인한다. 남의 키로 남의 공장을 건드릴 수 없다는 것도 함께 본다.
 
-    python tools/isolation_test.py                  # 8개로 빠르게
-    python tools/isolation_test.py --tenants 39     # 실제 수업 조건
-    python tools/isolation_test.py --base-url http://192.168.0.10:8000
+    uv run tools/isolation_test.py                  # 8개로 빠르게
+    uv run tools/isolation_test.py --tenants 39     # 실제 수업 조건
+    uv run tools/isolation_test.py --base-url http://192.168.0.10:8000
 """
 
 from __future__ import annotations

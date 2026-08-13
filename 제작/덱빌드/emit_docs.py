@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """덱과 같은 데이터에서 [첨부]원고.md · [설명란].md 를 뽑는다.
    덱을 고치면 두 문서가 자동으로 따라 바뀐다 — 어긋날 수 없다.
-사용:  python emit_docs.py 1 | 2 | both   (기본 both)
+사용:  uv run emit_docs.py 1 | 2 | both   (기본 both)
 """
 import html
 import sys, re, pathlib, importlib

@@ -285,7 +285,7 @@ def run(ctx, finding: dict) -> dict:
                 ctx.log("  세 번 연속 실패했습니다 — 일시적인 문제가 아닙니다.")
                 ctx.log("  손을 드세요. 오늘 봐야 할 장면이 여기입니다.")
                 ctx.log("  (강사 안내가 있을 때만) 규칙으로 계속하려면 Ctrl+C 후:")
-                ctx.log("      python loop.py --규칙으로")
+                ctx.log("      uv run loop.py --규칙으로")
                 ctx.log("  " + "=" * 56)
             # 이 회차의 진단만 건너뛴다 — loop.py 가 이 예외를 잡아 다음 회차로 간다.
             raise DiagnoseFailed(f"{type(exc).__name__}: {exc}") from exc

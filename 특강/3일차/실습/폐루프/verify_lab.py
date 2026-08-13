@@ -10,8 +10,8 @@
 라이브 검증은 실제로 시뮬레이터에 붙어 드리프트를 주입하고, 폐루프가 그것을
 잡아 설비를 움직이는지까지 본다. "함수가 있다"와 "공장이 움직였다"는 다르다.
 
-    python verify_lab.py                          템플릿·감지만 (서버 불필요)
-    python verify_lab.py --live --token <토큰>    전 항목 (시뮬레이터 필요)
+    uv run verify_lab.py                          템플릿·감지만 (서버 불필요)
+    uv run verify_lab.py --live --token <토큰>    전 항목 (시뮬레이터 필요)
 """
 
 from __future__ import annotations

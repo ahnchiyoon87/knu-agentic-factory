@@ -22,10 +22,9 @@ API 서버 (읽기 API + 제어 API 4종 + 강사 콘솔)
 ## 빠른 시작
 
 ```bash
-python -m pip install -r requirements.txt
 cp .env.example .env          # 접속 정보를 채운다
-python tools/migrate.py up    # 스키마 + 테넌트 시드
-python -m server.run          # http://localhost:8000
+uv run tools/migrate.py up    # 스키마 + 테넌트 시드
+uv run python -m server.run          # http://localhost:8000
 ```
 
 상세는 **[배포·기동 절차서](docs/배포_기동_절차서.md)**.
@@ -84,10 +83,10 @@ python -m server.run          # http://localhost:8000
 ## 검증
 
 ```bash
-python tools/selftest_engine.py    # 엔진 53항목 (DB 불필요, 가상 시계 불변식·주입 만료 포함)
-python tools/loadtest.py           # 39명 동시 접속
-python tools/isolation_test.py     # 네임스페이스 분리
-python tools/check_grants.py       # 공개 키로 쓰기가 막혔는가
+uv run tools/selftest_engine.py    # 엔진 53항목 (DB 불필요, 가상 시계 불변식·주입 만료 포함)
+uv run tools/loadtest.py           # 39명 동시 접속
+uv run tools/isolation_test.py     # 네임스페이스 분리
+uv run tools/check_grants.py       # 공개 키로 쓰기가 막혔는가
 ```
 
 ---

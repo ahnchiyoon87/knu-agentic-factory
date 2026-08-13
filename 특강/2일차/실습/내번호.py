@@ -1,7 +1,7 @@
 """내 공장 받기 — 이 파일을 한 번 실행하면 끝입니다.
 
-    python 내번호.py                 처음 (자동으로 하나 받습니다)
-    python 내번호.py S07             자리를 옮겼을 때 (원래 번호를 되찾습니다)
+    uv run 내번호.py                 처음 (자동으로 하나 받습니다)
+    uv run 내번호.py S07             자리를 옮겼을 때 (원래 번호를 되찾습니다)
 
 무엇을 하나
   1. 강사 서버에서 **내 공장 번호와 접속 키**를 받습니다.
@@ -34,13 +34,16 @@ from pathlib import Path
 try:
     import httpx
 except ModuleNotFoundError:
-    print("httpx 가 없습니다. 먼저 이것부터 —  pip install -r requirements.txt",
+    print("준비가 덜 됐습니다. 이 폴더에서 —  uv run 내번호.py",
           file=sys.stderr)
     sys.exit(1)
 
 ROOT = Path(__file__).resolve().parent          # 2일차/실습
 BASE = ROOT.parents[1]                          # 저장소 루트
 번호표파일 = BASE / ".내번호"                     # 저장소 루트에 둔다 (두 일차가 같이 씀)
+
+# 수업 서버는 클라우드 한 곳이다. 학생이 주소를 옮겨 적다 틀리는 일을 없앤다.
+기본서버 = "http://34.64.94.16:8000"
 
 
 def 번호표() -> str:
@@ -58,7 +61,7 @@ def 번호표() -> str:
         except Exception:                                          # noqa: BLE001
             # 조용히 새 번호로 갈아타면 학생은 공장이 바뀐 것을 모른다 — 알리고 진행한다.
             print("※ 번호표 파일이 깨져 있어 새로 만듭니다.")
-            print("   어제 받은 번호를 기억하면  python 내번호.py S07  처럼 붙여 되찾으세요.")
+            print("   어제 받은 번호를 기억하면  uv run 내번호.py S07  처럼 붙여 되찾으세요.")
     새표 = secrets.token_urlsafe(24)
     _저장(번호표={"번호표": 새표})
     return 새표
@@ -99,16 +102,15 @@ def 서버주소(직접: str | None) -> str:
                 return str(d["서버"]).rstrip("/")
         except Exception:                                          # noqa: BLE001
             pass
-    print("강사가 알려 준 **서버 주소**를 넣으세요. (화면에 떠 있습니다)")
-    print("  예)  http://192.168.0.10:8000")
+    # 수업 서버는 고정이다. 그냥 Enter 면 이걸 쓴다 — 학생이 주소를 옮겨 적을 일이 없다.
+    print(f"수업 서버: {기본서버}")
+    print("  (다른 주소를 쓰라고 안내받았으면 그 주소를 넣고, 아니면 그냥 Enter)")
     try:
-        답 = input("  서버 주소: ").strip().rstrip("/")
+        답 = input("  Enter 또는 다른 주소: ").strip().rstrip("/")
     except EOFError:
         답 = ""
     if not 답:
-        print("\n주소를 안 넣었습니다. 이렇게 다시 실행하세요 —", file=sys.stderr)
-        print("  python 내번호.py --서버 http://<강사가 알려 준 주소>:8000", file=sys.stderr)
-        sys.exit(1)
+        return 기본서버
     if not 답.startswith("http"):
         답 = "http://" + 답
     return 답
@@ -121,8 +123,8 @@ def 주소확인(주소: str, 물어봐도되나: bool) -> str:
     print()
     print("  ※ 잠깐 — 넣은 주소가 **내 컴퓨터**를 가리킵니다.")
     print(f"       {주소}")
-    print("     강사 서버는 다른 컴퓨터에 있습니다. 화면에 떠 있는 주소를 그대로 넣으세요.")
-    print("     예)  http://192.168.0.10:8000")
+    print("     수업 서버는 인터넷에 있습니다. 아래 주소를 쓰세요.")
+    print(f"     {기본서버}")
     print("     이대로 두면 내일 오전 진단 리포트에 원인 추정이 안 나옵니다.")
     if not 물어봐도되나:
         print()
@@ -130,11 +132,11 @@ def 주소확인(주소: str, 물어봐도되나: bool) -> str:
         return 주소
     print()
     try:
-        다시 = input("  강사가 알려 준 주소 (그냥 Enter 면 이대로 진행): ").strip().rstrip("/")
+        다시 = input(f"  Enter 를 누르면 {기본서버} 로 갑니다: ").strip().rstrip("/")
     except EOFError:
         다시 = ""
     if not 다시:
-        return 주소
+        return 기본서버
     if not 다시.startswith("http"):
         다시 = "http://" + 다시
     return 다시
@@ -213,7 +215,7 @@ def main() -> int:
         print("  (전에 받아 둔 공장입니다)")
     print()
     print(f"  이 번호를 적어 두세요. 자리를 옮기거나 컴퓨터를 바꾸면")
-    print(f"     python 내번호.py {번호}")
+    print(f"     uv run 내번호.py {번호}")
     print("  한 줄로 이 공장을 다시 가져옵니다.")
     print()
     print("  ■ 2일차 — 크롬 주소창에 그대로 붙여넣으세요")

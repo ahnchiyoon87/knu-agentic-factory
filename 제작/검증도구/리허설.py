@@ -62,6 +62,19 @@ LAB1 = 특강 / "2일차" / "실습"                   # 이상감지
 LAB2 = 특강 / "3일차" / "실습" / "도구만들기"      # MCP 도구
 LAB3 = 특강 / "3일차" / "실습" / "폐루프"          # 오케스트레이터
 
+def _기본주소() -> str:
+    """수업은 상시 클라우드다 — 시뮬레이터 .env 의 BASE_URL 을 그대로 쓴다."""
+    env = SIM / ".env"
+    if env.is_file():
+        for line in env.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if line.startswith("BASE_URL="):
+                v = line.partition("=")[2].strip()
+                if v:
+                    return v.rstrip("/")
+    return "http://34.64.94.16:8000"
+
+
 START = time.time()
 results: list[tuple[str, str, bool, str]] = []   # (구간, 항목, 통과, 상세)
 skipped: list[tuple[str, str, str]] = []         # (구간, 항목, 이유)
@@ -127,7 +140,8 @@ def run_script(path: Path, args: list[str], timeout: int,
     """
     env = {**학생환경(), **(extra_env or {})}
     try:
-        p = subprocess.run([sys.executable, str(path.name), *args], cwd=str(path.parent),
+        # 학생이 치는 것 그대로 — uv 가 파이썬·패키지를 갖춘다
+        p = subprocess.run(["uv", "run", str(path.name), *args], cwd=str(path.parent),
                            capture_output=True, timeout=timeout, env=env)
     except subprocess.TimeoutExpired:
         return False, f"{timeout}초 안에 안 끝남", ""
@@ -245,7 +259,7 @@ def _내_LAN주소() -> str | None:
 # =============================================================================
 def 자리배정(s: Sim, ns: str) -> None:
     """학생 여정의 첫 단계 — 여기서 막히면 나머지가 전부 의미 없다."""
-    phase("2일차 맨 처음 — 학생이 자기 공장을 받는다 (python 내번호.py)")
+    phase("2일차 맨 처음 — 학생이 자기 공장을 받는다 (uv run 내번호.py)")
 
     import secrets
 
@@ -678,7 +692,8 @@ def 부하(base: str, n: int, stagger: float) -> None:
 def main() -> int:
     ap = argparse.ArgumentParser(description="2일치 무인 리허설")
     ap.add_argument("--token", required=True, help="X-Instructor-Token")
-    ap.add_argument("--base-url", default="http://127.0.0.1:8000")
+    # 수업은 상시 클라우드다. .env 의 BASE_URL 을 기본으로 쓰고, 그것도 없으면 클라우드 주소.
+    ap.add_argument("--base-url", default=_기본주소())
     ap.add_argument("--ns", default="S01", help="리허설에 쓸 개인 네임스페이스")
     ap.add_argument("--ns2", default="S02", help="격리 검사에 쓸 옆자리 네임스페이스")
     ap.add_argument("--quick", action="store_true", help="누적 대기를 줄인다(결함을 놓칠 수 있음)")

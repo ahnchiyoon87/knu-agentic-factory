@@ -66,7 +66,10 @@ done
 say "5. 프로비저닝 (패키지·코드·가상환경) — 재실행 안전"
 gcloud compute ssh "$NAME" --zone="$ZONE" --command='
   set -e
-  sudo apt-get update -qq && sudo apt-get install -y -qq python3.12-venv git > /dev/null
+  sudo apt-get update -qq && sudo apt-get install -y -qq git curl > /dev/null
+  # uv 가 파이썬까지 갖춘다 — 로컬과 같은 방식이라 환경이 갈리지 않는다
+  command -v uv > /dev/null || curl -LsSf https://astral.sh/uv/install.sh | sh > /dev/null
+  export PATH="$HOME/.local/bin:$PATH"
   if [ ! -d knu-agentic-factory ]; then
     git clone -q https://github.com/ahnchiyoon87/knu-agentic-factory.git
   else
@@ -74,8 +77,7 @@ gcloud compute ssh "$NAME" --zone="$ZONE" --command='
   fi
   APP=~/knu-agentic-factory/특강/시뮬레이터
   cd "$APP"
-  [ -d .venv ] || python3.12 -m venv .venv
-  ./.venv/bin/pip install -q -r requirements.txt
+  uv sync -q
 '
 
 say "6. .env 업로드"
@@ -100,7 +102,7 @@ After=network-online.target
 [Service]
 User=$USER
 WorkingDirectory=$APP
-ExecStart=$APP/.venv/bin/python -m uvicorn server.app.main:app --host 0.0.0.0 --port 8000 --workers 1
+ExecStart=$HOME/.local/bin/uv run python -m uvicorn server.app.main:app --host 0.0.0.0 --port 8000 --workers 1
 Restart=always
 Environment=PYTHONUTF8=1
 
@@ -120,5 +122,5 @@ curl -s -m 15 "http://$IP:8000/api/v1/health" | head -c 300 && echo
 say "완료"
 echo "  학생 화면   http://$IP:8000/view?tenant=S01"
 echo "  강사 콘솔   http://$IP:8000/console"
-echo "  키 배포표(예비 수단)  python tools/키배포표.py --base http://$IP:8000"
+echo "  키 배포표(예비 수단)  uv run tools/키배포표.py --base http://$IP:8000"
 echo "  ⚠ 로컬 서버와 동시에 켜지 말 것 (절차서 §13-5). 잠재우기: gcloud compute ssh $NAME --zone=$ZONE --command='sudo systemctl stop factory'"

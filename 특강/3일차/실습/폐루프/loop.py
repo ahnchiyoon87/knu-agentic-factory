@@ -6,9 +6,9 @@
 이 파일은 **누가 무슨 일을 하는지 모릅니다.** agents/__init__.py 의 등록표만 봅니다.
 그래서 에이전트 하나를 갈아 끼우거나 새로 붙여도 여기는 그대로입니다.
 
-    python loop.py --check      공장에 닿는지, 통로가 열렸는지만 본다
-    python loop.py --once       한 바퀴만 돈다
-    python loop.py              계속 돈다 (Ctrl+C 로 멈춤)
+    uv run loop.py --check      공장에 닿는지, 통로가 열렸는지만 본다
+    uv run loop.py --once       한 바퀴만 돈다
+    uv run loop.py              계속 돈다 (Ctrl+C 로 멈춤)
 """
 
 from __future__ import annotations
@@ -251,9 +251,9 @@ def main() -> int:
         if "192.168.0.10" in api.base:
             print("  ★ 주소가 예시(192.168.0.10) 그대로입니다 — 아직 안 채워졌습니다.",
                   file=sys.stderr)
-        print("  2일차/실습 에서 python 내번호.py 를 돌리면 이 설정이 자동으로 채워집니다.",
+        print("  2일차/실습 에서 uv run 내번호.py 를 돌리면 이 설정이 자동으로 채워집니다.",
               file=sys.stderr)
-        print("      cd ../../../2일차/실습  →  python 내번호.py", file=sys.stderr)
+        print("      cd ../../../2일차/실습  →  uv run 내번호.py", file=sys.stderr)
         print("  그래도 안 되면 손 드세요.", file=sys.stderr)
         return 1
 

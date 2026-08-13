@@ -4,10 +4,10 @@
     query_equipment   설비 조회 — 최근 센서값과 정비 이력
 
 이 파일은 **템플릿**입니다. 뼈대와 연결은 이미 되어 있고,
-표시된 두 자리만 채우면 됩니다. 막히면 `python 점검.py --힌트 1`.
+표시된 두 자리만 채우면 됩니다. 막히면 `uv run 점검.py --힌트 1`.
 
-    python mcp_server.py            서버 실행 (config.json 의 transport 를 따름)
-    python mcp_server.py --check    도구가 실제로 도는지 서버 없이 확인
+    uv run mcp_server.py            서버 실행 (config.json 의 transport 를 따름)
+    uv run mcp_server.py --check    도구가 실제로 도는지 서버 없이 확인
 
 ────────────────────────────────────────────────────────────────────
 MCP 가 무엇인가
@@ -70,7 +70,7 @@ except ModuleNotFoundError:              # 2일차 폴더가 없어졌다
     sys.exit(1)
 except Exception as exc:                 # noqa: BLE001
     print(f"2일차의 detect.py 를 불러오지 못했습니다: {exc}", file=sys.stderr)
-    print("  `2일차/실습` 에서 `python 점검.py` 로 먼저 확인해 보세요.", file=sys.stderr)
+    print("  `2일차/실습` 에서 `uv run 점검.py` 로 먼저 확인해 보세요.", file=sys.stderr)
     sys.exit(1)
 
 mcp = MCPServer(

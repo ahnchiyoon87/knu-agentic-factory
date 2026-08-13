@@ -1,4 +1,4 @@
-"""기동 진입점 — python -m server.run
+"""기동 진입점 — uv run python -m server.run
 
 시뮬레이션 상태가 메모리에 있으므로 워커는 반드시 1개다.
 

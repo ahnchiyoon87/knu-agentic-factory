@@ -19,12 +19,12 @@
 | 3 | `handle_missing()` | 값이 안 들어온 자리를 어떻게 다룰지 |
 
 ```bash
-python 내번호.py           # 처음 한 번 — 내 공장을 받는다
-python 점검.py             # 막혔을 때 (--힌트 1·2 · --열기 1·2·3)
+uv run 내번호.py           # 처음 한 번 — 내 공장을 받는다
+uv run 점검.py             # 막혔을 때 (--힌트 1·2 · --열기 1·2·3)
 
-python run.py              # 내 구현을 7일치 데이터에 돌린다
-python run.py --k 2.0      # 임계값을 낮춰서
-python run.py --window 30  # 윈도를 짧게
+uv run run.py              # 내 구현을 7일치 데이터에 돌린다
+uv run run.py --k 2.0      # 임계값을 낮춰서
+uv run run.py --window 30  # 윈도를 짧게
 ```
 
 데이터는 **K-정밀 7일치 CSV**(60,480행)입니다. 받은 폴더의 `데이터/` 에 들어 있습니다.

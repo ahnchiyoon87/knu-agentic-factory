@@ -7,18 +7,12 @@
 
 ---
 
-## 준비
-
-```bash
-pip install -r requirements.txt
-```
-
 `config.json` 의 `data_source` 가 `fallback` 인지 확인하고, `fallback` 안의
-`shared_api` 와 `tenant` 는 **`2일차/실습` 의 `python 내번호.py` 가 자동으로 채웁니다.**
+`shared_api` 와 `tenant` 는 **`2일차/실습` 의 `uv run 내번호.py` 가 자동으로 채웁니다.**
 
 ```bash
-python mcp_server.py --check     # 서버 없이 도구만 호출해 본다
-python mcp_server.py             # MCP 서버 실행
+uv run mcp_server.py --check     # 서버 없이 도구만 호출해 본다
+uv run mcp_server.py             # MCP 서버 실행
 ```
 
 ---
@@ -26,7 +20,7 @@ python mcp_server.py             # MCP 서버 실행
 ## 3단계
 
 **Step 1 (25분)** — `mcp_server.py` 의 ★ **두 자리**를 채웁니다.
-막히면 `python 점검.py --힌트 1` → `--힌트 2` → `--열기 1`.
+막히면 `uv run 점검.py --힌트 1` → `--힌트 2` → `--열기 1`.
 
 | 도구 | 무엇 |
 |---|---|
@@ -35,7 +29,7 @@ python mcp_server.py             # MCP 서버 실행
 
 서버 뼈대·전송 전환·데이터 가져오기는 **이미 되어 있습니다.** 도구 본문만 채우면 됩니다.
 
-**Step 2 (22분)** — `python agent.py` — AI 에게 말로 지시합니다.
+**Step 2 (22분)** — `uv run agent.py` — AI 에게 말로 지시합니다.
 
 > 지난 주 설비 이상을 점검하고, 이상이 있으면 해당 설비의 정비 이력을 조회해
 > 원인 추정과 권고 조치를 담은 진단 리포트를 작성하라.
@@ -98,9 +92,9 @@ python mcp_server.py             # MCP 서버 실행
 |---|---|---|
 | `detect.py 를 불러오지 못했습니다` | 2일차 TODO 가 안 채워짐 | `2일차/실습` 을 먼저 끝내세요 |
 | `NotImplementedError` | ★ 두 자리가 비어 있음 | `mcp_server.py` 를 채우세요 |
-| 401 / 빈 결과 | `shared_api` 주소 오타 | `2일차/실습` 에서 `python 내번호.py` 를 다시 치세요 |
-| 서버가 안 붙음 | 방화벽·포트 | `python mcp_server.py --check` 로 도구만 먼저 확인 → 손 들기 |
-| 정비 이력이 빈 배열로 옴 | `shared_api` 가 `127.0.0.1` | `2일차/실습` 에서 `python 내번호.py` |
+| 401 / 빈 결과 | `shared_api` 주소 오타 | `2일차/실습` 에서 `uv run 내번호.py` 를 다시 치세요 |
+| 서버가 안 붙음 | 방화벽·포트 | `uv run mcp_server.py --check` 로 도구만 먼저 확인 → 손 들기 |
+| 정비 이력이 빈 배열로 옴 | `shared_api` 가 `127.0.0.1` | `2일차/실습` 에서 `uv run 내번호.py` |
 
 ---
 

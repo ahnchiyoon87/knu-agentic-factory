@@ -1,9 +1,9 @@
 """2일차 실습 Step 2 — 내 구현을 7일치 데이터에 돌려 본다.
 
-    python run.py                 기본 (윈도 60분, 임계 k=3.0)
-    python run.py --k 2.0         임계값을 낮춰서 — 오탐이 얼마나 느는가
-    python run.py --window 30     윈도를 짧게
-    python run.py --impl 정답     참고 구현으로 (강사용)
+    uv run run.py                 기본 (윈도 60분, 임계 k=3.0)
+    uv run run.py --k 2.0         임계값을 낮춰서 — 오탐이 얼마나 느는가
+    uv run run.py --window 30     윈도를 짧게
+    uv run run.py --impl 정답     참고 구현으로 (강사용)
 
 심어 둔 이상은 세 가지입니다. 몇 개를 잡아냈는지, 그리고 그 대가로
 아닌 것을 몇 개나 잡았는지(오탐) 함께 봅니다.
@@ -78,7 +78,7 @@ def main() -> int:
     except SyntaxError as e:
         # 채우다 만 문법 오류 — 역추적 대신 자리를 짚어 준다.
         sys.exit(f"detect.py {e.lineno}행에 문법 오류가 있습니다 — {e.msg}\n"
-                 f"  괄호·따옴표·들여쓰기를 그 줄에서 확인하세요. python 점검.py 도 같이 짚어 줍니다.")
+                 f"  괄호·따옴표·들여쓰기를 그 줄에서 확인하세요. uv run 점검.py 도 같이 짚어 줍니다.")
 
     df, labels = load()
     truth = labels.set_index(["equipment_id", "timestamp"])["is_anomaly"]
@@ -164,9 +164,9 @@ def main() -> int:
 
     print("\n" + "=" * 74)
     print("해 볼 것 — 임계값을 바꾸면 어떻게 달라지는가")
-    print("    python run.py --k 2.0     낮추면 더 잡히지만 오탐이 는다")
-    print("    python run.py --k 4.0     올리면 오탐이 줄지만 놓치는 게 는다")
-    print("    python run.py --window 30 윈도를 짧게 하면?")
+    print("    uv run run.py --k 2.0     낮추면 더 잡히지만 오탐이 는다")
+    print("    uv run run.py --k 4.0     올리면 오탐이 줄지만 놓치는 게 는다")
+    print("    uv run run.py --window 30 윈도를 짧게 하면?")
     print("\n온도 드리프트가 안 잡힌다면 — 그게 정상입니다. 왜 그런지 생각해 보세요.")
     return 0
 

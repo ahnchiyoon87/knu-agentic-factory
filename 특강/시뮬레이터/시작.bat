@@ -18,7 +18,7 @@ if %errorlevel%==0 (
 
 set PYTHONIOENCODING=utf-8
 set PYTHONUTF8=1
-start "" /b cmd /c "python -m uvicorn server.app.main:app --host 0.0.0.0 --port 8000 --workers 1"
+start "" /b cmd /c "uv run python -m uvicorn server.app.main:app --host 0.0.0.0 --port 8000 --workers 1"
 
 echo 서버를 켜는 중...
 :wait

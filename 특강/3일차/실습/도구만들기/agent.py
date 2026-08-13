@@ -1,8 +1,8 @@
 """3일차 오전 Step 2 — AI 에게 말로 시킨다.
 
-    python agent.py                    기본 지시문으로 돌린다
-    python agent.py --지시 "..."        내 문장으로 바꿔서
-    python agent.py --설비 EQ-03        특정 설비만 보라고 힌트를 줄 때
+    uv run agent.py                    기본 지시문으로 돌린다
+    uv run agent.py --지시 "..."        내 문장으로 바꿔서
+    uv run agent.py --설비 EQ-03        특정 설비만 보라고 힌트를 줄 때
 
 여기서 무슨 일이 일어나는가
     ① 내가 만든 도구 두 개의 **이름·설명·인자**를 AI 에게 건넨다
@@ -53,7 +53,7 @@ try:
 except SyntaxError as e:
     # 채우다 만 문법 오류 — 역추적 대신 자리를 짚어 준다.
     sys.exit(f"mcp_server.py {e.lineno}행에 문법 오류가 있습니다 — {e.msg}\n"
-             f"  괄호·따옴표·들여쓰기를 그 줄에서 확인하세요. python 점검.py 도 같이 짚어 줍니다.")
+             f"  괄호·따옴표·들여쓰기를 그 줄에서 확인하세요. uv run 점검.py 도 같이 짚어 줍니다.")
 
 기본지시 = ("지난 주 설비 이상을 점검하고, 이상이 있으면 해당 설비의 정비 이력을 조회해 "
             "원인 추정과 권고 조치를 담은 진단 리포트를 작성하라.")
@@ -134,7 +134,7 @@ def _접속키() -> str:
 
 
 def 설정확인() -> None:
-    안내 = ("    cd ../../../2일차/실습  →  python 내번호.py\n"
+    안내 = ("    cd ../../../2일차/실습  →  uv run 내번호.py\n"
             "    (2일차에 이미 돌렸으면 그냥 다시 치면 됩니다. 같은 번호가 나옵니다)")
     if not _서버() or not _번호():
         sys.exit("config.json 이 아직 비어 있습니다 — 서버 주소와 내 번호가 없습니다.\n" + 안내)
@@ -210,7 +210,7 @@ def main() -> int:
                     결과 = fn(**인자)                     # ← 내 컴퓨터에서 실행된다
                 except NotImplementedError:
                     print(f"\n  {이름} 이 아직 안 채워져 있습니다.", file=sys.stderr)
-                    print("  python 점검.py 로 어느 자리인지 확인하세요.", file=sys.stderr)
+                    print("  uv run 점검.py 로 어느 자리인지 확인하세요.", file=sys.stderr)
                     return 1
                 except Exception as exc:                            # noqa: BLE001
                     결과 = {"error": f"{type(exc).__name__}: {exc}"}

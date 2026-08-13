@@ -8,7 +8,7 @@
 리서치 주제3 — 드리프트는 이동평균이 적응해 미탐, 스파이크는 정탐,
               임계를 낮추면 오탐 급증, 결측은 통계를 깨뜨림.
 
-    python verify_lab.py
+    uv run verify_lab.py
 """
 
 from __future__ import annotations

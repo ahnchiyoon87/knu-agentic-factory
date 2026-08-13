@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """내 코드가 어디까지 됐는지 스스로 확인한다.
 
-    python 점검.py              지금 상태를 짚어 준다 (답은 알려주지 않는다)
-    python 점검.py --힌트 1     막힌 곳의 힌트 (개념)
-    python 점검.py --힌트 2     막힌 곳의 힌트 (의사코드)
-    python 점검.py --열기 1     ★ 시간이 다 됐을 때만. TODO 1 하나만 완성본으로 채운다
+    uv run 점검.py              지금 상태를 짚어 준다 (답은 알려주지 않는다)
+    uv run 점검.py --힌트 1     막힌 곳의 힌트 (개념)
+    uv run 점검.py --힌트 2     막힌 곳의 힌트 (의사코드)
+    uv run 점검.py --열기 1     ★ 시간이 다 됐을 때만. TODO 1 하나만 완성본으로 채운다
 
 `run.py` 는 7일치 전체를 돌려 결과를 보여 주는 것이고,
 이 도구는 **작은 예제로 함수 하나하나가 제대로 도는지**만 봅니다. 훨씬 빠릅니다.
@@ -197,7 +197,7 @@ def 열기(n: int) -> int:
     tgt.write_text(cur[:m2.start()] + 새함수 + "\n\n" + cur[m2.end():], encoding="utf-8")
 
     print(f"\n  TODO {n} ({name}) 만 완성본으로 채웠습니다. 나머지는 그대로입니다.")
-    print("  이어서 —  python 점검.py")
+    print("  이어서 —  uv run 점검.py")
     print("  되돌리려면 detect_내가짠것.py 를 detect.py 로 복사하세요.\n")
     print("  ※ 채운 함수를 한 번 읽어 보세요. 내가 막혔던 자리가 어디였는지 보입니다.")
     return 0
@@ -229,7 +229,7 @@ def main() -> int:
 
     print()
     if 통과 == 3:
-        print("  세 개 다 됐습니다.  이제 —  python run.py")
+        print("  세 개 다 됐습니다.  이제 —  uv run run.py")
         print("  숫자를 적어 두고,  --k 2.0  --k 4.0  --window 30  으로 흔들어 보세요.")
         return 0
 
@@ -238,7 +238,7 @@ def main() -> int:
         print(f"       {힌트[막힌곳][args.힌트]}")
     else:
         print(f"  다음에 볼 곳 — TODO {막힌곳}")
-        print("  힌트가 필요하면 —  python 점검.py --힌트 1")
+        print("  힌트가 필요하면 —  uv run 점검.py --힌트 1")
     return 1
 
 

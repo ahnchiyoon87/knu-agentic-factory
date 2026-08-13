@@ -1,8 +1,8 @@
 """마이그레이션 실행기.
 
-    python tools/migrate.py up       마이그레이션 + 권한 재적용 + 검증
-    python tools/migrate.py status   적용 현황
-    python tools/migrate.py reset    전체 삭제 후 재적용 (개발용, 확인 문구 필요)
+    uv run tools/migrate.py up       마이그레이션 + 권한 재적용 + 검증
+    uv run tools/migrate.py status   적용 현황
+    uv run tools/migrate.py reset    전체 삭제 후 재적용 (개발용, 확인 문구 필요)
 
 빈 Supabase 프로젝트에 이 명령 하나로 복원된다.
 무료 → Pro 이관도 새 프로젝트에 up 만 돌리면 된다.

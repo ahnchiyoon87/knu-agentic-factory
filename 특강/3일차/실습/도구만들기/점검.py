@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """내 도구가 어디까지 됐는지 스스로 확인한다.
 
-    python 점검.py              지금 상태를 짚어 준다 (답은 알려주지 않는다)
-    python 점검.py --힌트 1     막힌 곳의 힌트 (개념)
-    python 점검.py --힌트 2     막힌 곳의 힌트 (의사코드)
-    python 점검.py --열기 1     ★ 시간이 다 됐을 때만. 도구 하나만 완성본으로 채운다
+    uv run 점검.py              지금 상태를 짚어 준다 (답은 알려주지 않는다)
+    uv run 점검.py --힌트 1     막힌 곳의 힌트 (개념)
+    uv run 점검.py --힌트 2     막힌 곳의 힌트 (의사코드)
+    uv run 점검.py --열기 1     ★ 시간이 다 됐을 때만. 도구 하나만 완성본으로 채운다
 
 `mcp_server.py --check` 는 서버 없이 도구를 한 번 불러 보는 것이고,
 이 도구는 **연결 상태부터 도구 응답 모양까지** 순서대로 짚어 줍니다.
@@ -70,7 +70,7 @@ def 검사_설정() -> tuple[bool, list[str]]:
     if not api.strip() or not ten.strip():
         ok = False
         msg.append("서버 주소와 내 번호가 아직 비어 있습니다. 손으로 적지 마세요 —")
-        msg.append("    cd ../../../2일차/실습  →  python 내번호.py")
+        msg.append("    cd ../../../2일차/실습  →  uv run 내번호.py")
         msg.append("    (2일차에 이미 돌렸으면 그냥 다시 치면 됩니다. 같은 번호가 나옵니다)")
     else:
         if not api.startswith("http"):
@@ -79,7 +79,7 @@ def 검사_설정() -> tuple[bool, list[str]]:
         if not re.fullmatch(r"S\d{2}", ten):
             ok = False
             msg.append(f"fallback.tenant 가 {ten!r} 입니다. "
-                       "2일차/실습 에서 python 내번호.py 를 돌리면 자동으로 채워집니다.")
+                       "2일차/실습 에서 uv run 내번호.py 를 돌리면 자동으로 채워집니다.")
     # csv_path 는 기본이 "auto" 다 — mcp_server.py 와 똑같이 찾아야 판정이 어긋나지 않는다
     csv = _csv_경로(fb)
     if not csv.is_file():
@@ -96,14 +96,14 @@ def 검사_설정() -> tuple[bool, list[str]]:
             if r.status_code != 200 or 건수 == 0:
                 ok = False
                 msg.append(f"서버에 닿았지만 정비 이력이 안 옵니다 (HTTP {r.status_code}). "
-                           "2일차/실습 에서 python 내번호.py 를 다시 돌려 주소와 번호를 "
+                           "2일차/실습 에서 uv run 내번호.py 를 다시 돌려 주소와 번호를 "
                            "새로 채우세요 — 여기가 비면 원인 추정이 안 나옵니다.")
             else:
                 msg.append(f"서버 {api} · 내 번호 {ten} · 정비 이력 확인")
         except Exception as exc:                                 # noqa: BLE001
             ok = False
             msg.append(f"서버에 못 닿습니다 — {type(exc).__name__}. "
-                       "2일차/실습 에서 python 내번호.py 를 다시 돌려 주소를 새로 "
+                       "2일차/실습 에서 uv run 내번호.py 를 다시 돌려 주소를 새로 "
                        "채우세요. 그래도 안 되면 손 드세요.")
     return ok, msg
 
@@ -124,8 +124,8 @@ def 검사_어제코드() -> tuple[bool, list[str]]:
         out = d.detect([1.0] * 70 + [99.0], window=60, k=3.0)
     except NotImplementedError:
         return False, ["2일차 TODO 세 곳이 아직 비어 있습니다.",
-                       "`2일차/실습` 폴더에서 `python 점검.py` 로 먼저 끝내세요.",
-                       "시간이 없으면 `python 점검.py --열기 1` 부터 쓰세요."]
+                       "`2일차/실습` 폴더에서 `uv run 점검.py` 로 먼저 끝내세요.",
+                       "시간이 없으면 `uv run 점검.py --열기 1` 부터 쓰세요."]
     except Exception as e:                                       # noqa: BLE001
         return False, [f"detect() 가 터집니다 — {type(e).__name__}: {e}"]
     if not isinstance(out, list) or len(out) != 71:
@@ -240,7 +240,7 @@ def 열기(n: int) -> int:
         # 이미 채워진 것인지, 정말로 자리가 사라진 것인지를 갈라서 말해 준다.
         if f"def {name}" in cur:
             print(f"  {name} 은 이미 채워져 있습니다. 다시 열 것이 없습니다.")
-            print("  이어서 —  python 점검.py")
+            print("  이어서 —  uv run 점검.py")
             return 0
         print(f"  mcp_server.py 안에서 {name} 을 못 찾았습니다.")
         print("  파일을 크게 고쳤다면 mcp_server_내가짠것.py 로 되돌린 뒤 다시 해 보세요.")
@@ -263,7 +263,7 @@ def 열기(n: int) -> int:
     tgt.write_text(cur[:m2.start()] + 본문 + cur[m2.end():], encoding="utf-8")
 
     print(f"\n  도구 {n} ({name}) 만 완성본으로 채웠습니다. 나머지는 그대로입니다.")
-    print("  이어서 —  python 점검.py")
+    print("  이어서 —  uv run 점검.py")
     print("  되돌리려면 mcp_server_내가짠것.py 를 mcp_server.py 로 복사하세요.\n")
     return 0
 
@@ -313,7 +313,7 @@ def main() -> int:
 
     print(f"\n  도구 2개 중 {통과}개 통과")
     if 통과 == 2:
-        print("\n  둘 다 됐습니다.  이제 —  python agent.py")
+        print("\n  둘 다 됐습니다.  이제 —  uv run agent.py")
         print("  AI 가 이 도구들을 스스로 골라 부르는 것을 보게 됩니다.")
         return 0
     if args.힌트:
@@ -321,7 +321,7 @@ def main() -> int:
         print(f"       {힌트[막힌곳][args.힌트]}")
     else:
         print(f"  다음에 볼 곳 — 도구 {막힌곳}")
-        print("  힌트가 필요하면 —  python 점검.py --힌트 1")
+        print("  힌트가 필요하면 —  uv run 점검.py --힌트 1")
     return 1
 
 

@@ -4,7 +4,7 @@ db/always/900_grants.sql 적용 뒤 반드시 한 번 돌린다 (migrate.py up �
 Supabase 는 public 스키마 새 테이블에 anon 쓰기 권한까지 기본 부여하므로,
 마이그레이션을 하나 추가할 때마다 다시 뚫릴 수 있다.
 
-    python tools/check_grants.py
+    uv run tools/check_grants.py
 """
 
 from __future__ import annotations
@@ -114,7 +114,7 @@ def main() -> int:
     print("\n" + "=" * 70)
     if failures:
         print(f"실패 {len(failures)}건: " + ", ".join(failures))
-        print("→ python tools/migrate.py up 을 다시 돌리세요 "
+        print("→ uv run tools/migrate.py up 을 다시 돌리세요 "
               "(db/always/900_grants.sql 이 매번 재적용됩니다).")
         print("   권한 스크립트는 db/always/900_grants.sql 하나뿐입니다 — migrate up 이 매번 재적용합니다.")
         return 1

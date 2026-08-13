@@ -64,7 +64,7 @@ class FactoryAPI:
                 + "\n    ".join(빈칸)
                 + "\n\n    손으로 적지 마세요. 아래 한 줄이면 자동으로 채워집니다.\n"
                 "        cd ../../../2일차/실습\n"
-                "        python 내번호.py\n"
+                "        uv run 내번호.py\n"
                 "    (2일차에 이미 돌렸으면 그냥 다시 치면 됩니다 — 같은 번호가 나옵니다)"
             )
         try:
@@ -72,7 +72,7 @@ class FactoryAPI:
         except (UnicodeEncodeError, AttributeError):
             raise ValueError(
                 f'config.json 의 access_key 가 예시 그대로입니다 (현재: {self.key!r}).\n'
-                "    2일차/실습 에서 python 내번호.py 를 돌리면 자동으로 채워집니다."
+                "    2일차/실습 에서 uv run 내번호.py 를 돌리면 자동으로 채워집니다."
             ) from None
 
     # ------------------------------------------------------------------ 읽기
