@@ -102,10 +102,11 @@
   .shotbox img{ display:block; max-width:100%; height:auto;
                 border:1px solid #D9DEE5; border-radius:10px; }
   /* 누를 자리 — 붉은 테두리. 화면 크기에 대한 % 라 이미지가 커져도 안 어긋난다. */
-  .shotbox i{ position:absolute; border:3px solid var(--orange); border-radius:6px;
-              box-shadow:0 0 0 3px rgba(212,84,30,.16); }
-  .shotbox b{ position:absolute; font-size:22px; font-weight:800; color:#fff;
-              background:var(--orange); border-radius:50%; width:34px; height:34px;
+  .shotbox i{ position:absolute; border:2.5px solid var(--orange); border-radius:6px; }
+  /* 번호는 상자 **안쪽** 위 왼쪽. 밖으로 빼면 화면 여백에 떠서 어느 상자 것인지 모른다.
+     크면 화면 내용을 가린다 — 테두리보다 조금 큰 정도로만. */
+  .shotbox b{ position:absolute; font-size:15px; font-weight:800; color:#fff;
+              background:var(--orange); border-radius:50%; width:24px; height:24px;
               display:flex; align-items:center; justify-content:center;
               font-style:normal; line-height:1; }
 
