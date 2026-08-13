@@ -139,9 +139,14 @@ def run_script(path: Path, args: list[str], timeout: int,
     UTF-8 로 나오고, 가드가 빠졌으면 자식이 cp949 로 죽어 그 사실이 드러난다.
     """
     env = {**학생환경(), **(extra_env or {})}
+    # 학생 실습은 학생이 치는 그대로 `uv run` — uv 가 파이썬·패키지를 갖춘다.
+    # 시뮬레이터 쪽 강사 도구는 학생 환경에 없는 것(asyncpg 등)을 쓰므로
+    # 이 검증 도구의 파이썬으로 돌린다. 학생이 치는 명령이 아니다.
+    강사도구 = SIM in path.parents
+    cmd = ([sys.executable, str(path.name), *args] if 강사도구
+           else ["uv", "run", str(path.name), *args])
     try:
-        # 학생이 치는 것 그대로 — uv 가 파이썬·패키지를 갖춘다
-        p = subprocess.run(["uv", "run", str(path.name), *args], cwd=str(path.parent),
+        p = subprocess.run(cmd, cwd=str(path.parent),
                            capture_output=True, timeout=timeout, env=env)
     except subprocess.TimeoutExpired:
         return False, f"{timeout}초 안에 안 끝남", ""
@@ -381,8 +386,9 @@ def 일일차_이상감지() -> None:
     else:
         check("나눠줄 데이터셋이 있다", False, f"없음: {csv.name} / {info.name}")
 
-    check("실습 폴더에 requirements.txt 가 있다 (pandas 가 없으면 첫 명령에서 전원이 막힌다)",
-          (LAB1 / "requirements.txt").is_file())
+    # uv 가 이 둘을 보고 파이썬·패키지를 갖춘다. 없으면 첫 명령에서 전원이 막힌다.
+    check("실습 저장소에 pyproject.toml · .python-version 이 있다 (uv 가 환경을 갖추는 근거)",
+          (특강 / "pyproject.toml").is_file() and (특강 / ".python-version").is_file())
 
     # 학생이 아무것도 안 채우고 그냥 실행했을 때 — 여기서 죽으면 첫 5분에 전원이 이탈한다
     ok, msg, _ = run_script(LAB1 / "run.py", [], 300)
@@ -454,10 +460,15 @@ def 이일차_도구(s: Sim) -> None:
 
     _, msg, out = run_script(LAB2 / "점검.py", [], 180, {"SHARED_API": s.base})
     check("점검.py 가 빈 템플릿에서도 죽지 않는다 (이탈 방지)", 살아있나(out), msg)
+    # 실패했으면 「왜」가 보여야 한다 — 0-1 줄 다음에 이어지는 설명을 그대로 옮긴다.
+    _설명 = []
+    _줄들 = out.splitlines()
+    for _i, _l in enumerate(_줄들):
+        if "0-1" in _l and "config.json" in _l:
+            _설명 = [x.strip() for x in _줄들[_i + 1:_i + 5] if x.strip()]
+            break
     check("점검.py 가 강사 서버에 실제로 닿아 정비 이력을 확인한다",
-          "정비 이력 확인" in out, [line for line in out.splitlines()
-                                    if "config.json" in line][-1][:70]
-          if any("config.json" in line for line in out.splitlines()) else msg)
+          "정비 이력 확인" in out, " / ".join(_설명)[:200] or msg)
     check("2일차 detect.py 가 비면 그 사실을 먼저 알려 준다 (엉뚱한 데서 헤매지 않게)",
           "2일차" in out and "detect.py" in out, msg)
 

@@ -93,6 +93,10 @@ def md2html(md: str, 제목: str, 기준폴더: Path | None = None) -> str:
             설명, 경로 = m.group(1), Path(m.group(2))
             if not 경로.is_absolute() and 기준폴더 is not None:
                 경로 = (기준폴더 / 경로).resolve()
+            # 그림이 없으면 PDF 에 깨진 자리만 남는다 — 학생이 받는 문서다. 여기서 멈춘다.
+            if not 경로.is_file():
+                raise SystemExit(f"안내문이 가리키는 그림이 없습니다: {경로}\n"
+                                 f"  (원본 캡처를 제작/빌드도구/그림표시.py 로 만들어 두세요)")
             out.append(f'<img src="{경로.as_uri()}" alt="{html.escape(설명)}">')
             if 설명:
                 out.append(f'<div class="cap">{html.escape(설명)}</div>')
