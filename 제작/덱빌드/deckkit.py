@@ -41,6 +41,36 @@ def pic(h1, sub, art, ps, foot=""):
             f'<div class="art">{art}</div><div class="txt">{p}</div></div>{_foot(foot)}</section>')
 
 
+def shot(h1, sub, img, ps, foot=""):
+    """화면이 주인공 — 실제 노션 화면을 크게 놓고 오른쪽에 짧은 글.
+       화면은 손으로 그리지 않는다. 강의자가 캡처한 것을 그대로 쓴다."""
+    LOG.append(dict(t="shot", n=9, h1=h1, sub=sub, ps=ps, foot=foot))
+    p = "".join(f"<p>{x}</p>" for x in ps)
+    return (f'<section class="s shot">{_head(h1, sub)}<div class="body">'
+            f'<div class="art">{img}</div><div class="txt">{p}</div>'
+            f'</div>{_foot(foot)}</section>')
+
+
+def shotfull(h1, sub, img, foot=""):
+    """화면 하나만 — 완성본처럼 화면 자체가 할 말을 다 하는 장."""
+    LOG.append(dict(t="shotfull", n=10, h1=h1, sub=sub, foot=foot))
+    return (f'<section class="s shotfull">{_head(h1, sub)}'
+            f'<div class="body">{img}</div>{_foot(foot)}</section>')
+
+
+def step(h1, sub, rows, img, foot=""):
+    """왼쪽에 번호 붙은 조작 순서, 오른쪽에 그 조작이 일어나는 실제 화면.
+       화면에는 누를 자리를 붉게 표시한다 (shotkit.강조)."""
+    LOG.append(dict(t="step", n=11, h1=h1, sub=sub, rows=rows, foot=foot))
+    r = "".join(f'<div class="srow"><div class="sno">{no}</div>'
+                f'<div class="st"><strong>{st}</strong>'
+                + (f"<span>{sp}</span>" if sp else "") + "</div></div>"
+                for no, st, sp in rows)
+    return (f'<section class="s step">{_head(h1, sub)}<div class="body">'
+            f'<div class="txt">{r}</div><div class="art">{img}</div>'
+            f'</div>{_foot(foot)}</section>')
+
+
 def rail(h1, sub, rows, foot=""):
     LOG.append(dict(t="rail", n=4, h1=h1, sub=sub, rows=rows, foot=foot))
     r = "".join(f'<div class="row"><div class="ico">{ico}</div><div class="no">{no}</div>'

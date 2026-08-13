@@ -357,5 +357,6 @@ S.append(D.rail("남은 20분은 노션입니다",
                  (V.ICO_PIN, "03", "붙인다", "진단 리포트를 캡처해 붙이고 이해도 태그를 찍는다.")],
                 '오늘까지가 우리 이틀입니다. <span class="mark">노션 링크 제출이 수료</span>입니다.'))
 
-n = D.write(S, pathlib.Path(__file__).parent / "3일차덱.html", "3일차 · 판단하고, 움직이게 한다")
+(pathlib.Path(__file__).resolve().parents[2] / '제작' / '산출물' / '덱').mkdir(parents=True, exist_ok=True)
+n = D.write(S, pathlib.Path(__file__).resolve().parents[2] / "제작" / "산출물" / "덱" / "3일차덱.html", "3일차 · 판단하고, 움직이게 한다")
 print("슬라이드:", n)

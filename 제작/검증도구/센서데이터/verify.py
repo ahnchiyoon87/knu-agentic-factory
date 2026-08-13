@@ -53,7 +53,7 @@ def _시뮬레이터_config() -> Path:
     """
     for base in (ROOT, *ROOT.parents[:3]):
         for cand in (base / "시뮬레이터" / "config",
-                     base / "특강" / "시뮬레이터" / "config"):
+                     base / "강의" / "시뮬레이터" / "config"):
             if (cand / "sim_profile.json").is_file():
                 return cand
     raise SystemExit(

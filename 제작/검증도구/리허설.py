@@ -55,8 +55,8 @@ import httpx
 
 ROOT = Path(__file__).resolve().parent          # 제작/검증도구/
 REPO = ROOT.parents[1]                          # 경남대특강/ (저장소 루트)
-특강 = REPO / "특강"                             # 일차별 원본: 특강/{일차}/실습
-SIM = REPO / "특강" / "시뮬레이터"
+특강 = REPO / "강의"                             # 일차별 원본: 특강/{일차}/실습
+SIM = REPO / "강의" / "시뮬레이터"
 DATA = ROOT / "센서데이터" / "데이터"
 LAB1 = 특강 / "2일차" / "실습"                   # 이상감지
 LAB2 = 특강 / "3일차" / "실습" / "도구만들기"      # MCP 도구

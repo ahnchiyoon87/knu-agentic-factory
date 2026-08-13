@@ -20,7 +20,8 @@ import sys
 from playwright.async_api import async_playwright
 
 HERE = pathlib.Path(__file__).parent
-names = sys.argv[1:] or ["2일차덱", "3일차덱"]
+덱 = HERE.parents[1] / "제작" / "산출물" / "덱"      # build_*.py 가 여기에 쓴다
+names = sys.argv[1:] or ["2일차덱", "3일차덱", "노션덱"]
 
 JS = """
 () => {
@@ -62,7 +63,7 @@ async def main() -> None:
         pg = await b.new_page(viewport={"width": 1700, "height": 1000},
                               device_scale_factor=1.5)
         for name in names:
-            await pg.goto((HERE / f"{name}.html").as_uri())
+            await pg.goto((덱 / f"{name}.html").as_uri())
             await pg.wait_for_timeout(900)
             res = await pg.evaluate(JS)
             n = await pg.evaluate("document.querySelectorAll('.s').length")

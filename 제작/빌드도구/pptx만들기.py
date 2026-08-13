@@ -26,7 +26,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent          # 제작/빌드도구/
 REPO = ROOT.parents[1]                          # 경남대특강/ (저장소 루트)
-특강 = REPO / "특강"                             # 일차별: 특강/{일차}/이론/슬라이드/*.png
+강의 = REPO / "강의"                             # pptx 가 놓일 곳: 강의/{일차}/강의자료/
+PNG = REPO / "제작" / "산출물" / "슬라이드"        # render.py 가 찍어 둔 낱장
 
 
 def main() -> int:
@@ -43,12 +44,12 @@ def main() -> int:
         return 1
 
     # (PNG 폴더, 만들 pptx) — 노션은 2일차 1교시 자료라 같은 일차 아래 따로 둔다
-    묶음 = [("2일차", "슬라이드", "슬라이드.pptx"),
-            ("2일차", "노션슬라이드", "노션_자산화_강의자료.pptx"),
-            ("3일차", "슬라이드", "슬라이드.pptx")]
+    묶음 = [("2일차", "2일차", "슬라이드.pptx"),
+            ("2일차", "노션", "노션_자산화.pptx"),
+            ("3일차", "3일차", "슬라이드.pptx")]
 
     for 일차, 폴더, 파일 in 묶음:
-        src = 특강 / 일차 / "이론" / 폴더
+        src = PNG / 폴더
         pngs = sorted(src.glob("*.png"), key=lambda p: int(p.stem))
         if not pngs:
             print(f"  [빠짐] {src} 에 PNG 가 없습니다", file=sys.stderr)
@@ -66,7 +67,8 @@ def main() -> int:
             s.shapes.add_picture(str(p), 0, 0,
                                  width=prs.slide_width, height=prs.slide_height)
 
-        dst = 특강 / 일차 / "이론" / 파일
+        dst = 강의 / 일차 / "강의자료" / 파일
+        dst.parent.mkdir(parents=True, exist_ok=True)
         prs.save(str(dst))
         print(f"  만듦  {일차}/{dst.name}  ({len(pngs)}장 · {dst.stat().st_size // 1024}KB)")
 

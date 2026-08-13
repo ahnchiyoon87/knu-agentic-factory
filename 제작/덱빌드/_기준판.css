@@ -95,6 +95,50 @@
   .pic .art{ flex:0 0 560px; display:flex; align-items:center; justify-content:flex-start; }
   .pic .txt{ flex:1; }
 
+  /* ============ 9~11 · 실제 화면형 ============
+     화면은 캡처한 것을 그대로 쓴다. 그려서 흉내 내지 않는다 —
+     흉내 낸 화면은 학생이 보는 진짜 노션과 어긋나서 따라오지 못하게 만든다. */
+  .shotbox{ position:relative; display:inline-block; line-height:0; }
+  .shotbox img{ display:block; max-width:100%; height:auto;
+                border:1px solid #D9DEE5; border-radius:10px; }
+  /* 누를 자리 — 붉은 테두리. 화면 크기에 대한 % 라 이미지가 커져도 안 어긋난다. */
+  .shotbox i{ position:absolute; border:3px solid var(--orange); border-radius:6px;
+              box-shadow:0 0 0 3px rgba(212,84,30,.16); }
+  .shotbox b{ position:absolute; font-size:22px; font-weight:800; color:#fff;
+              background:var(--orange); border-radius:50%; width:34px; height:34px;
+              display:flex; align-items:center; justify-content:center;
+              font-style:normal; line-height:1; }
+
+  /* 화면은 본문 상자를 절대 넘지 않는다 — .art 를 stretch 로 늘려 높이를 확정한 뒤
+     그 100% 를 이미지 최대 높이로 삼는다. 픽셀로 못 박으면 장마다 넘친다. */
+  .shot .body, .step .body, .shotfull .body{ align-items:stretch; }
+  /* min-width:0 이 없으면 flex 항목이 내용 너비만큼 부풀어 슬라이드 밖으로 나간다 */
+  .shot .art, .step .art, .shot .txt, .step .txt{ min-height:0; min-width:0; }
+  /* 크기는 **이미지에** 건다. 이미지는 원래 크기를 아는 요소라 가로·세로 한도를
+     동시에 걸어도 비율이 유지된다. 상자에 걸면(높이 100% + 최대 너비) 두 한도가
+     겹치는 장에서 비율이 깨져 화면이 찌그러진다 — 실제로 그렇게 됐다.
+     470px = 제목 한 줄 기준 본문 높이(≈497)에서 여유를 둔 값. 넘치면 검사에 걸린다. */
+  .shotbox img{ max-width:100%; max-height:470px; width:auto; height:auto; }
+
+  .shot .body{ gap:52px; }
+  .shot .art{ flex:0 0 940px; display:flex; align-items:center; justify-content:flex-start; }
+  .shot .txt{ flex:1; align-self:center; }
+
+  .shotfull .body{ justify-content:center; }
+
+  .step .body{ gap:48px; }
+  .step .txt{ flex:0 0 620px; align-self:center; }
+  .step .art{ flex:1; display:flex; align-items:center; justify-content:flex-end; }
+  .srow{ display:flex; align-items:flex-start; gap:20px; }
+  .srow + .srow{ margin-top:24px; }
+  .sno{ flex:none; width:38px; height:38px; border-radius:50%; background:var(--navy);
+        color:#fff; font-size:21px; font-weight:800; display:flex;
+        align-items:center; justify-content:center; margin-top:3px; }
+  .st strong{ display:block; font-size:29px; font-weight:700; color:#111; line-height:1.4; }
+  .st span{ display:block; font-size:24px; color:var(--gray); margin-top:5px; line-height:1.45; }
+  .st code{ background:#F1F4F8; border:1px solid #DDE3EA; border-radius:5px;
+            padding:1px 8px; font-size:.92em; font-family:Consolas,monospace; }
+
   /* ============ 4 · 번호 레일형 ============ */
   .rail .body{ flex-direction:column; justify-content:space-between; gap:0; align-items:stretch; }
   .row{ display:flex; align-items:center; gap:38px; flex:1; padding:14px 0;
