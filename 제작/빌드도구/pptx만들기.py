@@ -42,8 +42,13 @@ def main() -> int:
         print("Pillow 가 없습니다 —  pip install Pillow", file=sys.stderr)
         return 1
 
-    for 일차 in ("2일차", "3일차"):
-        src = 특강 / 일차 / "이론" / "슬라이드"
+    # (PNG 폴더, 만들 pptx) — 노션은 2일차 1교시 자료라 같은 일차 아래 따로 둔다
+    묶음 = [("2일차", "슬라이드", "슬라이드.pptx"),
+            ("2일차", "노션슬라이드", "노션_자산화_강의자료.pptx"),
+            ("3일차", "슬라이드", "슬라이드.pptx")]
+
+    for 일차, 폴더, 파일 in 묶음:
+        src = 특강 / 일차 / "이론" / 폴더
         pngs = sorted(src.glob("*.png"), key=lambda p: int(p.stem))
         if not pngs:
             print(f"  [빠짐] {src} 에 PNG 가 없습니다", file=sys.stderr)
@@ -61,9 +66,9 @@ def main() -> int:
             s.shapes.add_picture(str(p), 0, 0,
                                  width=prs.slide_width, height=prs.slide_height)
 
-        dst = 특강 / 일차 / "이론" / "슬라이드.pptx"
+        dst = 특강 / 일차 / "이론" / 파일
         prs.save(str(dst))
-        print(f"  만듦  {dst.name}  ({len(pngs)}장 · {dst.stat().st_size // 1024}KB)")
+        print(f"  만듦  {일차}/{dst.name}  ({len(pngs)}장 · {dst.stat().st_size // 1024}KB)")
 
     print("\n  ※ pptx 를 손으로 고치지 마세요. 다시 뽑으면 사라집니다.")
     print("     글자를 고치려면 —  제작/덱빌드/build_*.py  →  render.py  →  이 스크립트")
