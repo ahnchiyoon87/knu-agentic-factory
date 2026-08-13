@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import base64
 import functools
+import io
 import struct
 from pathlib import Path
 
@@ -43,6 +44,8 @@ def _읽기(경로: str) -> tuple[str, int, int]:
 
 여백 = 1.2        # 상자를 대상보다 이만큼(%) 키운다 — 테두리가 글자에 닿지 않게
 최소간격 = 1.0     # 세로로 이웃한 상자 사이에 이만큼(%)은 비운다
+최소폭 = 64.0      # 잘라낸 그림이 원본의 이만큼(%)보다 좁아지지 않게 — 맥락 보존
+최소높이 = 88.0    # 낮게 잡으면 자른 자리가 글자 한가운데를 지나 반 토막이 보인다
 
 
 def _다듬기(항목):
@@ -71,16 +74,68 @@ def _다듬기(항목):
     return 결과
 
 
-def 화면(이름: str, *표시, 폴더: str = "노션") -> str:
+def _잘라내기(경로: str, 항목, 여유: float, 최소세로: float | None = None):
+    """표시한 자리만 남기고 잘라, 그 부분이 크게 그려지게 한다.
+
+    화면 전체를 슬라이드 한쪽에 넣으면 0.3~0.6 배로 줄어서, 원본의 작은 글자가
+    4~9px 로 그려진다. 강의장 뒷자리에서는 무엇을 누르라는 건지 안 보인다.
+    **볼 곳만 남기면 같은 자리에 훨씬 크게 들어간다.**
+    잘린 만큼 표시 좌표도 새 그림 기준으로 다시 계산해 돌려준다.
+    """
+    from PIL import Image
+
+    p = 그림 / 경로
+    im = Image.open(p)
+    W, H = im.size
+
+    # 위쪽 여유를 넉넉히 둔다 — 창 제목·표 머리 같은 **여기가 어디인지** 알려 주는
+    # 것이 대개 위에 있다. 바싹 자르면 글자는 커지지만 무슨 화면인지 모르게 된다.
+    x1 = max(0.0, min(t[0] for t in 항목) - 여유)
+    y1 = max(0.0, min(t[1] for t in 항목) - 여유 * 2.2)
+    x2 = min(100.0, max(t[0] + t[2] for t in 항목) + 여유)
+    y2 = min(100.0, max(t[1] + t[3] for t in 항목) + 여유)
+
+    # 너무 잘게 자르지 않는다 — 조각만 남으면 맥락이 사라진다
+    if x2 - x1 < 최소폭:
+        가운데 = (x1 + x2) / 2
+        x1, x2 = max(0.0, 가운데 - 최소폭 / 2), min(100.0, 가운데 + 최소폭 / 2)
+        if x2 - x1 < 최소폭:                     # 가장자리에 붙었으면 반대쪽으로 넓힌다
+            x1, x2 = (0.0, 최소폭) if x1 <= 0.01 else (100.0 - 최소폭, 100.0)
+    세로한도 = 최소높이 if 최소세로 is None else 최소세로
+    if y2 - y1 < 세로한도:
+        가운데 = (y1 + y2) / 2
+        y1, y2 = max(0.0, 가운데 - 세로한도 / 2), min(100.0, 가운데 + 세로한도 / 2)
+        if y2 - y1 < 세로한도:
+            y1, y2 = (0.0, 세로한도) if y1 <= 0.01 else (100.0 - 세로한도, 100.0)
+
+    box = (round(x1 / 100 * W), round(y1 / 100 * H),
+           round(x2 / 100 * W), round(y2 / 100 * H))
+    잘린것 = im.convert("RGB").crop(box)
+
+    새폭, 새높이 = (x2 - x1), (y2 - y1)
+    옮김 = [((t[0] - x1) / 새폭 * 100, (t[1] - y1) / 새높이 * 100,
+             t[2] / 새폭 * 100, t[3] / 새높이 * 100, t[4]) for t in 항목]
+
+    buf = io.BytesIO()
+    잘린것.save(buf, format="PNG", optimize=True)
+    return base64.b64encode(buf.getvalue()).decode("ascii"), 옮김
+
+
+def 화면(이름: str, *표시, 폴더: str = "노션", 확대: bool = False,
+         여유: float = 6.0, 조망: bool = False,
+         최소세로: float | None = None) -> str:
     """이름.png 를 박고, 표시마다 붉은 상자를 얹은 HTML 을 돌려준다.
 
     표시 = (왼쪽%, 위%, 너비%, 높이%) 또는 (…, "뱃지글자")
       좌표는 **대상 요소 그대로** 적는다. 여백과 겹침 정리는 `_다듬기` 가 한다.
       뱃지는 상자 **안쪽** 위 왼쪽에 놓는다 — 밖에 두면 화면 여백에 떠 버린다.
     """
-    자료, _w, _h = _읽기(f"{폴더}/{이름}.png")
-    img = f'<img src="data:image/png;base64,{자료}" alt="">'
     항목 = [(t[0], t[1], t[2], t[3], t[4] if len(t) > 4 else None) for t in 표시]
+    if 확대 and 항목:
+        자료, 항목 = _잘라내기(f"{폴더}/{이름}.png", 항목, 여유, 최소세로)
+    else:
+        자료, _w, _h = _읽기(f"{폴더}/{이름}.png")
+    img = f'<img src="data:image/png;base64,{자료}" alt="">'
     상자 = ""
     for x, y, w, h, 뱃지 in _다듬기(항목):
         상자 += f'<i style="left:{x}%;top:{y}%;width:{w}%;height:{h}%"></i>'
@@ -92,4 +147,6 @@ def 화면(이름: str, *표시, 폴더: str = "노션") -> str:
             else:
                 자리 = f'left:{x + w}%;transform:translate(18%,-14%)'
             상자 += f'<b style="{자리};top:{y}%">{뱃지}</b>'
-    return f'<div class="shotbox">{img}{상자}</div>'
+    # 조망 = 전체 모양만 보는 장. 작은 글자를 읽을 필요가 없어 크기 검사에서 뺀다.
+    표식 = ' data-view="1"' if 조망 else ""
+    return f'<div class="shotbox"{표식}>{img}{상자}</div>'
