@@ -156,7 +156,9 @@
   .row{ display:flex; align-items:center; gap:38px; flex:1; padding:14px 0;
         border-bottom:1px solid #E2E6EB; }
   .row:last-child{ border-bottom:0; }
-  .row .ico{ flex:0 0 92px; display:flex; align-items:center; justify-content:center; }
+  /* 이모지는 기본 글자 크기로 두면 흐릿한 점처럼 보인다 — 항목 아이콘은 크게 */
+  .row .ico{ flex:0 0 92px; display:flex; align-items:center; justify-content:center;
+             font-size:44px; line-height:1; }
   .row .no{ flex:0 0 74px; font-size:30px; font-weight:800; color:#B9C4D2; }
   .row .rt strong{ display:block; font-size:32px; font-weight:800; color:#111; }
   .row .rt span{ display:block; font-size:28px; color:var(--gray); margin-top:8px; }
