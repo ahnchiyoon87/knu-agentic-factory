@@ -469,6 +469,30 @@ def main() -> int:
         '  }\n'
         '}\n', encoding="utf-8")
 
+    # 「환경 점검」 태스크 — 막혔을 때 **한 번에 세 가지를 가른다.**
+    #   ① 지금 터미널이 실습 폴더에 있는가  ② uv 를 찾았는가  ③ 버전이 나오는가
+    #
+    # 진단 줄을 학생에게 복붙시키지 않는다 — 따옴표가 깨져 진단 자체가 에러를 내는 일이
+    # 실습장에서 자주 난다. 메뉴(터미널 → 작업 실행 → 환경 점검)로 고르게 한다.
+    #
+    # 명령에 **따옴표를 하나도 쓰지 않는다.** PowerShell 로 문자열을 넘기면 겹따옴표가
+    # 벗겨져 진단이 오히려 에러를 낸다(실제로 그렇게 됐다). cmd 의 `&` 로 세 줄을
+    # 이어 찍으면 인용이 필요 없다 — cd(폴더) · where(자리) · --version(버전).
+    (out / ".vscode" / "tasks.json").write_text(
+        '{\n'
+        '  "version": "2.0.0",\n'
+        '  "tasks": [\n'
+        '    {\n'
+        '      "label": "환경 점검",\n'
+        '      "type": "shell",\n'
+        '      "command": "cd & where uv & uv --version",\n'
+        '      "options": { "shell": { "executable": "cmd.exe", "args": ["/c"] } },\n'
+        '      "presentation": { "reveal": "always", "panel": "new" },\n'
+        '      "problemMatcher": []\n'
+        '    }\n'
+        '  ]\n'
+        '}\n', encoding="utf-8")
+
     크기 = sum(p.stat().st_size for p in out.rglob("*") if p.is_file())
     print(f"만들었습니다 — {out}")
     print(f"  2일차 {n1}개 · 3일차 {n2}개 · 데이터 {n3}개 · 합계 {크기 / 1e6:.1f}MB")
