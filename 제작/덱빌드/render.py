@@ -20,6 +20,10 @@ if not SRC.is_file():                       # 예전 자리(덱빌드 옆)도 �
 이름 = "노션" if name.startswith("노션") else ("2일차" if name.startswith("2") else "3일차")
 OUT = REPO / "제작" / "산출물" / "슬라이드" / 이름
 OUT.mkdir(parents=True, exist_ok=True)
+# 장수가 줄면 옛 PNG 가 남아 pptx 에 섞인다 — 30장짜리를 28장으로 줄였더니
+# 지난 29·30장이 그대로 따라 들어갔다. 찍기 전에 비운다.
+for _옛 in OUT.glob("*.png"):
+    _옛.unlink()
 
 
 async def main():
