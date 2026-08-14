@@ -88,7 +88,9 @@ def step(h1, sub, rows, img, foot="", 넣을것=None, 넣을것제목="여기에
     입력 = ""
     if 넣을것:
         줄 = "".join(f"<div>{t}</div>" for t in 넣을것)
-        입력 = f'<div class="typein"><b>{넣을것제목}</b>{줄}</div>'
+        # 넣을것제목="" 이면 라벨 없이 회색 줄만 — 한 줄짜리라 라벨이 군더더기인 장이 있다
+        머리 = f"<b>{넣을것제목}</b>" if 넣을것제목 else ""
+        입력 = f'<div class="typein">{머리}{줄}</div>'
     return (f'<section class="s step">{_head(h1, sub)}<div class="body">'
             f'<div class="txt">{r}{입력}</div><div class="art">{img}</div>'
             f'</div>{_foot(foot)}</section>')
