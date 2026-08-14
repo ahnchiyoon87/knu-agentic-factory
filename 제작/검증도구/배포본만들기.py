@@ -449,6 +449,25 @@ def main() -> int:
 
     # 문서도 .gitignore 도 넣지 않는다 — 학생이 받는 것은 **코드와 데이터뿐**이다.
     # (읽을 것은 드라이브의 실습가이드 PDF 하나. 두 곳에 두면 어느 것이 최신인지 생긴다.)
+    #
+    # 딱 하나 예외 — VS Code 터미널 설정. 문서가 아니라 **막힘을 없애는 장치**다.
+    #   uv 설치 스크립트가 PATH 를 등록해도 창이 그걸 못 찾는 컴퓨터가 있다.
+    #   그러면 `uv` 를 못 찾는다고 나오고, 학생은 자기가 뭘 잘못했는지 알 수 없다.
+    #   이 파일이 있으면 폴더를 여는 순간 터미널이 uv 자리를 알고 시작한다 —
+    #   **학생이 할 일이 없어진다.**
+    (out / ".vscode").mkdir(exist_ok=True)
+    (out / ".vscode" / "settings.json").write_text(
+        '{\n'
+        '  "terminal.integrated.env.windows": {\n'
+        '    "PATH": "${env:USERPROFILE}\\\\.local\\\\bin;${env:PATH}"\n'
+        '  },\n'
+        '  "terminal.integrated.env.osx": {\n'
+        '    "PATH": "${env:HOME}/.local/bin:${env:PATH}"\n'
+        '  },\n'
+        '  "terminal.integrated.env.linux": {\n'
+        '    "PATH": "${env:HOME}/.local/bin:${env:PATH}"\n'
+        '  }\n'
+        '}\n', encoding="utf-8")
 
     크기 = sum(p.stat().st_size for p in out.rglob("*") if p.is_file())
     print(f"만들었습니다 — {out}")
