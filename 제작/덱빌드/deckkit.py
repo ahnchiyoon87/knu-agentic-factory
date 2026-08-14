@@ -66,7 +66,10 @@ def step(h1, sub, rows, img, foot="", 넣을것=None, 넣을것제목="여기에
     학생이 「②는 어디?」 하고 찾다가 흐름이 끊긴다. 여기서 막는다.
     """
     import re as _re
-    뱃지 = set(_re.findall(r'<b class="(?:left|right)"[^>]*>(\d+)</b>', img))
+    # 뱃지는 <b>, <b class="오른쪽">, <b class="안쪽"> 셋 중 하나로 나온다.
+    # 예전 정규식은 class="left|right" 만 찾아 **아무것도 못 잡고 있었다** — 검사가
+    # 통과한 게 아니라 검사가 안 돌고 있었던 것이다.
+    뱃지 = set(_re.findall(r"<b\b[^>]*>(\d+)</b>", img))
     번호 = {no for no, _, _ in rows}
     if 뱃지 and 뱃지 != 번호:
         raise SystemExit(
