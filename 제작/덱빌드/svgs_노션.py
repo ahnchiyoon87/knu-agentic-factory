@@ -28,6 +28,70 @@ def _조각(x, y, w, h, r, op):
             f'fill="{SUB}" opacity="{op}"/>')
 
 
+# ─────────────────────────────────────────────────────────────────────
+# AI 에게 던져 받은 정리본이 쌓이는 장면 — 예쁘지만 다시 읽어야 한다
+# ─────────────────────────────────────────────────────────────────────
+def _문서(x, y, 진하기=1.0):
+    return f"""
+  <rect x="{x}" y="{y}" width="86" height="112" rx="6" fill="{BG}"
+        stroke="{LINE}" stroke-width="1.6" opacity="{진하기}"/>
+  <rect x="{x + 12}" y="{y + 16}" width="62" height="7" rx="3" fill="{SUB}" opacity=".45"/>
+  <rect x="{x + 12}" y="{y + 32}" width="48" height="6" rx="3" fill="{LINE}"/>
+  <rect x="{x + 12}" y="{y + 46}" width="62" height="6" rx="3" fill="{LINE}"/>
+  <rect x="{x + 12}" y="{y + 60}" width="40" height="6" rx="3" fill="{LINE}"/>
+  <rect x="{x + 12}" y="{y + 74}" width="58" height="6" rx="3" fill="{LINE}"/>
+  <rect x="{x + 12}" y="{y + 88}" width="34" height="6" rx="3" fill="{LINE}"/>"""
+
+
+PRETTY = _s(560, 400, "0 0 560 400", f"""
+  <text x="0" y="18" fill="{SUB}" font-size="17" {F}>내 필기 · 강의자료를 던지면</text>
+  <rect x="0" y="34" width="150" height="46" rx="10" fill="{BLUE_BG}" stroke="{BLUE}" stroke-width="1.6"/>
+  <text x="75" y="63" text-anchor="middle" fill="{BLUE}" font-size="18" font-weight="700" {F}>AI 가 정리</text>
+  <path d="M160 57 L206 57" stroke="{SUB}" stroke-width="2"/>
+  <path d="M198 51 L206 57 L198 63" stroke="{SUB}" stroke-width="2" fill="none"/>
+  <text x="216" y="63" fill="{INK}" font-size="18" font-weight="700" {F}>예쁜 정리본이 쌓인다</text>
+
+  {_문서(0, 110)}
+  {_문서(100, 110, .85)}
+  {_문서(200, 110, .7)}
+  {_문서(300, 110, .55)}
+  {_문서(400, 110, .4)}
+  <text x="470" y="176" fill="{SUB}" font-size="26" font-weight="700" {F}>…</text>
+
+  <path d="M0 262 L560 262" stroke="{LINE}" stroke-width="1.5" stroke-dasharray="5 5"/>
+  <text x="0" y="296" fill="{HOT}" font-size="18" font-weight="700" {F}>그런데 —</text>
+  <text x="0" y="326" fill="{INK}" font-size="18" {F}>이걸 다시 <tspan font-weight="700">읽고 이해</tspan>해야 하고,</text>
+  <text x="0" y="356" fill="{INK}" font-size="18" {F}>시험 때 가서 <tspan font-weight="700" fill="{HOT}">또 외웁니다.</tspan></text>
+  <text x="0" y="388" fill="{SUB}" font-size="16" {F}>일이 줄지 않았습니다.</text>
+""")
+
+
+# ─────────────────────────────────────────────────────────────────────
+# 말로 뱉어 보기 — 막히는 자리가 곧 모르는 자리
+# ─────────────────────────────────────────────────────────────────────
+SPEAK = _s(560, 400, "0 0 560 400", f"""
+  <rect x="0" y="0" width="560" height="250" rx="12" fill="{BG}"
+        stroke="{LINE}" stroke-width="1.8"/>
+  <rect x="0" y="0" width="560" height="34" rx="12" fill="#f6f8fb"/>
+  <rect x="0" y="24" width="560" height="10" fill="#f6f8fb"/>
+  <text x="16" y="23" fill="{SUB}" font-size="14" {F}>빈 메모장 — 말하면 글자로 적힙니다</text>
+
+  <text x="20" y="66" fill="{INK}" font-size="17" {F}>"함수는 값을 넣으면 답을 돌려주는 상자예요."</text>
+  <text x="20" y="98" fill="{INK}" font-size="17" {F}>"같은 걸 여러 번 쓸 때 만들어 두면 편하고요."</text>
+  <text x="20" y="130" fill="{INK}" font-size="17" {F}>"그러니까 매개변수는… 어… 그게…"</text>
+
+  <rect x="14" y="112" width="330" height="30" rx="6" fill="{HOT_BG}" stroke="{HOT}" stroke-width="1.8"/>
+  <text x="356" y="133" fill="{HOT}" font-size="16" font-weight="700" {F}>← 여기서 막혔다</text>
+
+  <text x="20" y="176" fill="{SUB}" font-size="16" {F}>…</text>
+
+  <text x="0" y="292" fill="{BLUE}" font-size="17" font-weight="700" {F}>설명한 부분</text>
+  <text x="110" y="292" fill="{INK}" font-size="17" {F}>— 이미 아는 것. 넘어간다</text>
+  <text x="0" y="326" fill="{HOT}" font-size="17" font-weight="700" {F}>막힌 부분</text>
+  <text x="110" y="326" fill="{INK}" font-size="17" {F}>— 내가 모르는 것. <tspan font-weight="700">여기만 판다</tspan></text>
+""")
+
+
 SCATTER = _s(520, 400, "0 0 520 400", f"""
   <circle cx="260" cy="200" r="150" fill="{PAPER}"/>
   {_조각(120, 90, 120, 12, -14, .55)}
