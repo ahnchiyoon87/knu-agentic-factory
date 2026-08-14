@@ -340,24 +340,43 @@ def _화살(y):
   <path d="M280 {y} L280 {y + 22}" stroke="{SUB}" stroke-width="2"/>
   <path d="M273 {y + 15} L280 {y + 22} L287 {y + 15}" stroke="{SUB}"
         stroke-width="2" fill="none"/>
-  <text x="298" y="{y + 18}" fill="{SUB}" font-size="13" {F}>쉬운 말로 한 번 더</text>"""
+  <text x="298" y="{y + 18}" fill="{SUB}" font-size="12" {F}>한 겹만 벗긴다</text>"""
 
 
-DEF_CMP = _s(560, 412, "0 0 560 412", f"""
-  {_내림(0, "① 교과서", LINE, "#f6f8fb",
-        ["“정의역의 각 원소를 공역의 오직 하나의 원소에",
-         "대응시키는 관계로서, 매개변수로 인자를 전달받아",
-         "정해진 연산을 수행하고 반환값을 산출하는 서브루틴”"],
-        13, "…읽다가 숨이 막힌다")}
-  {_화살(154)}
-  {_내림(184, "② 한 번 풀어 쓰면", SUB, BG,
-        ["“입력을 받아 처리한 뒤", "결과를 돌려주는 코드 묶음”"], 15)}
-  {_화살(284)}
-  {_내림(314, "③ 끝까지 내 말로", BLUE, BLUE_BG,
-        ["“값을 넣으면 답을 돌려주는 상자”"], 17)}
+# **뜻을 깎아서 쉬워지는 게 아니다.** 모르는 낱말을 만나면 그 낱말을 다시 파고들고,
+# 바닥에 닿은 다음 이해한 것을 엮어 올라온다. 앞 장(모르는 자리는 끝까지 파고듭니다)과
+# 같은 동작을 **정의를 대할 때도 똑같이** 한다는 것을 보여 준다.
+def _단(x, y, w, 낱말, 뜻, 색=SUB, 배경=BG):
+    return f"""
+  <rect x="{x}" y="{y}" width="{w}" height="52" rx="8" fill="{배경}"
+        stroke="{색}" stroke-width="1.5"/>
+  <text x="{x + 14}" y="{y + 22}" fill="{색}" font-size="14" font-weight="700" {F}>{낱말}</text>
+  <text x="{x + 14}" y="{y + 42}" fill="{INK}" font-size="13" {F}>{뜻}</text>"""
 
-  <text x="560" y="398" text-anchor="end" fill="{BLUE}" font-size="15"
-        font-weight="700" {F}>뜻은 셋 다 같다</text>
+
+DEF_CMP = _s(560, 470, "0 0 560 470", f"""
+  <text x="0" y="14" fill="{LINE}" font-size="12" font-weight="700" {F}>교과서 정의</text>
+  <text x="0" y="38" fill="{INK}" font-size="13" {F}>“매개변수로 인자를 전달받아 정해진 연산을</text>
+  <text x="0" y="58" fill="{INK}" font-size="13" {F}>수행하고 반환값을 산출하는 서브루틴”</text>
+
+  <text x="440" y="86" fill="{HOT}" font-size="12" font-weight="700" {F}>↓ 내려간다</text>
+
+  {_단(0, 74, 420, "매개변수?", "값을 받아 두는 자리 — 그런데 「인자」는 또 뭐지?", HOT, HOT_BG)}
+  {_단(40, 140, 420, "인자?", "그 자리에 실제로 넣는 값. 3 을 넣으면 3 이 인자", HOT, HOT_BG)}
+  {_단(80, 206, 420, "반환값?", "일을 마치고 밖으로 내주는 결과", HOT, HOT_BG)}
+  <text x="120" y="284" fill="{SUB}" font-size="13" {F}>… 바닥</text>
+
+  <text x="0" y="304" fill="{BLUE}" font-size="12" font-weight="700" {F}>↑ 엮으며 올라온다</text>
+
+  {_단(40, 314, 480,
+      "받아 두는 자리에 값을 넣으면",
+      "정해진 계산을 하고 결과를 내준다", BLUE, BLUE_BG)}
+  {_단(0, 380, 520,
+      "“값을 넣으면 정해진 계산을 해서 답을 돌려주는 상자”",
+      "— 매개변수 · 인자 · 연산 · 반환값이 다 들어 있다", BLUE, BLUE_BG)}
+
+  <text x="0" y="462" fill="{BLUE}" font-size="14" font-weight="700" {F}>
+    쉬워졌지만 뜻은 하나도 안 빠졌다</text>
 """)
 
 
