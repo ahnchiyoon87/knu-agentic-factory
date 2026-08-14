@@ -108,17 +108,21 @@
   /* 숫자는 원의 정가운데. 원의 중심을 상자 모서리에 놓는다 —
      자기 크기의 절반만큼 margin 으로 당기면 transform 없이 정확히 맞는다.
      (transform 으로 밀면 원까지 함께 옮겨져 숫자가 가운데를 벗어나 보인다) */
-  /* 번호는 상자 **바로 위**에 얹는다 — 상자 안에 넣으면 화면 내용을 덮고,
-     원 중심을 모서리에 맞추면 가장자리에서 그림 밖으로 나간다. 둘 다 겪었다.
-     위로 올리면 내용을 안 가리고, 상자가 화면 위쪽에 있을 때만 아래로 내린다. */
+  /* 번호는 상자 **옆**에 붙인다 — 세 자리를 다 겪고 여기로 왔다.
+       안쪽 : 화면 내용을 덮는다 (＋ 도 제목 글자도 가렸다)
+       위쪽 : 목록처럼 촘촘한 화면에서 **바로 윗 항목**을 덮는다
+       모서리에 중심 맞추기 : 가장자리 상자에서 그림 밖으로 나간다
+     좌우는 대개 비어 있다. 왼쪽에 자리가 없으면 오른쪽으로 보낸다. */
   .shotbox b{ position:absolute; width:22px; height:22px; border-radius:50%;
               background:var(--orange); color:#fff;
               font-size:13px; font-weight:800; font-style:normal;
               font-family:system-ui,"Malgun Gothic",sans-serif;
               display:flex; align-items:center; justify-content:center;
               line-height:22px; text-align:center;
-              transform:translateY(-100%); margin-top:-3px; }
-  .shotbox b.아래{ transform:none; margin-top:3px; }
+              transform:translateX(-100%); margin-left:-4px; }
+  .shotbox b.오른쪽{ transform:none; margin-left:4px; }
+  /* 좌우 어디에도 자리가 없을 때만 — 상자가 화면 폭을 거의 다 차지하는 경우 */
+  .shotbox b.안쪽{ transform:none; margin-left:3px; margin-top:3px; }
 
   /* 화면은 본문 상자를 절대 넘지 않는다 — .art 를 stretch 로 늘려 높이를 확정한 뒤
      그 100% 를 이미지 최대 높이로 삼는다. 픽셀로 못 박으면 장마다 넘친다. */

@@ -175,10 +175,15 @@ def 화면(이름: str, *표시, 폴더: str = "노션", 확대: bool = False,
     for x, y, w, h, 뱃지 in _다듬기(항목, 이름):
         상자 += f'<i style="left:{x}%;top:{y}%;width:{w}%;height:{h}%"></i>'
         if 뱃지:
-            # 번호는 상자 **바로 위**에 얹는다 (CSS). 상자가 화면 맨 위에 붙어
-            # 있으면 위로 못 가므로 아래로 내린다.
-            아래 = ' class="아래"' if y < 5.0 else ""
-            상자 += f'<b{아래} style="left:{x}%;top:{y if y >= 5 else y + h}%">{뱃지}</b>'
+            # 번호 자리 — 왼쪽 옆 → 오른쪽 옆 → (둘 다 없으면) 상자 안쪽.
+            # 상자가 화면 폭을 거의 다 차지하면 옆에 둘 자리가 없다.
+            if x >= 5.0:
+                꼴, 가로 = "", x
+            elif x + w <= 95.0:
+                꼴, 가로 = ' class="오른쪽"', x + w
+            else:
+                꼴, 가로 = ' class="안쪽"', x
+            상자 += f'<b{꼴} style="left:{가로}%;top:{y}%">{뱃지}</b>'
     # 조망 = 전체 모양만 보는 장. 작은 글자를 읽을 필요가 없어 크기 검사에서 뺀다.
     표식 = ' data-view="1"' if 조망 else ""
     return f'<div class="shotbox"{표식} {크기}>{img}{상자}</div>'
