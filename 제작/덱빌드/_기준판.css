@@ -108,16 +108,17 @@
   /* 숫자는 원의 정가운데. 원의 중심을 상자 모서리에 놓는다 —
      자기 크기의 절반만큼 margin 으로 당기면 transform 없이 정확히 맞는다.
      (transform 으로 밀면 원까지 함께 옮겨져 숫자가 가운데를 벗어나 보인다) */
-  /* 번호는 상자 **안쪽 왼쪽 위 모서리**에 붙인다.
-     원 중심을 모서리에 맞추면(margin 으로 절반 빼기) 화면 가장자리 상자에서
-     원의 절반이 그림 밖으로 나간다 — 실제로 네 장이 그렇게 나갔다.
-     안쪽에 두면 모서리 한 귀퉁이만 가리고, 밖으로 나갈 일이 없다. */
-  .shotbox b{ position:absolute; width:24px; height:24px; border-radius:50%;
+  /* 번호는 상자 **바로 위**에 얹는다 — 상자 안에 넣으면 화면 내용을 덮고,
+     원 중심을 모서리에 맞추면 가장자리에서 그림 밖으로 나간다. 둘 다 겪었다.
+     위로 올리면 내용을 안 가리고, 상자가 화면 위쪽에 있을 때만 아래로 내린다. */
+  .shotbox b{ position:absolute; width:22px; height:22px; border-radius:50%;
               background:var(--orange); color:#fff;
-              font-size:14px; font-weight:800; font-style:normal;
+              font-size:13px; font-weight:800; font-style:normal;
               font-family:system-ui,"Malgun Gothic",sans-serif;
               display:flex; align-items:center; justify-content:center;
-              line-height:24px; text-align:center; }
+              line-height:22px; text-align:center;
+              transform:translateY(-100%); margin-top:-3px; }
+  .shotbox b.아래{ transform:none; margin-top:3px; }
 
   /* 화면은 본문 상자를 절대 넘지 않는다 — .art 를 stretch 로 늘려 높이를 확정한 뒤
      그 100% 를 이미지 최대 높이로 삼는다. 픽셀로 못 박으면 장마다 넘친다. */
@@ -128,7 +129,10 @@
      동시에 걸어도 비율이 유지된다. 상자에 걸면(높이 100% + 최대 너비) 두 한도가
      겹치는 장에서 비율이 깨져 화면이 찌그러진다 — 실제로 그렇게 됐다.
      470px = 제목 한 줄 기준 본문 높이(≈497)에서 여유를 둔 값. 넘치면 검사에 걸린다. */
-  .shotbox img{ max-width:100%; max-height:496px; width:auto; height:auto; }
+  /* 크기는 shotkit 이 인라인 width 로 정한다 — 작은 캡처도 자리를 꽉 채우게 키운다.
+     여기서 max-height 로만 묶으면 작은 그림이 원본 크기 그대로 좁쌀만 하게 남는다. */
+  .shotbox{ max-width:100%; }
+  .shotbox img{ width:100%; height:auto; display:block; }
 
   .shot .body{ gap:52px; }
   .shot .art{ flex:0 0 940px; display:flex; align-items:center; justify-content:flex-start; }

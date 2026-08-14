@@ -134,9 +134,13 @@ def _잘라내기(경로: str, 항목, 여유: float, 최소세로: float | None
     return base64.b64encode(buf.getvalue()).decode("ascii"), 옮김
 
 
+# 레이아웃별로 화면에 주어진 자리 (CSS 와 맞춰 둔다)
+자리크기 = {"step": (740, 496), "shot": (940, 496), "full": (1408, 496)}
+
+
 def 화면(이름: str, *표시, 폴더: str = "노션", 확대: bool = False,
          여유: float = 6.0, 조망: bool = False,
-         최소세로: float | None = None) -> str:
+         최소세로: float | None = None, 자리: str = "step") -> str:
     """이름.png 를 박고, 표시마다 붉은 상자를 얹은 HTML 을 돌려준다.
 
     표시 = (왼쪽%, 위%, 너비%, 높이%) 또는 (…, "뱃지글자")
@@ -152,16 +156,29 @@ def 화면(이름: str, *표시, 폴더: str = "노션", 확대: bool = False,
                              f'"1" 처럼 맨 숫자로 적습니다. 동그라미는 CSS 가 그립니다.')
     if 확대 and 항목:
         자료, 항목 = _잘라내기(f"{폴더}/{이름}.png", 항목, 여유, 최소세로)
+        from PIL import Image
+        폭, 높이 = Image.open(그림 / f"{폴더}/{이름}.png").size   # 잘린 크기는 아래서 다시 잰다
+        import base64 as _b
+        폭, 높이 = Image.open(io.BytesIO(_b.b64decode(자료))).size
     else:
-        자료, _w, _h = _읽기(f"{폴더}/{이름}.png")
+        자료, 폭, 높이 = _읽기(f"{폴더}/{이름}.png")
+
+    # **작은 캡처는 키운다.** 원본 크기 그대로 두면 사이드바 조각 같은 그림이
+    # 슬라이드 구석에 좁쌀만 하게 붙는다 (실제로 그렇게 나갔다).
+    # 주어진 자리(가로·세로) 안에서 비율을 지키며 꽉 채운다.
+    가용폭, 가용높이 = 자리크기.get(자리, 자리크기["step"])
+    배 = min(가용폭 / 폭, 가용높이 / 높이)
+    크기 = f'style="width:{round(폭 * 배)}px"'
+
     img = f'<img src="data:image/png;base64,{자료}" alt="">'
     상자 = ""
     for x, y, w, h, 뱃지 in _다듬기(항목, 이름):
         상자 += f'<i style="left:{x}%;top:{y}%;width:{w}%;height:{h}%"></i>'
         if 뱃지:
-            # 번호는 상자 **안쪽 왼쪽 위**에 붙는다 (CSS 가 자리를 잡는다).
-            # 바깥에 두면 화면 가장자리 상자에서 그림 밖으로 나간다.
-            상자 += f'<b style="left:{x}%;top:{y}%">{뱃지}</b>'
+            # 번호는 상자 **바로 위**에 얹는다 (CSS). 상자가 화면 맨 위에 붙어
+            # 있으면 위로 못 가므로 아래로 내린다.
+            아래 = ' class="아래"' if y < 5.0 else ""
+            상자 += f'<b{아래} style="left:{x}%;top:{y if y >= 5 else y + h}%">{뱃지}</b>'
     # 조망 = 전체 모양만 보는 장. 작은 글자를 읽을 필요가 없어 크기 검사에서 뺀다.
     표식 = ' data-view="1"' if 조망 else ""
-    return f'<div class="shotbox"{표식}>{img}{상자}</div>'
+    return f'<div class="shotbox"{표식} {크기}>{img}{상자}</div>'
