@@ -319,23 +319,45 @@ DIG = _s(560, 400, "0 0 560 400", f"""
 # ─────────────────────────────────────────────────────────────────────
 # 7. 정의는 외우지 않는다 — 의미가 같으면 정답 (코딩 용어로)
 # ─────────────────────────────────────────────────────────────────────
-DEF_CMP = _s(560, 380, "0 0 560 380", f"""
-  <rect x="0" y="0" width="560" height="120" rx="10" fill="#f6f8fb"
-        stroke="{LINE}" stroke-width="1.5"/>
-  <text x="20" y="30" fill="{LINE}" font-size="12" font-weight="700" {F}>교과서</text>
-  <text x="20" y="62" fill="{INK}" font-size="15" {F}>“함수란 입력을 받아 처리한 뒤</text>
-  <text x="20" y="88" fill="{INK}" font-size="15" {F}>결과를 돌려주는 코드 묶음이다”</text>
+# **한 번에 건너뛰지 않는다.** 어려운 정의에서 곧장 「상자」로 가면 마술처럼 보인다.
+# 한 칸씩 쉬워지는 것을 보여 줘야 학생이 그 과정을 따라 할 수 있다.
+def _내림(y, 꼬리표, 색, 배경, 줄들, 크기=14, 끝말=""):
+    본문 = "".join(
+        f'<text x="20" y="{y + 52 + i * 22}" fill="{INK}" font-size="{크기}" {F}>{t}</text>'
+        for i, t in enumerate(줄들))
+    높이 = 40 + len(줄들) * 22 + (26 if 끝말 else 0)   # 끝말이 테두리에 걸리지 않게
+    꼬리 = (f'<text x="20" y="{y + 52 + len(줄들) * 22 + 4}" fill="{색}" '
+            f'font-size="12" font-weight="700" {F}>{끝말}</text>' if 끝말 else "")
+    return f"""
+  <rect x="0" y="{y}" width="560" height="{높이}" rx="10" fill="{배경}"
+        stroke="{색}" stroke-width="1.5"/>
+  <text x="20" y="{y + 26}" fill="{색}" font-size="12" font-weight="700" {F}>{꼬리표}</text>
+  {본문}{꼬리}"""
 
-  <rect x="0" y="150" width="560" height="120" rx="10" fill="{BLUE_BG}"
-        stroke="{BLUE}" stroke-width="1.5"/>
-  <text x="20" y="180" fill="{BLUE}" font-size="12" font-weight="700" {F}>내가 쓴 것</text>
-  <text x="20" y="212" fill="{INK}" font-size="15" {F}>“값을 넣으면 답을 돌려주는 상자.</text>
-  <text x="20" y="238" fill="{INK}" font-size="15" {F}>같은 걸 여러 번 쓸 때 만든다”</text>
 
-  <text x="280" y="312" text-anchor="middle" fill="{SUB}" font-size="15" {F}>
-    글자는 다르다. 그런데 뜻이 같다.</text>
-  <text x="280" y="348" text-anchor="middle" fill="{BLUE}" font-size="20"
-        font-weight="700" {F}>→ 정답입니다</text>
+def _화살(y):
+    return f"""
+  <path d="M280 {y} L280 {y + 22}" stroke="{SUB}" stroke-width="2"/>
+  <path d="M273 {y + 15} L280 {y + 22} L287 {y + 15}" stroke="{SUB}"
+        stroke-width="2" fill="none"/>
+  <text x="298" y="{y + 18}" fill="{SUB}" font-size="13" {F}>쉬운 말로 한 번 더</text>"""
+
+
+DEF_CMP = _s(560, 412, "0 0 560 412", f"""
+  {_내림(0, "① 교과서", LINE, "#f6f8fb",
+        ["“정의역의 각 원소를 공역의 오직 하나의 원소에",
+         "대응시키는 관계로서, 매개변수로 인자를 전달받아",
+         "정해진 연산을 수행하고 반환값을 산출하는 서브루틴”"],
+        13, "…읽다가 숨이 막힌다")}
+  {_화살(154)}
+  {_내림(184, "② 한 번 풀어 쓰면", SUB, BG,
+        ["“입력을 받아 처리한 뒤", "결과를 돌려주는 코드 묶음”"], 15)}
+  {_화살(284)}
+  {_내림(314, "③ 끝까지 내 말로", BLUE, BLUE_BG,
+        ["“값을 넣으면 답을 돌려주는 상자”"], 17)}
+
+  <text x="560" y="398" text-anchor="end" fill="{BLUE}" font-size="15"
+        font-weight="700" {F}>뜻은 셋 다 같다</text>
 """)
 
 
