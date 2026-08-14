@@ -71,11 +71,14 @@ def step(h1, sub, rows, img, foot="", 넣을것=None, 넣을것제목="여기에
     # 통과한 게 아니라 검사가 안 돌고 있었던 것이다.
     뱃지 = set(_re.findall(r"<b\b[^>]*>(\d+)</b>", img))
     번호 = {no for no, _, _ in rows}
-    if 뱃지 and 뱃지 != 번호:
+    # 화면에 **안 찍힌 조작**은 상자를 안 붙인다 (번호만 왼쪽에 둔다) — 그건 정상이다.
+    # 반대로 왼쪽에 없는 번호가 화면에 있으면 학생이 「②는 어디?」 하고 찾다 끊긴다.
+    남는뱃지 = 뱃지 - 번호
+    if 남는뱃지:
         raise SystemExit(
-            f"「{h1}」 — 왼쪽 번호와 화면 번호가 다릅니다\n"
+            f"「{h1}」 — 화면에만 있는 번호가 있습니다: {sorted(남는뱃지)}\n"
             f"    왼쪽 {sorted(번호)}   화면 {sorted(뱃지)}\n"
-            f"  설명 항목 수와 화면 상자 수를 맞추세요 (붙어 있는 것은 한 항목으로 묶습니다).")
+            f"  화면 상자의 번호는 반드시 왼쪽 설명에도 있어야 합니다.")
     LOG.append(dict(t="step", n=11, h1=h1, sub=sub, rows=rows, foot=foot))
     r = "".join(f'<div class="srow"><div class="sno">{no}</div>'
                 f'<div class="st"><strong>{st}</strong>'

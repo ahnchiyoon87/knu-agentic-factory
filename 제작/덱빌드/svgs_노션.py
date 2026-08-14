@@ -277,18 +277,18 @@ def _칩(x, y, w, t, col, bg, size=14):
 
 
 ORDER_OK = _s(560, 200, "0 0 560 200", f"""
-  <text x="0" y="20" fill="{BLUE}" font-size="14" font-weight="700" {F}>이 순서</text>
-  {_칩(0, 36, 150, "내가 먼저 쓴다", BLUE, BLUE_BG)}
+  <text x="0" y="20" fill="{HOT}" font-size="14" font-weight="700" {F}>대부분은</text>
+  {_칩(0, 36, 150, "AI 에게 묻는다", HOT, HOT_BG)}
   <text x="162" y="63" fill="{SUB}" font-size="20" {F}>→</text>
-  {_칩(184, 36, 150, "AI 가 고쳐 준다", BLUE, BLUE_BG)}
+  {_칩(184, 36, 150, "답을 읽는다", HOT, HOT_BG)}
   <text x="346" y="63" fill="{SUB}" font-size="20" {F}>→</text>
-  {_칩(368, 36, 190, "내 구멍이 드러난다", BLUE, BLUE_BG)}
-  <text x="0" y="128" fill="{HOT}" font-size="14" font-weight="700" {F}>바꾸면</text>
-  {_칩(0, 144, 150, "AI 에게 묻는다", HOT, HOT_BG)}
+  {_칩(368, 36, 190, "읽고 끝난다", HOT, HOT_BG)}
+  <text x="0" y="128" fill="{BLUE}" font-size="14" font-weight="700" {F}>뒤집으면</text>
+  {_칩(0, 144, 150, "내가 먼저 쓴다", BLUE, BLUE_BG)}
   <text x="162" y="171" fill="{SUB}" font-size="20" {F}>→</text>
-  {_칩(184, 144, 150, "답을 읽는다", HOT, HOT_BG)}
+  {_칩(184, 144, 150, "AI 가 고쳐 준다", BLUE, BLUE_BG)}
   <text x="346" y="171" fill="{SUB}" font-size="20" {F}>→</text>
-  {_칩(368, 144, 190, "읽고 끝난다", HOT, HOT_BG)}
+  {_칩(368, 144, 190, "내 구멍이 드러난다", BLUE, BLUE_BG)}
 """)
 
 
@@ -352,6 +352,35 @@ def _단(x, y, w, 낱말, 뜻, 색=SUB, 배경=BG):
         stroke="{색}" stroke-width="1.5"/>
   <text x="{x + 14}" y="{y + 22}" fill="{색}" font-size="14" font-weight="700" {F}>{낱말}</text>
   <text x="{x + 14}" y="{y + 42}" fill="{INK}" font-size="13" {F}>{뜻}</text>"""
+
+
+# 두 덩어리만 — 남이 쓴 정의 하나, 이해하고 나서 내가 쓴 문장 하나.
+# 예전 그림은 상자 여섯 개에 계단까지 져서 눈이 갈 데를 몰랐다.
+# 「빠진 게 없다」는 말로 설명하지 않는다 — **예시 자체가 증명한다.**
+DEF_NEW = _s(560, 306, "0 0 560 306", f"""
+  <text x="0" y="14" fill="{SUB}" font-size="13" font-weight="700" {F}>교과서 정의</text>
+  <rect x="0" y="26" width="560" height="70" rx="12" fill="#f5f6f8"
+        stroke="{LINE}" stroke-width="1.5"/>
+  <text x="20" y="54" fill="#3b4350" font-size="15" {F}>“매개변수로 인자를 전달받아 정해진 연산을</text>
+  <text x="20" y="78" fill="#3b4350" font-size="15" {F}>수행하고 반환값을 산출하는 서브루틴”</text>
+
+  <path d="M280 106 L280 140" stroke="{SUB}" stroke-width="2"/>
+  <path d="M274 133 L280 141 L286 133" stroke="{SUB}" stroke-width="2" fill="none"/>
+  <text x="296" y="128" fill="{SUB}" font-size="14" font-weight="700"
+        {F}>이해하고 나면</text>
+
+  <text x="0" y="166" fill="{BLUE}" font-size="13" font-weight="700" {F}>내 말로 설명하면</text>
+  <rect x="0" y="178" width="560" height="122" rx="12" fill="{BLUE_BG}"
+        stroke="{BLUE}" stroke-width="2"/>
+  <text x="20" y="208" fill="{BLUE}" font-size="17" font-weight="700"
+        {F}>“값을 넣어 주면, 그 값으로 정해진 계산을 해서</text>
+  <text x="20" y="233" fill="{BLUE}" font-size="17" font-weight="700"
+        {F}>결과를 돌려주는 상자.</text>
+  <text x="20" y="258" fill="{BLUE}" font-size="17" font-weight="700"
+        {F}>넣는 값은 매번 달라도 되고, 계산 방법은 늘 같다.</text>
+  <text x="20" y="283" fill="{BLUE}" font-size="17" font-weight="700"
+        {F}>같은 걸 여러 번 쓸 때 만들어 둔다.”</text>
+""")
 
 
 DEF_CMP = _s(560, 470, "0 0 560 470", f"""

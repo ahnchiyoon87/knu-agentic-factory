@@ -34,9 +34,10 @@
 
   .s{
     width:1600px; height:900px; background:#fff;
-    /* 여백을 줄여 화면에 자리를 몰아준다 — 캡처가 작으면 그 안 글자가 안 읽힌다.
+    /* 강사가 손으로 맞춘 값을 그대로 옮겼다 (1~17장 실측).
+         제목 y=54 · 부제 y=130 · 그림 위 193 · 그림 아래 777 · 구분선 782 · 각주 815
        좌우 76 고정 — 모든 요소가 이 기준선에서 시작한다. */
-    padding:56px 76px 48px;
+    padding:56px 76px 42px;
     display:flex; flex-direction:column;   /* 세로 flex — 겹침 구조적 차단 */
     position:relative; overflow:hidden;
     page-break-after:always; break-after:page;
@@ -54,11 +55,13 @@
   /* ---- 본문 영역 ----
      본문은 남는 세로 공간을 전부 차지한다. 아래가 비면 삽화를 키운다.
      기준판에 빈 하단을 보여 주면 생성물도 하단이 빈다. */
-  .body{ flex:1; display:flex; min-height:0; padding-top:32px; align-items:center; }
+  /* 본문은 y 193 에서 시작해 777 에서 끝난다 — 584 를 그림에 다 준다 */
+  .body{ flex:1; display:flex; min-height:0; padding-top:14px; align-items:center; }
 
   /* ---- 마무리 — 결론 한 줄. 가는 윗선으로만 구분한다 ---- */
+  /* 구분선 y=782 · 각주 글 y=815 — 강사가 손으로 맞춘 자리 (1~17장 실측) */
   .foot{ flex:none; font-size:29px; line-height:1.5; color:#111;
-         padding-top:26px; margin-top:26px; border-top:1px solid #E2E6EB; }
+         padding-top:33px; margin-top:5px; border-top:1px solid #E2E6EB; }
   .mark{ background:var(--wash); padding:4px 10px; font-weight:700; }
 
   /* 문단 사이가 글자 크기의 2배를 넘으면 한 줄 띄운 것처럼 보인다.

@@ -32,6 +32,20 @@ def main() -> int:
     낼곳.mkdir(parents=True, exist_ok=True)
 
     import win32com.client as w
+
+    # **이미 파워포인트가 떠 있으면 손대지 않는다.**
+    # 예전에는 그냥 Dispatch 로 붙어서 일이 끝나면 Quit 했다 — 그러면 강사가
+    # 편집하던 창까지 같이 닫혀 작업이 날아간다. 실제로 그렇게 껐다.
+    try:
+        w.GetActiveObject("PowerPoint.Application")
+    except Exception:
+        pass                                        # 안 떠 있다 — 우리가 열어 쓴다
+    else:
+        raise SystemExit(
+            "파워포인트가 열려 있습니다 — 그대로 두고 이 도구는 돌리지 않습니다.\n"
+            "  (열린 창을 닫아 버리면 편집 중이던 내용이 사라집니다)\n"
+            "  확인하려면 파워포인트를 모두 닫고 다시 실행하세요.")
+
     app = w.Dispatch("PowerPoint.Application")
     p = app.Presentations.Open(str(원본), True, False, False)
     p.SaveCopyAs(str(낼곳 / "s.png"), 18)          # 18 = ppSaveAsPNG
