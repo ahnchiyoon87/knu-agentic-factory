@@ -100,6 +100,19 @@ JS = r"""
                     + ' · 환산 ' + 예상.toFixed(1) + 'px (그린 폭 ' + r.width.toFixed(0) + ')');
     });
 
+    // ⑥-0 강조 상자·번호가 **화면 밖으로** 나갔는가
+    //     상자는 화면 안으로 잘라 두지만, 번호는 상자 밖에 붙어서 삐져나갈 수 있다.
+    s.querySelectorAll('.shotbox').forEach(box => {
+      const br = box.getBoundingClientRect();
+      box.querySelectorAll('i, b').forEach(el => {
+        const r = el.getBoundingClientRect();
+        if (r.left < br.left - 1 || r.right > br.right + 1
+            || r.top < br.top - 1 || r.bottom > br.bottom + 1)
+          issues.push('강조가 화면 밖으로 나감: <' + el.tagName.toLowerCase() + '> '
+                      + (el.textContent || '').trim());
+      });
+    });
+
     // ⑥ 강조 상자끼리 겹침
     const 상자 = [...s.querySelectorAll('.shotbox i')].map(e => e.getBoundingClientRect());
     for (let a = 0; a < 상자.length; a++)

@@ -108,14 +108,16 @@
   /* 숫자는 원의 정가운데. 원의 중심을 상자 모서리에 놓는다 —
      자기 크기의 절반만큼 margin 으로 당기면 transform 없이 정확히 맞는다.
      (transform 으로 밀면 원까지 함께 옮겨져 숫자가 가운데를 벗어나 보인다) */
-  .shotbox b{ position:absolute; width:26px; height:26px; border-radius:50%;
+  /* 번호는 상자 **안쪽 왼쪽 위 모서리**에 붙인다.
+     원 중심을 모서리에 맞추면(margin 으로 절반 빼기) 화면 가장자리 상자에서
+     원의 절반이 그림 밖으로 나간다 — 실제로 네 장이 그렇게 나갔다.
+     안쪽에 두면 모서리 한 귀퉁이만 가리고, 밖으로 나갈 일이 없다. */
+  .shotbox b{ position:absolute; width:24px; height:24px; border-radius:50%;
               background:var(--orange); color:#fff;
-              font-size:15px; font-weight:800; font-style:normal;
+              font-size:14px; font-weight:800; font-style:normal;
               font-family:system-ui,"Malgun Gothic",sans-serif;
               display:flex; align-items:center; justify-content:center;
-              line-height:26px; text-align:center; margin-top:-13px; }
-  .shotbox b.left { margin-left:-13px; }
-  .shotbox b.right{ margin-left:-13px; }
+              line-height:24px; text-align:center; }
 
   /* 화면은 본문 상자를 절대 넘지 않는다 — .art 를 stretch 로 늘려 높이를 확정한 뒤
      그 100% 를 이미지 최대 높이로 삼는다. 픽셀로 못 박으면 장마다 넘친다. */
@@ -150,6 +152,14 @@
   .st span{ display:block; font-size:24px; color:var(--gray); margin-top:5px; line-height:1.45; }
   .st code{ background:#F1F4F8; border:1px solid #DDE3EA; border-radius:5px;
             padding:1px 8px; font-size:.92em; font-family:Consolas,monospace; }
+
+  /* 넣을 내용은 조작 설명과 갈라 둔다 — 학생은 이 회색 글자를 그대로 옮겨 친다.
+     설명 문장 속에 섞어 두면 어디까지가 칠 내용인지 알 수 없다. */
+  .typein{ margin-top:26px; padding-top:18px; border-top:1px dashed #C9D1DB; }
+  .typein b{ display:block; font-size:20px; font-weight:700; color:var(--gray);
+             margin-bottom:10px; }
+  .typein div{ font-size:24px; color:#6B7280; line-height:1.5;
+               border-bottom:1px solid #E2E6EB; padding:5px 2px; }
 
   /* ============ 4 · 번호 레일형 ============ */
   .rail .body{ flex-direction:column; justify-content:space-between; gap:0; align-items:stretch; }

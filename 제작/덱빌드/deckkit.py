@@ -58,7 +58,7 @@ def shotfull(h1, sub, img, foot=""):
             f'<div class="body">{img}</div>{_foot(foot)}</section>')
 
 
-def step(h1, sub, rows, img, foot=""):
+def step(h1, sub, rows, img, foot="", 넣을것=None, 넣을것제목="여기에 넣을 내용"):
     """왼쪽에 번호 붙은 조작 순서, 오른쪽에 그 조작이 일어나는 실제 화면.
        화면에는 누를 자리를 붉게 표시한다 (shotkit.화면).
 
@@ -78,8 +78,13 @@ def step(h1, sub, rows, img, foot=""):
                 f'<div class="st"><strong>{st}</strong>'
                 + (f"<span>{sp}</span>" if sp else "") + "</div></div>"
                 for no, st, sp in rows)
+    # 입력할 내용은 조작 설명과 갈라서 **회색 글자로** 보여 준다 — 그대로 옮겨 치면 된다
+    입력 = ""
+    if 넣을것:
+        줄 = "".join(f"<div>{t}</div>" for t in 넣을것)
+        입력 = f'<div class="typein"><b>{넣을것제목}</b>{줄}</div>'
     return (f'<section class="s step">{_head(h1, sub)}<div class="body">'
-            f'<div class="txt">{r}</div><div class="art">{img}</div>'
+            f'<div class="txt">{r}{입력}</div><div class="art">{img}</div>'
             f'</div>{_foot(foot)}</section>')
 
 
