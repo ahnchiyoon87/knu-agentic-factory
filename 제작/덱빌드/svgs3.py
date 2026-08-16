@@ -12,7 +12,7 @@ HALLU = _s(520, 400, "0 0 520 400", f"""
   <rect x="86" y="188" width="180" height="14" rx="7"/>
 </g>
 <path d="M330 176l64 64M394 176l-64 64" stroke="{O}" stroke-width="10" stroke-linecap="round"/>
-<text class="lbl-o" x="446" y="330">지어낸 값</text>
+<text class="lbl-o" x="500" y="330" text-anchor="end">지어낸 값</text>
 """)
 
 # ── 눈이 없다 — 뇌만 있고 감각기관 없음
@@ -50,6 +50,21 @@ OVERLOAD = _s(540, 400, "0 0 540 400", f"""
 f"""</g>
 <path d="M270 320h150" stroke="{O}" stroke-width="6" stroke-dasharray="12 10" stroke-linecap="round"/>
 <text class="lbl-o" x="270" y="372">뒤쪽은 흘린다</text>
+""")
+
+# ── 표준이 없으면 M×N 으로 얽힌다 (에이전트 4 × 도구 5 = 이음매 20)
+#    OVERLOAD(뒤쪽은 흘린다)를 쓰면 「긴 지시가 뒤를 흘린다」는 딴 얘기가 붙는다.
+MXN = _s(540, 400, "0 0 540 400", f"""
+""" + "".join(
+    f'<rect x="40" y="{54 + i * 84}" width="92" height="56" rx="10" '
+    f'stroke="{N}" stroke-width="7"/>' for i in range(4)) + "".join(
+    f'<rect x="408" y="{40 + i * 66}" width="92" height="46" rx="8" '
+    f'stroke="{O}" stroke-width="7"/>' for i in range(5)) + f"""
+<g stroke="{G}" stroke-width="2.5" opacity=".75">""" + "".join(
+    f'<path d="M132 {82 + a * 84}L408 {63 + t * 66}"/>'
+    for a in range(4) for t in range(5)) + f"""</g>
+<text class="lbl-g" x="40" y="392">에이전트 4</text>
+<text class="lbl-o" x="500" y="392" text-anchor="end">도구 5</text>
 """)
 
 # ── 셋으로 쪼갠다 + 총괄

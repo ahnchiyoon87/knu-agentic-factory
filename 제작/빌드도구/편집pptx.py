@@ -135,19 +135,32 @@ PT = 0.6            # 1px → pt
                                 ops.push({k: 'svg', ...r, n: svgn++}); return; }
 
     // 이 칸 자체의 배경과 테두리 — .bar, 표 머리, 구분선, 동그라미가 여기서 나온다
-    if (보임(c.backgroundColor) && el !== document.body)
+    // 슬라이드 판(sec) 자체의 바탕은 도형으로 만들지 않는다 — 배경색으로 넣는다
+    if (보임(c.backgroundColor) && el !== document.body && el !== sec)
       ops.push({k: 'fill', ...r, fill: c.backgroundColor, round: px(c.borderRadius),
                 oval: c.borderRadius.includes('50%')});
-    for (const [면, dx, dy, dw, dh] of [['Top', 0, 0, r.w, 0],
-                                        ['Bottom', 0, r.h, r.w, 0],
-                                        ['Left', 0, 0, 0, r.h],
-                                        ['Right', r.w, 0, 0, r.h]]) {
-      const w = px(c['border' + 면 + 'Width']);
-      const col = c['border' + 면 + 'Color'];
-      if (w > 0 && 보임(col) && c['border' + 면 + 'Style'] !== 'none')
-        ops.push({k: 'line', x: r.x + dx, y: r.y + dy, w: dw, h: dh,
-                  fill: col, lw: w,
-                  dash: c['border' + 면 + 'Style'] === 'dashed'});
+    // 네 면이 다 같은 테두리면 **선 네 개가 아니라 사각형 하나**로 만든다.
+    // 선으로 쪼개 두면 강조 상자를 옮길 때마다 네 번 잡아야 한다.
+    const 면들 = ['Top', 'Bottom', 'Left', 'Right'].map(면 => ({
+      w: px(c['border' + 면 + 'Width']), col: c['border' + 면 + 'Color'],
+      st: c['border' + 면 + 'Style']}));
+    const 살아있는 = 면들.filter(f => f.w > 0 && 보임(f.col) && f.st !== 'none');
+    const 사방 = 살아있는.length === 4 &&
+                 살아있는.every(f => f.w === 살아있는[0].w && f.col === 살아있는[0].col);
+    if (사방) {
+      ops.push({k: 'frame', ...r, fill: 살아있는[0].col, lw: 살아있는[0].w,
+                round: px(c.borderRadius),
+                dash: 살아있는[0].st === 'dashed'});
+    } else {
+      for (const [i, [면, dx, dy, dw, dh]] of [['Top', 0, 0, r.w, 0],
+                                               ['Bottom', 0, r.h, r.w, 0],
+                                               ['Left', 0, 0, 0, r.h],
+                                               ['Right', r.w, 0, 0, r.h]].entries()) {
+        const f = 면들[i];
+        if (f.w > 0 && 보임(f.col) && f.st !== 'none')
+          ops.push({k: 'line', x: r.x + dx, y: r.y + dy, w: dw, h: dh,
+                    fill: f.col, lw: f.w, dash: f.st === 'dashed'});
+      }
     }
 
     const 자식 = [...el.children];
@@ -176,6 +189,49 @@ PT = 0.6            # 1px → pt
 """
 
 
+def _한상자로(ops):
+    """세로로 이어지는 글 조각을 **하나의 텍스트 상자**로 묶는다.
+
+    문단마다 상자를 따로 만들면 파워포인트에서 옮길 때 하나씩 따로 잡힌다.
+    한 덩어리로 묶고 문단 사이는 **줄 간격**으로 벌린다.
+
+    묶는 조건 — 왼쪽 끝과 폭이 같고, 바로 아래에 있고, 사이에 **다른 것이 없을 것.**
+    (구분선이나 그림이 끼어 있으면 다른 덩어리다)
+    """
+    나온것, 묶음, 사이 = [], [], []
+
+    def 내보내기():
+        nonlocal 묶음
+        if len(묶음) == 1:
+            나온것.append(묶음[0])
+        elif 묶음:
+            나온것.append({**묶음[0], "묶음": 묶음})
+        묶음 = []
+
+    for o in ops:
+        if o["k"] != "text":
+            사이.append(o)          # 판정은 다음 글 조각이 올 때 한다
+            continue
+        앞 = 묶음[-1] if 묶음 else None
+        # 밑칠(fill)만 끼어 있으면 같은 덩어리다. 구분선·그림이 있으면 다른 덩어리.
+        깨끗 = all(x["k"] == "fill" for x in 사이)
+        붙나 = (앞 is not None and 깨끗
+                and not o.get("가운데") and not 앞.get("가운데")
+                and abs(o["x"] - 앞["x"]) < 2 and abs(o["w"] - 앞["w"]) < 4
+                and o.get("align") == 앞.get("align")
+                and 0 <= o["y"] - (앞["y"] + 앞["h"]) < 붙는틈)
+        if not 붙나:
+            내보내기()
+        나온것.extend(사이); 사이 = []
+        묶음.append(o)
+    내보내기()
+    나온것.extend(사이)
+    return 나온것
+
+
+붙는틈 = 26.0      # 문단 사이가 이보다 벌어지면 다른 덩어리로 본다
+
+
 def _색(s: str):
     from pptx.dml.color import RGBColor
     m = re.findall(r"[\d.]+", s or "")
@@ -196,11 +252,12 @@ def 한장(prs, 명령, 바탕, 삽화: dict[int, bytes]):
 
     s = prs.slides.add_slide(prs.slide_layouts[6])
 
+    # 바탕은 **도형이 아니라 슬라이드 배경색**으로 넣는다.
+    # 흰 사각형을 한 장 깔아 두면 요소를 누를 때마다 그 판이 먼저 잡히고
+    # 크기 조절 손잡이도 판 것이 잡혀 아무것도 못 만진다. 실제로 그랬다.
     if 바탕:
-        칠 = s.shapes.add_shape(MSO_SHAPE.RECTANGLE, 0, 0,
-                                prs.slide_width, prs.slide_height)
-        칠.fill.solid(); 칠.fill.fore_color.rgb = _색(바탕)
-        칠.line.fill.background(); 칠.shadow.inherit = False
+        s.background.fill.solid()
+        s.background.fill.fore_color.rgb = _색(바탕)
 
     맞춤 = {"center": PP_ALIGN.CENTER, "right": PP_ALIGN.RIGHT,
             "justify": PP_ALIGN.JUSTIFY}
@@ -243,6 +300,9 @@ def 한장(prs, 명령, 바탕, 삽화: dict[int, bytes]):
             sh.fill.background()
             sh.line.color.rgb = _색(o["fill"]); sh.line.width = Pt(o["lw"] * PT)
             sh.shadow.inherit = False
+            if o.get("dash"):
+                from pptx.enum.dml import MSO_LINE_DASH_STYLE
+                sh.line.dash_style = MSO_LINE_DASH_STYLE.DASH
             if o["round"] >= 3:
                 sh.adjustments[0] = min(0.5, o["round"] / max(o["w"], o["h"], 1))
 
@@ -253,32 +313,52 @@ def 한장(prs, 명령, 바탕, 삽화: dict[int, bytes]):
 
         elif k == "text":
             가운데 = o.get("가운데")
+            덩어리 = o.get("묶음") or [o]
+            끝 = 덩어리[-1]
+            높이 = 끝["y"] + 끝["h"] - o["y"]
             # 글상자는 CSS 칸보다 조금 넓게 — 글꼴이 미세하게 달라 줄이 일찍 꺾이는 것을 막는다
             tb = s.shapes.add_textbox(X, Y if 가운데 else Emu(round((o["y"] - 2) * EMU)),
                                       Emu(round((o["w"] + (0 if 가운데 else 8)) * EMU)),
-                                      Emu(round((o["h"] + (0 if 가운데 else 6)) * EMU)))
+                                      Emu(round((높이 + (0 if 가운데 else 6)) * EMU)))
             tf = tb.text_frame
             tf.word_wrap = True
             tf.margin_left = tf.margin_right = tf.margin_top = tf.margin_bottom = 0
             tf.vertical_anchor = MSO_ANCHOR.MIDDLE if 가운데 else MSO_ANCHOR.TOP
+            첫문단 = True
             p = tf.paragraphs[0]
-            p.alignment = 맞춤.get(o["align"], PP_ALIGN.LEFT)
-            p.line_spacing = Pt(o["lh"] * PT)
-            for 조각 in o["runs"]:
-                for i, 토막 in enumerate(조각["t"].split("\n")):
-                    if i:
-                        p = tf.add_paragraph()
-                        p.alignment = 맞춤.get(o["align"], PP_ALIGN.LEFT)
-                        p.line_spacing = Pt(o["lh"] * PT)
-                    if not 토막:
-                        continue
-                    r = p.add_run(); r.text = 토막
-                    f = r.font
-                    f.size = Pt(round(조각["sz"] * PT, 1))
-                    f.bold = bool(조각["b"])
-                    f.color.rgb = _색(조각["c"])
-                    f.name = "Consolas" if 조각["m"] else "맑은 고딕"
+            for 자리, 조각들 in enumerate(덩어리):
+                if not 첫문단:
+                    p = tf.add_paragraph()
+                    # 문단 사이는 **빈 줄이 아니라 간격으로** 벌린다
+                    앞 = 덩어리[자리 - 1]
+                    p.space_before = Pt(max(조각들["y"] - (앞["y"] + 앞["h"]), 0) * PT)
+                p.alignment = 맞춤.get(조각들["align"], PP_ALIGN.LEFT)
+                p.line_spacing = Pt(조각들["lh"] * PT)
+                첫문단 = False
+                p = _글넣기(tf, p, 조각들, 맞춤)
     return s
+
+
+def _글넣기(tf, p, o, 맞춤):
+    """한 문단을 채운다. <br> 이 있으면 그 자리에서 문단을 하나 더 연다."""
+    from pptx.enum.text import PP_ALIGN
+    from pptx.util import Pt
+
+    for 조각 in o["runs"]:
+        for i, 토막 in enumerate(조각["t"].split("\n")):
+            if i:
+                p = tf.add_paragraph()
+                p.alignment = 맞춤.get(o["align"], PP_ALIGN.LEFT)
+                p.line_spacing = Pt(o["lh"] * PT)
+            if not 토막:
+                continue
+            r = p.add_run(); r.text = 토막
+            f = r.font
+            f.size = Pt(round(조각["sz"] * PT, 1))
+            f.bold = bool(조각["b"])
+            f.color.rgb = _색(조각["c"])
+            f.name = "Consolas" if 조각["m"] else "맑은 고딕"
+    return p
 
 
 def main() -> int:
@@ -310,6 +390,7 @@ def main() -> int:
 
         for i in range(수):
             결과 = pg.evaluate(훑기, i)
+            결과["ops"] = _한상자로(결과["ops"])
             # 삽화(SVG)는 도형으로 못 옮긴다 — 그 자리만 2배로 찍어 그림으로 넣는다
             삽화 = {}
             for el in pg.query_selector_all("svg[data-svgn]"):

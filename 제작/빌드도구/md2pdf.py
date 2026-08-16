@@ -55,6 +55,14 @@ blockquote { border-left: 4px solid #f0a500; background: #fffaf0; margin: 12px 0
 img { max-width: 100%; border: 1px solid #c9d2dc; border-radius: 5px;
       margin: 10px 0; page-break-inside: avoid; }
 .cap { font-size: 9pt; color: #5a6672; margin: -6px 0 12px; }
+/* 「안 되면」 카드 — 한 덩어리가 눈에 보이게 박스로 묶는다.
+   두 줄이 그냥 <p> 로 흩어지면 어디까지가 한 항목인지 안 보인다. */
+.trouble { border: 1px solid #e6d2d2; border-left: 5px solid #c0392b;
+           background: #fdf8f7; border-radius: 4px; padding: 9px 13px;
+           margin: 9px 0; page-break-inside: avoid; }
+.trouble .t { margin: 0 0 4px; font-weight: 700; color: #8a2020; font-size: 10pt; }
+.trouble .t code { background: #f6e7e7; color: #8a2020; }
+.trouble .b { margin: 0; font-size: 10pt; }
 blockquote p { margin: 4px 0; }
 ul, ol { margin: 8px 0; padding-left: 24px; }
 li { margin: 4px 0; }
@@ -113,6 +121,15 @@ def md2html(md: str, 제목: str, 기준폴더: Path | None = None) -> str:
             i += 1
             continue
 
+        # 주석 — `<!-- 사진 … -->`. 아직 안 찍은 화면의 자리를 가이드에 표시해 둔 것이다.
+        # 그냥 두면 인라인()이 `<` 를 이스케이프해 **학생 PDF 에 태그가 그대로 찍힌다.**
+        # 코드블록 안의 `<!--` 는 위에서 이미 소비되므로 여기 안 온다.
+        if line.strip().startswith("<!--"):
+            while i < len(줄들) and "-->" not in 줄들[i]:
+                i += 1
+            i += 1                                                  # `-->` 가 있는 줄까지 버린다
+            continue
+
         if re.match(r"^\s*\|.*\|\s*$", line):                       # 표
             표 = []
             while i < len(줄들) and re.match(r"^\s*\|.*\|\s*$", 줄들[i]):
@@ -154,6 +171,18 @@ def md2html(md: str, 제목: str, 기준폴더: Path | None = None) -> str:
                 buf.append(re.sub(r"^\s*\d+\.\s+", "", 줄들[i]))
                 i += 1
             out.append("<ol>" + "".join(f"<li>{인라인(x)}</li>" for x in buf) + "</ol>")
+            continue
+        # ── 「안 되면」 카드 ──────────────────────────────────────────────
+        #    **화면에 뜬 문구**
+        #    → 무슨 뜻인가 — 이렇게 하세요
+        #    두 줄을 한 박스로 묶는다. 따로 <p> 로 내보내면 경계가 안 보인다.
+        elif (re.fullmatch(r"\*\*[^*].*\*\*", line.strip())
+              and i + 1 < len(줄들) and 줄들[i + 1].lstrip().startswith("→")):
+            제목 = line.strip()[2:-2]
+            본문 = 줄들[i + 1].lstrip()[1:].strip()      # `→` 는 표시일 뿐, 지면엔 안 낸다
+            i += 2                                      # `line` 은 아직 안 소비됐다 — 둘 다 넘긴다
+            out.append(f'<div class="trouble"><p class="t">{인라인(제목)}</p>'
+                       f'<p class="b">{인라인(본문)}</p></div>')
             continue
         elif re.match(r"^\s*---+\s*$", line):
             out.append("<hr>")

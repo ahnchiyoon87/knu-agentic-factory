@@ -67,18 +67,30 @@ def main() -> int:
     ap = argparse.ArgumentParser(description="이상감지 실행 — 내 구현을 7일치에 돌린다")
     ap.add_argument("--window", type=int, default=60, help="이동 윈도 크기(분)")
     ap.add_argument("--k", type=float, default=3.0, help="임계값")
-    ap.add_argument("--impl", default="detect", help="detect | 정답")
+    ap.add_argument("--impl", default="detect", help="detect | 정답 | 파일 이름")
     args = ap.parse_args()
 
-    mod_name = "detect" if args.impl == "detect" else "정답.detect_answer"
+    # `--impl` 은 **파일 이름을 그대로** 받는다.
+    #   학생은 쓸 일이 없다 (기본값 detect 로 자기 코드가 돈다).
+    #   2일차 마지막 「AI 가 짠 것과 나란히」 시연에서 **강사가** 쓴다 —
+    #   AI 가 만든 것을 `detect_ai.py` 로 저장하고 `--impl detect_ai` 로
+    #   **같은 7일치에 태워** 학생 숫자와 나란히 놓는다.
+    #   코드를 보여 주기만 하면 「AI 가 짰다」는 말만 남는다. 돌려야 입증이 된다.
+    mod_name = "정답.detect_answer" if args.impl == "정답" else args.impl
     try:
         mod = importlib.import_module(mod_name)
     except ModuleNotFoundError:
-        sys.exit(f"{mod_name} 을(를) 찾지 못했습니다.")
+        sys.exit(f"{mod_name}.py 를 찾지 못했습니다 — `2일차/실습` 안에 있어야 합니다.")
     except SyntaxError as e:
         # 채우다 만 문법 오류 — 역추적 대신 자리를 짚어 준다.
-        sys.exit(f"detect.py {e.lineno}행에 문법 오류가 있습니다 — {e.msg}\n"
+        sys.exit(f"{mod_name}.py {e.lineno}행에 문법 오류가 있습니다 — {e.msg}\n"
                  f"  괄호·따옴표·들여쓰기를 그 줄에서 확인하세요. uv run 점검.py 도 같이 짚어 줍니다.")
+
+    # run.py 가 부르는 것은 `detect()` 하나다. 없으면 여기서 멈춰야
+    # 시연 도중 AttributeError 로 깨지지 않는다.
+    if not hasattr(mod, "detect"):
+        sys.exit(f"{mod_name}.py 에 detect() 가 없습니다.\n"
+                 f"  detect(values, window=60, k=3.0) 이 True/False 목록을 돌려줘야 합니다.")
 
     df, labels = load()
     truth = labels.set_index(["equipment_id", "timestamp"])["is_anomaly"]

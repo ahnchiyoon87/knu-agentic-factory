@@ -81,7 +81,7 @@ SENSOR = _s(540, 400, "0 0 540 400", f"""
 <path d="M312 226l30-8 26 10 28-12 30 6 28-14 30 8 26-10"
       stroke="{O}" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
 <path d="M180 262v40" stroke="{G}" stroke-width="2"/>
-<text class="lbl-g" x="30" y="330">1초마다 기록</text>
+<text class="lbl-g" x="30" y="330">1분마다 기록</text>
 """)
 
 # ── 24시간 원 (16시간 무인) — 기준판 3번 그대로
@@ -107,7 +107,7 @@ FLOOD = _s(560, 420, "0 0 560 420", f"""
         f'<path d="M{100+ i%3*170} {124 + i//3*120}v{22 if i%2 else 34}"/>'
         f'<path d="M{128+ i%3*170} {124 + i//3*120}v{30}"/>' for i in range(6)) + f"""</g>
 <path d="M40 330h480" stroke="{G}" stroke-width="2"/>
-<text class="lbl-o" x="280" y="374" text-anchor="middle">1초마다 24개</text>
+<text class="lbl-o" x="280" y="374" text-anchor="middle">1분마다 24개</text>
 """)
 
 # ── 고정 임계선 (구간 표지용)
@@ -214,6 +214,37 @@ FOLLOW = _s(560, 380, "0 0 560 380", f"""
 <text class="lbl" x="330" y="150" fill="{N2}">최근 평균</text>
 """)
 
+# ── 회전수를 낮추면 온도가 따라 내려간다 (「온도는 회전수의 함수」)
+#    FOLLOW(지금 값 / 최근 평균)를 쓰면 제목과 그림이 겉돈다 — 그래서 따로 그린다.
+RPMTEMP = _s(560, 400, "0 0 560 400", f"""
+<path d="M120 30v330" stroke="{G}" stroke-width="2"/>
+<path d="M120 360h420" stroke="{G}" stroke-width="2"/>
+
+<path d="M130 96h170l0 74h230" stroke="{N}" stroke-width="8"
+      stroke-linecap="round" stroke-linejoin="round"/>
+<text class="lbl" x="112" y="86" text-anchor="end" fill="{N}">회전수</text>
+
+<path d="M130 250h210C380 250 392 300 420 306l110 6" stroke="{O}" stroke-width="8"
+      stroke-linecap="round" stroke-linejoin="round"/>
+<text class="lbl-o" x="112" y="242" text-anchor="end">온도</text>
+
+<path d="M300 186v46M300 232l-9-12M300 232l9-12" stroke="{G}" stroke-width="3"
+      stroke-linecap="round" stroke-linejoin="round"/>
+<text class="lbl-g" x="316" y="222">따라온다</text>
+""")
+
+# ── 설비마다 평소 온도가 다르다 — 선 하나로는 못 덮는다
+BASELINES = _s(560, 400, "0 0 560 400", f"""
+<path d="M60 366h460" stroke="{G}" stroke-width="2"/>
+""" + "".join(
+    f'<path d="M{80} {y}l52-6 52 8 52-10 52 6 52-8 52 6" stroke="{N}" stroke-width="6" '
+    f'stroke-linecap="round" stroke-linejoin="round"/>'
+    for y in (66, 104, 176, 232, 288, 330)) + f"""
+<path d="M60 142h460" stroke="{O}" stroke-width="5" stroke-dasharray="14 10"
+      stroke-linecap="round"/>
+<text class="lbl-o" x="520" y="126" text-anchor="end">경고선 하나</text>
+""")
+
 # ── 창이 미끄러진다 (윈도)
 SLIDE = _s(700, 360, "0 0 700 360", f"""
 <path d="M30 300h640" stroke="{G}" stroke-width="2"/>
@@ -241,6 +272,16 @@ FN = _s(400, 200, "0 0 400 200", f"""
 <path d="M256 78l30-30" stroke="{G}" stroke-width="3"/>
 <text class="lbl-g" x="292" y="42">놓침</text>""")
 
+# ── 잡았다 — 이상 구간(오르는 곡선) 위에서 알람이 울린 그림
+#    「잡은 쪽」 자리에 FN(놓침)을 쓰면 그림이 정반대를 말한다.
+HIT = _s(400, 200, "0 0 400 200", f"""
+<path d="M60 150h280" stroke="{G}" stroke-width="2"/>
+<path d="M70 132C140 128 230 108 340 78" stroke="{N}" stroke-width="7" stroke-linecap="round"/>
+<g stroke="{O}" stroke-width="5" stroke-linecap="round">
+<path d="M212 60v52M272 48v46M332 40v34"/></g>
+<circle cx="212" cy="46" r="7" fill="{O}"/><circle cx="272" cy="34" r="7" fill="{O}"/>
+<circle cx="332" cy="26" r="7" fill="{O}"/>""")
+
 # ── 저울 (맞바꿈)
 SCALE = _s(460, 400, "0 0 460 400", f"""
 <g stroke="{N}" stroke-width="9" stroke-linecap="round">
@@ -259,13 +300,14 @@ BYHAND = _s(520, 380, "0 0 520 380", f"""
 <rect x="40" y="40" width="440" height="240" rx="12" stroke="{N}" stroke-width="8"/>
 <path d="M40 96h440" stroke="{N}" stroke-width="6"/>
 <g fill="{G}">
-<rect x="76" y="130" width="150" height="12" rx="6"/>
-<rect x="76" y="164" width="230" height="12" rx="6"/>
-<rect x="76" y="232" width="180" height="12" rx="6"/></g>
-<g fill="{O}"><rect x="100" y="198" width="120" height="12" rx="6"/></g>
-<path d="M340 190c26-18 52-4 52 18 0 26-34 40-58 56" stroke="{N}" stroke-width="8" stroke-linecap="round"/>
-<path d="M334 264h44" stroke="{N}" stroke-width="8" stroke-linecap="round"/>
-<text class="lbl-o" x="100" y="330">TODO 3</text>
+<rect x="76" y="126" width="150" height="12" rx="6"/>
+<rect x="76" y="182" width="196" height="12" rx="6"/>
+<rect x="76" y="238" width="164" height="12" rx="6"/></g>
+<g stroke="{O}" stroke-width="7" fill="none">
+<rect x="286" y="118" width="130" height="28" rx="6"/>
+<rect x="286" y="174" width="130" height="28" rx="6"/>
+<rect x="286" y="230" width="130" height="28" rx="6"/></g>
+<text class="lbl-o" x="286" y="330">채울 곳 셋</text>
 """)
 
 # ── TODO 아이콘 3
@@ -330,5 +372,8 @@ ICO_BAL   = _i('<path d="M38 14v46M22 60h32"/><path d="M12 26h52"/>'
                '<path d="M12 26l-6 16h12z" stroke="'+O+'"/><path d="M64 26l-6 16h12z"/>')
 ICO_PICK  = _i('<path d="M14 20h34l14 14v22H14z"/><path d="M48 20v14h14" stroke="'+O+'"/>')
 ICO_WRITE = _i('<path d="M12 58h52"/><path d="M20 46l4-12 22-22 8 8-22 22z"/>')
+# 번호 하나로 내 공장을 되찾는다 — ICO_PIN 은 「그래프가 든 판」이라 이 뜻이 안 산다
+ICO_KEY   = _i('<circle cx="24" cy="38" r="13"/><path d="M37 38h30"/>'
+               '<path d="M55 38v12M65 38v9" stroke="'+O+'"/>')
 ICO_PIN   = _i('<rect x="14" y="12" width="48" height="36" rx="4"/>'
                '<path d="M22 40l12-12 8 8 8-10 8 14" stroke="'+O+'"/><path d="M38 48v16"/>')

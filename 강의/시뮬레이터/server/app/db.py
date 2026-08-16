@@ -197,8 +197,12 @@ async def list_tenants(mode: str, tenant_filter: list[str]) -> list[dict]:
         args.append(tenant_filter)
         where.append(f"tenant_id = any(${len(args)})")
     elif mode in ("individual", "team"):
-        args.append(mode)
-        where.append(f"tenant_type = ${len(args)}")
+        # 강사 공장(S00, tenant_type='instructor')은 개인 모드에 **같이 싣는다**.
+        # 배정에서는 `claim._개인공장()` 이 individual 만 고르므로 저절로 빠지고,
+        # 여기서 안 실으면 강사 공장이 만들어지기만 하고 돌지 않는다 (008 마이그레이션).
+        종류 = [mode, "instructor"] if mode == "individual" else [mode]
+        args.append(종류)
+        where.append(f"tenant_type = any(${len(args)})")
     sql = (
         "select tenant_id, tenant_type, display_name, access_key, control_unlocked "
         f"from tenant where {' and '.join(where)} order by tenant_id"

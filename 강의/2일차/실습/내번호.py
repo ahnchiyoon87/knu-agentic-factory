@@ -114,18 +114,12 @@ def 서버주소(직접: str | None) -> str:
                 return str(d["서버"]).rstrip("/")
         except Exception:                                          # noqa: BLE001
             pass
-    # 수업 서버는 고정이다. 그냥 Enter 면 이걸 쓴다 — 학생이 주소를 옮겨 적을 일이 없다.
+    # 수업 서버는 클라우드 한 곳뿐이다. **묻지 않는다.**
+    #   전에는 「Enter 또는 다른 주소」를 물었는데, 주소가 달라질 일이 없는데도
+    #   선택지를 주니 학생이 「내 건 다른 주소인가」 하고 첫 줄에서 멈췄다.
+    #   주소를 바꿔야 하는 건 강사뿐이고, 그때는 `--서버` 를 쓴다.
     print(f"수업 서버: {기본서버}")
-    print("  (다른 주소를 쓰라고 안내받았으면 그 주소를 넣고, 아니면 그냥 Enter)")
-    try:
-        답 = _다듬기(input("  Enter 또는 다른 주소: "))
-    except EOFError:
-        답 = ""
-    if not 답:
-        return 기본서버
-    if not 답.startswith("http"):
-        답 = "http://" + 답
-    return 답
+    return 기본서버
 
 
 def 주소확인(주소: str, 물어봐도되나: bool) -> str:
