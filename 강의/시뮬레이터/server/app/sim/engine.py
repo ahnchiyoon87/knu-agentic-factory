@@ -67,6 +67,7 @@ class EquipmentState:
 
     # 내부 상태(관측값이 아니라 '진짜' 값)
     core_temp: float = 24.0
+    temp_noise: float = 0.0       # 앞 값에 끌리는 온도 잡음(AR(1)) — 화면이 톡톡 안 튀게
     drift_offset: float = 0.0     # 현재 드리프트 가산분
     drift_target: float = 0.0     # 주입이 지시하는 목표 가산분
     spike_offset: float = 0.0
@@ -274,12 +275,24 @@ class Factory:
             else:
                 eq.drift_offset = max(eq.drift_target, eq.drift_offset - recov)
 
-            # 4) 관측값 = 진짜값 + 이상주입 + 가우시안 노이즈
+            # 4) 관측값 = 진짜값 + 이상주입 + 잡음
             #    노이즈가 없으면 단순 임계값으로 전부 잡혀 2일차 실습이 성립하지 않는다.
+            #
+            #    ★ 온도 잡음은 **앞 값에 끌린다**(AR(1) · 색깔 있는 잡음).
+            #      전에는 매 샘플마다 독립적인 가우시안을 새로 뽑아서 화면 숫자가 톡톡 튀었다.
+            #      진짜 베어링은 쇳덩이라 1분 간격으로 보면 부드럽게 움직인다.
+            #      7일치 CSV 실측이 그 증거다 — **1차 자기상관 0.80**.
+            #      라이브만 백색 잡음이라 질감이 혼자 달랐다.
+            #
+            #      폭은 그대로 둔다. a 를 섞어도 정상상태 표준편차가 noise_sigma_c 가 되도록
+            #      새로 뽑는 몫에 sqrt(1-a²) 를 곱한다. 그래서 **오탐·미탐 성질이 안 바뀐다.**
+            #      (실습 숫자는 전부 7일치 CSV 에서 나오므로 여기 값은 화면 질감만 정한다)
             if eq.sensor_online:
+                a = float(th.get("noise_memory", 0.8))
+                σ = float(th["noise_sigma_c"])
+                eq.temp_noise = a * eq.temp_noise + self.rng.gauss(0.0, σ * (1 - a * a) ** 0.5)
                 eq.temperature = round(
-                    eq.core_temp + eq.drift_offset
-                    + self.rng.gauss(0.0, float(th["noise_sigma_c"])), 3
+                    eq.core_temp + eq.drift_offset + eq.temp_noise, 3
                 )
                 eq.vibration = round(
                     max(0.0, self._vib_true(eq.rpm) + eq.spike_offset

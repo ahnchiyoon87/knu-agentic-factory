@@ -7,6 +7,8 @@
     "rpm_exponent": 1.4,
     "tau_seconds": 60.0,
     "noise_sigma_c": 0.35,
+    "_noise_memory": "온도 잡음이 앞 값에 얼마나 끌리는가(0=매번 새로 튄다, 0.9=아주 부드럽다). 7일치 CSV 실측 자기상관이 0.80 이라 라이브도 같은 질감으로 맞췄다. 폭(noise_sigma_c)은 이 값과 무관하게 유지된다.",
+    "noise_memory": 0.8,
     "drift_recovery_c_per_minute": 0.2,
     "_derived": "이 값은 **베어링 온도**다(하우징 표피가 아니라 내부·외륜). 정격 1800rpm 에서 정상 온도 약 62℃ (슬라이드 서사 기준값). 1200rpm 으로 감속하면 약 46℃ 로 내려간다."
   },
