@@ -2,7 +2,7 @@
 """덱 HTML 을 장별 PNG 로 찍는다 —  python render.py <덱이름>
 
 PNG 는 pptx 로 묶기 전의 중간물이라 산출물 아래에 둔다(저장소에 안 들어간다).
-강의장에서 여는 것은 pptx 하나다 —  빌드도구/pptx만들기.py 가 여기서 읽어 묶는다.
+강의장에서 여는 것은 pptx 하나다 —  빌드도구/편집pptx.py 가 여기서 읽어 묶는다.
 """
 import asyncio
 import pathlib
