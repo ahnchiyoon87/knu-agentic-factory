@@ -12,7 +12,7 @@ with sync_playwright() as p:
     pg = b.new_page(viewport={"width": 800, "height": 1000}, device_scale_factor=2)
     pg.goto((out/"미리보기.html").resolve().as_uri()); pg.wait_for_timeout(1000)
     pg.evaluate("""() => {
-        const t = [...document.querySelectorAll('h2')].find(x => x.textContent.includes('사람 눈으로'));
+        const t = [...document.querySelectorAll('h2')].find(x => x.textContent.includes('오늘 여기까지'));
         if (t) t.scrollIntoView({block:'start'});
     }""")
     pg.wait_for_timeout(400)
