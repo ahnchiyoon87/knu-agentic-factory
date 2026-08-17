@@ -8,7 +8,7 @@
     "tau_seconds": 60.0,
     "noise_sigma_c": 0.35,
     "drift_recovery_c_per_minute": 0.2,
-    "_derived": "이 값은 **베어링 온도**다(하우징 표피가 아니라 내부·외륜). 정격 1800rpm 에서 정상 온도 약 62℃ (슬라이드 서사 기준값). 1200rpm 으로 감속하면 약 46℃ 로 내려간다."
+    "_derived": "정격 1800rpm 에서 정상 온도 약 62℃ (슬라이드 서사 기준값). 1200rpm 으로 감속하면 약 46℃ 로 내려간다."
   },
   "vibration": {
     "base_mm_s": 1.05,
