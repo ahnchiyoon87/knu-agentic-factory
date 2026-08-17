@@ -350,9 +350,17 @@ async function 보기() {
     $('c배속').textContent = '×' + (배속 ?? '—');
     // `active_injections` 는 **배열**이다. 빈 배열은 JS 에서 참이라
     // 그대로 쓰면 「0건」이 아니라 숫자 없이 「건」만 찍힌다.
-    const 주입 = (s.active_injections || []).length;
-    $('c주입').textContent = 주입 ? `${주입}건 진행 중` : '없음';
-    $('c주입').style.color = 주입 ? 'var(--warn)' : 'var(--dim)';
+    // 건수만 찍으면 강사가 **어느 설비에 들어갔는지·아직 살아 있는지**를 알 방법이 없다.
+    // 서버는 대상 공장·설비·종류를 다 돌려주므로 그대로 보여 준다.
+    // (학생 화면에는 절대 안 나온다 — 여기는 강사만 보는 리모컨이다)
+    const 목록 = s.active_injections || [];
+    const 이름 = {temp_drift: '온도 드리프트', vibration_spike: '진동 스파이크',
+                sensor_dropout: '센서 결측'};
+    $('c주입').textContent = 목록.length
+      ? 목록.map(i => `${i.equipment_id} · ${이름[i.kind] || i.kind}`
+                      + `${i.tenant_id === '*' ? ' (전체)' : ` (${i.tenant_id})`}`).join(' / ')
+      : '없음';
+    $('c주입').style.color = 목록.length ? 'var(--warn)' : 'var(--dim)';
     const t = await call('/api/instructor/tenants');
     const ts = t.tenants || [];
     공장목록 = ts.filter(x => x.tenant_type === 'individual').map(x => x.tenant_id);
