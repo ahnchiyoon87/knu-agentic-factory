@@ -138,6 +138,10 @@
     <div class="l"><span>제어 통로</span><span class="v" id="c제어">—</span></div>
     <div class="l"><span>진행 중인 고장</span><span class="v" id="c주입">—</span></div>
     <div id="기록"></div>
+    <!-- 위 카드의 ✓ 는 「내가 눌렀다」는 기억일 뿐, 공장 상태가 아니다.
+         연습으로 눌러 본 뒤 깨끗하게 보고 싶을 때 쓴다. -->
+    <div class="l"><span>눌렀다 표시</span>
+      <a class="v" href="#" id="c지우기" style="color:var(--dim);text-decoration:underline">지우기</a></div>
   </section>
 
   <!-- 평소엔 안 쓰는 것. 접어 두어 위 카드 셋이 가려지지 않게 한다. -->
@@ -206,7 +210,17 @@
 const $ = id => document.getElementById(id);
 let TOKEN = localStorage.getItem('수업토큰') || '';
 let DAY = 2;
-let 한것 = new Set(JSON.parse(localStorage.getItem('수업한것') || '[]'));
+// 「눌렀다」 표시는 **그날 하루만** 남긴다.
+//   전에는 그냥 쌓아 둬서, 전날 연습으로 누른 체크가 수업 당일 아침에 그대로 켜져 있었다.
+//   강사가 「아 이건 이미 했구나」 하고 안 누르면 학생 화면에는 아무 일도 안 일어난다.
+//   기억이 도움이 아니라 함정이 되는 자리라, 날짜가 바뀌면 저절로 지운다.
+const 오늘 = new Date().toLocaleDateString('sv');      // YYYY-MM-DD
+let 한것 = (() => {
+  try {
+    const 넣어둔것 = JSON.parse(localStorage.getItem('수업한것') || '{}');
+    return new Set(넣어둔것.날짜 === 오늘 ? 넣어둔것.목록 : []);
+  } catch { return new Set(); }
+})();
 
 const H = () => ({'X-Instructor-Token': TOKEN, 'Content-Type': 'application/json'});
 
@@ -219,7 +233,11 @@ function 적기(s, 나쁨) {
   $('기록').innerHTML = `<span class="${나쁨 ? 'e' : ''}">${s}</span>`;
 }
 function 저장() {
-  localStorage.setItem('수업한것', JSON.stringify([...한것]));
+  localStorage.setItem('수업한것', JSON.stringify({날짜: 오늘, 목록: [...한것]}));
+}
+function 체크지우기() {
+  한것.clear(); 저장(); 그리기();
+  적기('눌렀다 표시를 지웠습니다. 공장 상태는 그대로입니다.');
 }
 
 // ── 오늘 할 일 — 이것이 화면의 전부다 ─────────────────────────────────────
@@ -456,6 +474,7 @@ async function 들어가기() {
   $('문').hidden = true;
   $('판').hidden = false; $('현황').hidden = false; $('그밖에').hidden = false;
   그밖에붙이기();
+  $('c지우기').onclick = e => { e.preventDefault(); 체크지우기(); };
   await 보기(); 그리기();
   setInterval(보기, 5000);
 }
