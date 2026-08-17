@@ -30,6 +30,13 @@
                 "Malgun Gothic","맑은 고딕",system-ui,sans-serif;
     letter-spacing:-.01em;
     -webkit-font-smoothing:antialiased;
+
+    /* 한국어는 **어절 단위로 끊는다.** 이걸 안 두면 브라우저가 글자 아무 데서나
+       줄을 바꿔 「하루치 생 / 산분을」 · 「그냥 조용히 나 / 빠졌다」 처럼 낱말이
+       두 줄로 쪼개진다. 강의장 뒷자리에서 읽으면 한 번에 안 읽힌다.
+       break-word 는 안전판 — 한 어절이 칸보다 길면(긴 코드 조각 등) 그때만 끊는다. */
+    word-break: keep-all;
+    overflow-wrap: break-word;
   }
 
   .s{
@@ -78,7 +85,9 @@
 
   /* ============ 1 · 표지형 ============ */
   .cover{ background:var(--navy); color:#fff; justify-content:center; }
-  .cover .eyebrow{ font-size:26px; letter-spacing:.34em; font-weight:600; color:#9DB4D4; margin-bottom:30px; }
+  /* 자간을 .34em 까지 벌리면 라틴 대문자는 멋있지만 한글은 「2 일 차」로 **낱글자가 흩어져**
+     한 낱말로 안 읽힌다. 살짝만 띄운다. */
+  .cover .eyebrow{ font-size:26px; letter-spacing:.1em; font-weight:600; color:#9DB4D4; margin-bottom:30px; }
   .cover h1{ color:#fff; font-size:62px; line-height:1.2; }
   .cover .bar{ width:126px; height:9px; background:var(--orange); margin:32px 0 28px; }
   .cover .sub{ color:#C3D2E6; font-size:29px; }

@@ -110,13 +110,16 @@ FLOOD = _s(560, 420, "0 0 560 420", f"""
 <text class="lbl-o" x="280" y="374" text-anchor="middle">1분마다 24개</text>
 """)
 
-# ── 고정 임계선 (구간 표지용)
+# ── 고정 임계선 (구간 표지용) — **선을 넘으면 울린다**는 아이디어를 그린다.
+#    전에는 선 아래로 지나가는 곡선에 「넘지 않는다」를 달아 뒀는데, 그건 **다음 장의 반전**이다.
+#    「이 방법이 답 같다」고 제안하는 장에서 그림이 먼저 답을 부정하고 있었다 (절대 규칙 4).
 LINE80 = _s(460, 360, "0 0 460 360", f"""
-<path d="M20 110h420" stroke="{N2}" stroke-width="6" stroke-dasharray="18 12"/>
-<path d="M20 300C140 296 300 288 440 276" stroke="{O}" stroke-width="8" stroke-linecap="round"/>
-<circle cx="230" cy="110" r="0"/>
-<path d="M230 122v140" stroke="{G}" stroke-width="2"/>
-<text class="lbl-g" x="230" y="336" text-anchor="middle">넘지 않는다</text>
+<path d="M20 120h420" stroke="{N2}" stroke-width="6" stroke-dasharray="18 12"/>
+<path d="M20 300C150 298 262 258 320 120C350 62 390 54 440 44"
+      stroke="{O}" stroke-width="8" stroke-linecap="round"/>
+<circle cx="320" cy="120" r="14" fill="{O}"/>
+<path d="M320 146v146" stroke="{G}" stroke-width="2"/>
+<text class="lbl-o" x="320" y="330" text-anchor="middle">여기서 울린다</text>
 """)
 
 # ── 기준판 8번 그래프 — 80℃ / 16℃ 남음 / 62→64
@@ -234,15 +237,103 @@ RPMTEMP = _s(560, 400, "0 0 560 400", f"""
 """)
 
 # ── 설비마다 평소 온도가 다르다 — 선 하나로는 못 덮는다
+#    전에는 **똑같은 물결 여섯 개**를 나란히 쌓았다. 그러면 「제각각」이 아니라 「여러 개」로 읽힌다.
+#    흔들리는 모양을 줄마다 다르게 두고, 맨 위·맨 아래에 실제 값을 붙여 폭이 보이게 한다.
+_평소들 = (
+    (62,  "l52-7 52 9 52-11 52 7 52-9 52 8"),
+    (108, "l52 6 52-8 52 5 52-9 52 7 52-5"),
+    (178, "l52-5 52 7 52-6 52 9 52-7 52 6"),
+    (226, "l52 8 52-6 52 9 52-5 52 8 52-7"),
+    (292, "l52-6 52 5 52-8 52 6 52-5 52 7"),
+    (336, "l52 5 52-7 52 6 52-8 52 5 52-6"),
+)
 BASELINES = _s(560, 400, "0 0 560 400", f"""
 <path d="M60 366h460" stroke="{G}" stroke-width="2"/>
 """ + "".join(
-    f'<path d="M{80} {y}l52-6 52 8 52-10 52 6 52-8 52 6" stroke="{N}" stroke-width="6" '
-    f'stroke-linecap="round" stroke-linejoin="round"/>'
-    for y in (66, 104, 176, 232, 288, 330)) + f"""
+    f'<path d="M80 {y}{d}" stroke="{N}" stroke-width="6" '
+    f'stroke-linecap="round" stroke-linejoin="round"/>' for y, d in _평소들) + f"""
+<text x="62" y="56" font-size="25" font-weight="700" fill="{N}" text-anchor="end">74℃</text>
+<text x="62" y="344" font-size="25" font-weight="700" fill="{N}" text-anchor="end">56℃</text>
 <path d="M60 142h460" stroke="{O}" stroke-width="5" stroke-dasharray="14 10"
       stroke-linecap="round"/>
 <text class="lbl-o" x="520" y="126" text-anchor="end">경고선 하나</text>
+""")
+
+# ── 기준이 값을 따라 올라간다 — 그래서 거리가 끝내 안 벌어진다
+#    전에는 이 장에 「인지·행동·판단?」 고리를 붙여 뒀는데, 그건 3일차 폐루프 그림이고
+#    「판단?」은 **바로 다음 장의 주제**였다. 이 장의 주장은 그게 아니라 미탐의 원리다.
+DRIFTCHASE = _s(560, 400, "0 0 560 400", f"""
+<path d="M40 356h480" stroke="{G}" stroke-width="2"/>
+<path d="M60 300C160 288 260 250 360 200C420 170 470 152 508 142"
+      stroke="{N}" stroke-width="7" stroke-linecap="round"/>
+<path d="M60 336C160 324 260 286 360 236C420 206 470 188 508 178"
+      stroke="{O}" stroke-width="5" stroke-dasharray="12 9" stroke-linecap="round"/>
+<text x="508" y="122" font-size="24" font-weight="700" fill="{N}" text-anchor="end">지금 값</text>
+<text x="508" y="228" font-size="24" font-weight="700" fill="{O}" text-anchor="end">기준</text>
+<g stroke="{G}" stroke-width="2.5" stroke-linecap="round">
+<path d="M180 286v30M180 316l-6-9M180 316l6-9M180 286l-6 9M180 286l6 9"/>
+<path d="M420 186v30M420 216l-6-9M420 216l6-9M420 186l-6 9M420 186l6 9"/></g>
+<text x="280" y="390" font-size="24" font-weight="700" fill="{G}" text-anchor="middle">거리가 안 벌어진다</text>
+""")
+
+# ── 규칙은 숫자만 읽는다 — 사람이 쓴 메모는 못 읽는다
+#    4장·22장이 이미 물음표를 쓰고 있어 세 번째로 또 쓰면 「또 그 그림」이 된다.
+MEMO = _s(560, 400, "0 0 560 400", f"""
+<rect x="40" y="92" width="200" height="212" rx="10" stroke="{N}" stroke-width="6"/>
+<g stroke="{N}" stroke-width="7" stroke-linecap="round">
+<path d="M74 140h58M162 140h44M74 184h58M162 184h44M74 228h58M162 228h44M74 272h58M162 272h44"/></g>
+<text x="140" y="72" font-size="25" font-weight="700" fill="{N}" text-anchor="middle">숫자</text>
+<text x="140" y="344" font-size="23" fill="{G}" text-anchor="middle">규칙이 읽는다</text>
+<rect x="320" y="92" width="200" height="212" rx="10" stroke="{O}" stroke-width="6"/>
+<g stroke="{O}" stroke-width="6" stroke-linecap="round">
+<path d="M352 146c14-11 26 11 40 0s26 11 40 0 26 11 40 0"/>
+<path d="M352 202c14-11 26 11 40 0s26 11 40 0"/>
+<path d="M352 258c14-11 26 11 40 0s26 11 40 0 26 11 40 0"/></g>
+<text x="420" y="72" font-size="25" font-weight="700" fill="{O}" text-anchor="middle">사람이 쓴 메모</text>
+<text x="420" y="344" font-size="23" fill="{G}" text-anchor="middle">규칙이 못 읽는다</text>
+""")
+
+# ── 내가 짠 것과 AI가 짠 것을 **같은 데이터에** 돌려 판정한다
+#    전에는 이 장에도 「채울 곳 셋」 그림을 붙여 뒀다 — 바로 다음 장과 같은 그림이라
+#    두 번 나오고, 무엇보다 「판정한다」는 이 장의 주장을 그리지 않았다.
+JUDGE = _s(560, 400, "0 0 560 400", f"""
+<rect x="40" y="76" width="210" height="150" rx="10" stroke="{N}" stroke-width="6"/>
+<g stroke="{G}" stroke-width="8" stroke-linecap="round">
+<path d="M72 118h120M72 151h150M72 184h100"/></g>
+<text x="145" y="56" font-size="25" font-weight="700" fill="{N}" text-anchor="middle">내가 짠 것</text>
+<rect x="310" y="76" width="210" height="150" rx="10" stroke="{O}" stroke-width="6"/>
+<g stroke="{G}" stroke-width="8" stroke-linecap="round">
+<path d="M342 118h150M342 151h110M342 184h140"/></g>
+<text x="415" y="56" font-size="25" font-weight="700" fill="{O}" text-anchor="middle">AI가 짠 것</text>
+<g stroke="{G}" stroke-width="3" stroke-linecap="round">
+<path d="M145 238v44M145 282l-9-14M145 282l9-14"/>
+<path d="M415 238v44M415 282l-9-14M415 282l9-14"/></g>
+<rect x="40" y="296" width="480" height="58" rx="9" fill="{N}" fill-opacity=".08"
+      stroke="{N}" stroke-width="3"/>
+<text x="280" y="334" font-size="26" font-weight="700" fill="{N}" text-anchor="middle">같은 7일치에 돌린다</text>
+""")
+
+# ── 지금 값은 창에 넣지 않는다
+#    전에는 이 장에 작은 창 아이콘을 360px 로 늘려 붙여 뒀는데, 선이 상자를 뚫고 나가 조잡했고
+#    무엇보다 **제목을 그리지 않았다.** 창은 앞의 W개만 감싸고 지금 값은 그 밖에 있다는 것,
+#    그리고 그 거리가 z 라는 것을 한 장면으로 그린다.
+NOWOUT = _s(560, 400, "0 0 560 400", f"""
+<path d="M40 340h480" stroke="{G}" stroke-width="2"/>
+<rect x="46" y="214" width="250" height="80" rx="10" stroke="{O}" stroke-width="5"
+      fill="{O}" fill-opacity=".07"/>
+<text class="lbl-o" x="171" y="200" text-anchor="middle">창 — 앞의 W개</text>
+<g fill="{N}">
+<circle cx="80" cy="266" r="9"/><circle cx="124" cy="248" r="9"/>
+<circle cx="168" cy="272" r="9"/><circle cx="212" cy="252" r="9"/>
+<circle cx="256" cy="258" r="9"/>
+</g>
+<path d="M46 258h424" stroke="{N2}" stroke-width="3" stroke-dasharray="10 8"/>
+<text x="484" y="266" font-size="26" font-weight="700" fill="{N2}">μ</text>
+<circle cx="400" cy="96" r="13" fill="{O}"/>
+<text class="lbl-o" x="400" y="66" text-anchor="middle">지금 값</text>
+<path d="M400 116v134M400 116l-9 14M400 116l9 14M400 250l-9-14M400 250l9-14"
+      stroke="{G}" stroke-width="2.5" stroke-linecap="round"/>
+<text x="418" y="192" font-size="26" font-weight="700" fill="{G}">z</text>
 """)
 
 # ── 창이 미끄러진다 (윈도)
@@ -251,7 +342,6 @@ SLIDE = _s(700, 360, "0 0 700 360", f"""
 <path d="M40 250l46-18 46 10 46-26 46 8 46-24 46 6 46-28 46 10 46-26 46 8 46-22 46 6"
       stroke="{N}" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
 <rect x="330" y="120" width="240" height="180" rx="8" stroke="{O}" stroke-width="6" fill="{O}" fill-opacity=".07"/>
-<path d="M330 340h240" stroke="{O}" stroke-width="2"/>
 <text class="lbl-o" x="450" y="106" text-anchor="middle">최근 W개</text>
 <path d="M600 210h56M656 210l-14-10M656 210l-14 10" stroke="{G}" stroke-width="3" stroke-linecap="round"/>
 """)

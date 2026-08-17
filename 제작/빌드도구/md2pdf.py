@@ -32,7 +32,10 @@ from pathlib import Path
 CSS = """
 @page { size: A4; margin: 18mm 16mm; }
 body { font-family: "Malgun Gothic","맑은 고딕",sans-serif; font-size: 10.5pt;
-       line-height: 1.75; color: #1a1a1a; }
+       line-height: 1.75; color: #1a1a1a;
+       /* 한국어는 어절 단위로 끊는다 — 안 두면 낱말이 두 줄로 쪼개진다.
+          break-word 는 안전판(긴 코드 조각만 끊는다). 슬라이드 쪽도 같은 규칙이다. */
+       word-break: keep-all; overflow-wrap: break-word; }
 h1 { font-size: 19pt; border-bottom: 2.5px solid #1b4b8f; padding-bottom: 7px;
      margin: 0 0 16px; color: #14335e; }
 h2 { font-size: 14.5pt; margin: 26px 0 10px; color: #1b4b8f;
