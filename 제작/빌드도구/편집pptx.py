@@ -166,7 +166,10 @@ PT = 0.6            # 1px → pt
     const 자식 = [...el.children];
     if (자식.length && 자식.some(블록)) { 자식.forEach(walk); return; }
 
-    const 글 = el.textContent.trim();
+    // 삽화(svg)를 품은 칸은 **글자 칸이 아니다.** svg 안의 <text> 까지 textContent 에
+    // 딸려 오는 바람에, 라벨이 든 삽화(그래프 등)가 통째로 텍스트 상자가 되고
+    // 그림은 아예 안 들어갔다. 그런 칸은 안으로 더 내려가 svg 를 사진으로 잡는다.
+    const 글 = el.querySelector('svg') ? "" : el.textContent.trim();
     if (글) {
       for (const b of 밑칠(el)) ops.push({k: 'fill', ...b});
       // 칸 안쪽 여백을 빼야 글자가 제자리에 온다 — 각주(padding-top 26)·표 칸(24/30)이

@@ -213,6 +213,8 @@ def 준비(s: Sim, ns: str) -> dict:
           f"x{c['time_scale']:g}")
     # 2일차 아침의 출하 상태는 배속 60(tick 1초)이다. 120 이면 어제 수업이나
     # 앞선 테스트가 남긴 상태다 — 그대로 두면 2일차 화면이 너무 빨리 흐른다.
+    #   리모컨 [고장 넣기] 가 ×120 으로 올리고 [수업 끝내기] 가 ×60 으로 되돌린다.
+    #   여기서 120 이 잡히면 **끝내기를 안 눌렀다**는 뜻이다.
     check("2일차 아침 상태다 (1초에 한 번씩 바뀐다)", c["real_tick_seconds"] == 1.0,
           f"실제 tick {c['real_tick_seconds']}초 · 배속 x{c['time_scale']:g}"
           + ("" if c["real_tick_seconds"] == 1.0 else
