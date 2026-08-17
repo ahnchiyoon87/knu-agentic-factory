@@ -107,6 +107,15 @@ async def console() -> FileResponse:
     return FileResponse(WEB_DIR / "console" / "index.html")
 
 
+# 수업 중에 강사가 보는 화면. `/console` 은 시뮬레이터를 시험하려고 만든
+# 개발자 판이라 버튼이 스무 개다 — 수업 중 누를 것은 셋뿐인데 그것을 못 찾는다.
+# 여기는 **오늘 할 일만** 순서대로 큰 카드로 둔다. 영문 경로도 같이 받는다.
+@app.get("/수업", include_in_schema=False)
+@app.get("/class", include_in_schema=False)
+async def 수업() -> FileResponse:
+    return FileResponse(WEB_DIR / "수업" / "index.html")
+
+
 @app.get("/fallback", include_in_schema=False)
 async def fallback() -> FileResponse:
     return FileResponse(WEB_DIR / "fallback" / "index.html")

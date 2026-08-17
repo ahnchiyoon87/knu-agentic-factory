@@ -1,0 +1,280 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>수업 리모컨</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<!--
+  수업 중에 강사가 보는 화면. **버튼을 최소로 둔다.**
+
+  왜 따로 만들었나 — /console 은 시뮬레이터를 시험하려고 만든 개발자 판이다.
+  버튼 스무 개에 설명 문단이 빼곡한데 수업 중 누를 것은 세 개뿐이라,
+  강사가 「지금 뭘 눌러야 하지」를 화면에서 못 찾았다.
+
+  여기 규칙 —
+    · 지금 할 차례만 진하게, 나머지는 흐리게
+    · 누르면 무슨 일이 일어나는지 버튼 옆에 한 줄로
+    · 토큰은 한 번만. localStorage 에 두어 브라우저를 닫아도 남는다
+    · 되돌릴 수 없는 것은 확인을 한 번 묻는다
+-->
+<style>
+  :root{
+    --bg:#0f1216; --card:#171c22; --line:#252d36; --txt:#e6ebf1; --dim:#8894a2;
+    --on:#3b82f6; --ok:#22c55e; --warn:#f59e0b; --danger:#ef4444;
+  }
+  *{box-sizing:border-box;margin:0}
+  body{background:var(--bg);color:var(--txt);
+       font-family:"Malgun Gothic","맑은 고딕",system-ui,sans-serif;
+       font-size:15px;line-height:1.6;padding:0 0 60px}
+
+  header{position:sticky;top:0;z-index:5;background:#0f1216ee;backdrop-filter:blur(6px);
+         border-bottom:1px solid var(--line);padding:14px 22px;
+         display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+  h1{font-size:19px;font-weight:800;letter-spacing:-.01em}
+  .tabs{display:flex;gap:6px}
+  .tab{background:#1b222a;border:1px solid var(--line);color:var(--dim);
+       padding:6px 15px;border-radius:999px;font-size:14px;font-weight:700;cursor:pointer}
+  .tab.on{background:var(--on);border-color:var(--on);color:#fff}
+  .grow{flex:1}
+  .state{display:flex;align-items:center;gap:9px;font-size:13.5px;color:var(--dim)}
+  .dot{width:9px;height:9px;border-radius:50%;background:#555}
+  .dot.ok{background:var(--ok);box-shadow:0 0 0 4px #22c55e22}
+  .dot.bad{background:var(--danger);box-shadow:0 0 0 4px #ef444422}
+
+  main{max-width:760px;margin:0 auto;padding:26px 22px}
+
+  /* 토큰 — 처음 한 번만 보인다 */
+  #문{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:26px}
+  #문 p{color:var(--dim);margin:8px 0 18px;font-size:14px}
+  .row{display:flex;gap:9px}
+  input{flex:1;background:#0e1318;border:1px solid var(--line);color:var(--txt);
+        border-radius:9px;padding:11px 13px;font-size:15px}
+  input:focus{outline:none;border-color:var(--on)}
+
+  /* 단계 카드 */
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;
+        padding:20px 22px;margin:0 0 14px;transition:.15s}
+  .card.done{opacity:.42}
+  .card.next{border-color:var(--on);box-shadow:0 0 0 1px var(--on),0 8px 26px #3b82f61f}
+  .head{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+  .num{width:28px;height:28px;flex:none;border-radius:50%;background:#232b34;color:var(--dim);
+       display:grid;place-items:center;font-weight:800;font-size:14px}
+  .card.next .num{background:var(--on);color:#fff}
+  .card.done .num{background:var(--ok);color:#08240f}
+  .ttl{font-size:17px;font-weight:800}
+  .when{color:var(--dim);font-size:13.5px;margin:0 0 15px 40px}
+  .act{margin-left:40px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  select{background:#0e1318;border:1px solid var(--line);color:var(--txt);
+         border-radius:9px;padding:10px 12px;font-size:14.5px;min-width:190px}
+  button{background:#232b34;border:1px solid var(--line);color:var(--txt);
+         border-radius:9px;padding:11px 20px;font-size:15px;font-weight:700;cursor:pointer}
+  button:hover{border-color:#3a444e}
+  .b-on{background:var(--on);border-color:var(--on);color:#fff}
+  .b-danger{background:transparent;border-color:#5b2b2b;color:#f08a8a}
+  button:disabled{opacity:.4;cursor:not-allowed}
+  .hint{margin:12px 0 0 40px;font-size:13.5px;color:var(--dim)}
+  .hint b{color:var(--warn);font-weight:700}
+
+  /* 지금 걸려 있는 것 */
+  #현황{margin:22px 0 0;padding:16px 20px;background:#12171d;
+        border:1px solid var(--line);border-radius:12px;font-size:14px}
+  #현황 h2{font-size:13px;color:var(--dim);font-weight:700;margin-bottom:9px}
+  #현황 .l{display:flex;justify-content:space-between;padding:5px 0;border-top:1px solid #1e252d}
+  #현황 .l:first-of-type{border-top:0}
+  #현황 .v{font-weight:700}
+  #기록{margin-top:14px;font-size:13px;color:var(--dim);min-height:20px}
+  #기록 .e{color:#f08a8a}
+  a{color:#7ab7ff}
+</style>
+
+<header>
+  <h1>수업 리모컨</h1>
+  <div class="tabs">
+    <button class="tab on" data-day="2">2일차</button>
+    <button class="tab" data-day="3">3일차</button>
+  </div>
+  <div class="grow"></div>
+  <div class="state"><span class="dot" id="불"></span><span id="상태">확인 중…</span></div>
+</header>
+
+<main>
+  <section id="문">
+    <div class="ttl">처음 한 번만 — 강사 토큰</div>
+    <p><code>강의/시뮬레이터/.env</code> 의 <b>INSTRUCTOR_TOKEN</b> 값을 붙여넣으세요.
+       한 번 넣으면 이 브라우저가 기억합니다.</p>
+    <div class="row">
+      <input id="토큰" type="password" placeholder="INSTRUCTOR_TOKEN" autocomplete="off">
+      <button class="b-on" id="들어가기">시작</button>
+    </div>
+  </section>
+
+  <section id="판" hidden></section>
+
+  <section id="현황" hidden>
+    <h2>지금 공장 상태</h2>
+    <div class="l"><span>공장</span><span class="v" id="c공장">—</span></div>
+    <div class="l"><span>배속</span><span class="v" id="c배속">—</span></div>
+    <div class="l"><span>제어 통로</span><span class="v" id="c제어">—</span></div>
+    <div class="l"><span>진행 중인 고장</span><span class="v" id="c주입">—</span></div>
+    <div id="기록"></div>
+  </section>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+let TOKEN = localStorage.getItem('수업토큰') || '';
+let DAY = 2;
+let 한것 = new Set(JSON.parse(localStorage.getItem('수업한것') || '[]'));
+
+const H = () => ({'X-Instructor-Token': TOKEN, 'Content-Type': 'application/json'});
+
+async function call(path, opts = {}) {
+  const r = await fetch(path, {...opts, headers: H()});
+  if (!r.ok) throw new Error((await r.text()).slice(0, 160));
+  return r.json();
+}
+function 적기(s, 나쁨) {
+  $('기록').innerHTML = `<span class="${나쁨 ? 'e' : ''}">${s}</span>`;
+}
+function 저장() {
+  localStorage.setItem('수업한것', JSON.stringify([...한것]));
+}
+
+// ── 오늘 할 일 — 이것이 화면의 전부다 ─────────────────────────────────────
+const 할일 = {
+  2: [
+    {id: '2주입', ttl: '고장 넣기', when: '학생들이 공장 화면을 보고 있을 때 (가이드 3번)',
+     대상: true, 버튼: '고장 넣기', 색: 'b-on',
+     hint: '온도가 시간당 0.5℃씩 오릅니다. <b>눈으로는 거의 안 보입니다</b> — 그게 이 단계의 목적입니다.',
+     해라: async t => { await call('/api/instructor/inject', {method: 'POST',
+       body: JSON.stringify({tenant_id: t, kind: 'temp_drift', equipment_id: null, params: {}})});
+       return '고장을 넣었습니다'; }},
+    {id: '2끝', ttl: '수업 끝내기', when: '2일차를 마칠 때',
+     버튼: '고장 멈추기', 색: 'b-danger', 확인: '진행 중인 고장을 모두 멈춥니다. 계속할까요?',
+     hint: '서버는 켜 둬도 됩니다. 내일 그대로 씁니다.',
+     해라: async () => { const r = await call('/api/instructor/inject', {method: 'DELETE'});
+       return `고장 ${r.stopped}건을 멈췄습니다`; }},
+  ],
+  3: [
+    {id: '3열기', ttl: '제어 열기', when: '오후 시작 — 슬라이드 30장',
+     버튼: '제어 열기 + 배속 ×120', 색: 'b-on',
+     hint: '<b>이걸 안 누르면</b> 학생 <code>loop.py</code> 가 전부 403 으로 죽습니다.',
+     해라: async () => {
+       await call('/api/instructor/control-lock?unlocked=true&tenant_id=*', {method: 'POST'});
+       await call('/api/instructor/time-scale?scale=120', {method: 'POST'});
+       return '제어를 열고 배속을 ×120 으로 올렸습니다'; }},
+    {id: '3주입', ttl: '고장 넣기', when: '전원이 loop.py 를 돌린 것을 확인한 뒤 — 슬라이드 40장',
+     대상: true, 버튼: '고장 넣기', 색: 'b-on',
+     hint: '먼저 <b>"지금 넣습니다. 1~3분 조용한 것이 정상입니다"</b> 라고 말하세요. ' +
+           '순서가 뒤집히면 학생은 영영 못 봅니다.',
+     해라: async t => { await call('/api/instructor/inject', {method: 'POST',
+       body: JSON.stringify({tenant_id: t, kind: 'temp_drift', equipment_id: null, params: {}})});
+       return '고장을 넣었습니다'; }},
+    {id: '3끝', ttl: '수업 끝내기', when: '3일차를 마칠 때',
+     버튼: '제어 잠그기 + 원복', 색: 'b-danger',
+     확인: '제어를 잠그고 고장을 멈추고 배속을 ×60 으로 되돌립니다. 계속할까요?',
+     hint: '이 뒤에 <b>VM 을 반드시 정지</b>하세요. 켜 두면 크레딧이 계속 나갑니다.',
+     해라: async () => {
+       await call('/api/instructor/inject', {method: 'DELETE'});
+       await call('/api/instructor/control-lock?unlocked=false&tenant_id=*', {method: 'POST'});
+       await call('/api/instructor/time-scale?scale=60', {method: 'POST'});
+       return '수업 전 상태로 되돌렸습니다'; }},
+  ],
+};
+
+let 공장목록 = [];
+
+function 그리기() {
+  const 판 = $('판');
+  판.innerHTML = '';
+  const 목록 = 할일[DAY];
+  const 다음 = 목록.findIndex(x => !한것.has(x.id));
+
+  목록.forEach((x, n) => {
+    const 끝났나 = 한것.has(x.id);
+    const 차례 = n === 다음;
+    const el = document.createElement('div');
+    el.className = 'card' + (끝났나 ? ' done' : 차례 ? ' next' : '');
+    el.innerHTML =
+      `<div class="head"><div class="num">${끝났나 ? '✓' : n + 1}</div>
+         <div class="ttl">${x.ttl}</div></div>
+       <div class="when">${x.when}</div>
+       <div class="act"></div>
+       <div class="hint">${x.hint}</div>`;
+    const act = el.querySelector('.act');
+
+    let 고른것 = null;
+    if (x.대상) {
+      고른것 = document.createElement('select');
+      고른것.innerHTML = `<option value="*">전체 (학생 모두)</option>` +
+        공장목록.map(t => `<option value="${t}">${t} 한 사람만</option>`).join('');
+      act.appendChild(고른것);
+    }
+    const b = document.createElement('button');
+    b.className = x.색;
+    b.textContent = 끝났나 ? '다시 하기' : x.버튼;
+    b.onclick = async () => {
+      if (x.확인 && !confirm(x.확인)) return;
+      b.disabled = true;
+      const 옛 = b.textContent;
+      b.textContent = '…';
+      try {
+        적기(await x.해라(고른것 ? 고른것.value : '*'));
+        한것.add(x.id); 저장();
+      } catch (e) {
+        적기('안 됐습니다 — ' + e.message, true);
+      }
+      b.disabled = false; b.textContent = 옛;
+      보기(); 그리기();
+    };
+    act.appendChild(b);
+    판.appendChild(el);
+  });
+}
+
+async function 보기() {
+  try {
+    const s = await call('/api/instructor/status');
+    $('불').className = 'dot ok';
+    $('상태').textContent = `서버 정상 · 공장 ${s.tenants ?? '—'}개`;
+    $('c공장').textContent = (s.tenants ?? '—') + '개';
+    const 배속 = s.clock?.time_scale ?? s.time_scale;
+    $('c배속').textContent = '×' + (배속 ?? '—');
+    const 주입 = s.injections?.length ?? s.active_injections ?? 0;
+    $('c주입').textContent = 주입 ? `${주입}건` : '없음';
+    const t = await call('/api/instructor/tenants');
+    const ts = t.tenants || [];
+    공장목록 = ts.filter(x => x.tenant_type === 'individual').map(x => x.tenant_id);
+    const 열림 = ts.filter(x => x.control_unlocked).length;
+    $('c제어').textContent = 열림 ? `열림 (${열림}개)` : '잠김';
+    $('c제어').style.color = 열림 ? 'var(--ok)' : 'var(--dim)';
+  } catch (e) {
+    $('불').className = 'dot bad';
+    $('상태').textContent = '서버에 닿지 못했습니다';
+    적기('서버 확인 실패 — ' + e.message, true);
+  }
+}
+
+async function 들어가기() {
+  TOKEN = $('토큰').value.trim();
+  if (!TOKEN) return 적기('토큰을 넣어 주세요.', true);
+  try {
+    await call('/api/instructor/status');
+  } catch {
+    return 적기('토큰이 맞지 않습니다.', true);
+  }
+  localStorage.setItem('수업토큰', TOKEN);
+  $('문').hidden = true; $('판').hidden = false; $('현황').hidden = false;
+  await 보기(); 그리기();
+  setInterval(보기, 5000);
+}
+
+$('들어가기').onclick = 들어가기;
+$('토큰').addEventListener('keydown', e => { if (e.key === 'Enter') 들어가기(); });
+document.querySelectorAll('.tab').forEach(b => b.onclick = () => {
+  document.querySelectorAll('.tab').forEach(x => x.classList.remove('on'));
+  b.classList.add('on');
+  DAY = +b.dataset.day;
+  그리기();
+});
+
+if (TOKEN) { $('토큰').value = TOKEN; 들어가기(); }
+</script>

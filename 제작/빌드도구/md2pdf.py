@@ -55,6 +55,27 @@ blockquote { border-left: 4px solid #f0a500; background: #fffaf0; margin: 12px 0
 img { max-width: 100%; border: 1px solid #c9d2dc; border-radius: 5px;
       margin: 10px 0; page-break-inside: avoid; }
 .cap { font-size: 9pt; color: #5a6672; margin: -6px 0 12px; }
+
+/* ── 굵은 글씨가 세 가지 다른 일을 하고 있었다 ────────────────────────────
+   ①②③ 조작 단계 · 「안 되면」 같은 구역 이름 · 마무리 한 문장.
+   전부 같은 모양이라 어디가 「할 일」이고 어디가 「읽을 것」인지 안 갈렸다.
+   셋을 눈으로 구분되게 나눈다. */
+
+/* 학생이 실제로 하는 것 — 제일 눈에 띄어야 한다 */
+.step { margin: 15px 0 7px; padding: 7px 12px; font-size: 11pt; font-weight: 700;
+        color: #14335e; background: #eaf1f8; border-left: 4px solid #1b4b8f;
+        border-radius: 3px; page-break-after: avoid; }
+
+/* 구역 이름 — 작고 조용하게, 위에 선을 그어 구역을 뗀다 */
+.label { margin: 20px 0 7px; padding-top: 9px; font-size: 9.5pt; font-weight: 700;
+         color: #67717c; letter-spacing: .03em;
+         border-top: 1px solid #e2e7ec; page-break-after: avoid; }
+.label .x { color: #67717c; font-weight: 400; }
+
+/* 마무리 한 문장 — 그 단계에서 남길 것 */
+.punch { margin: 13px 0; padding: 8px 13px; font-weight: 700; color: #1f4636;
+         background: #f2f8f4; border-left: 4px solid #4f8f68; border-radius: 3px; }
+.punch code { background: #e6f0ea; color: #1f4636; }
 /* 「안 되면」 카드 — 한 덩어리가 눈에 보이게 박스로 묶는다.
    두 줄이 그냥 <p> 로 흩어지면 어디까지가 한 항목인지 안 보인다. */
 .trouble { border: 1px solid #e6d2d2; border-left: 5px solid #c0392b;
@@ -87,6 +108,25 @@ def 인라인(t: str) -> str:
     t = re.sub(r"\[([^\]]+)\]\(([^)]+)\)", r"\1", t)          # 링크는 글자만 남긴다
     t = re.sub(r"\x00(\d+)\x00", lambda m: 조각[int(m.group(1))], t)
     return t
+
+
+# 구역 이름 — 조작이 아니라 「여기부터 이런 내용」을 알리는 표찰이다.
+# 조용하게 두고 위에 선만 그어 구역을 뗀다 (굵게 강조하면 조작 단계와 뒤섞인다).
+구역이름 = ("먼저 나오는 화면", "이어서 나오는 화면", "나오는 화면",
+         "승인 요청 화면", "안 되면", "막혔으면", "읽는 법")
+
+
+def 특수한줄(l: str) -> bool:
+    """문단에 이어 붙이면 안 되는 줄 — 표·목록·그림·코드·**줄 전체가 굵은 것**.
+
+    `**` 로 시작만 하는 줄은 이어지는 문장이다.
+    (`**전부 정상**입니다. 원래 …` — 이걸 제외하면 한 문장이 중간에서 벌어진다)
+    """
+    s = l.strip()
+    return (s.startswith(("#", "|", "```", "!", ">", "→", "<!--", "---"))
+            or bool(re.fullmatch(r"\*\*[^*].*\*\*", s))     # 줄 전체가 굵은 것만
+            or bool(re.match(r"^\s*[-*]\s+", l))
+            or bool(re.match(r"^\s*\d+\.\s+", l)))
 
 
 def md2html(md: str, 제목: str, 기준폴더: Path | None = None) -> str:
@@ -184,8 +224,36 @@ def md2html(md: str, 제목: str, 기준폴더: Path | None = None) -> str:
             out.append(f'<div class="trouble"><p class="t">{인라인(제목)}</p>'
                        f'<p class="b">{인라인(본문)}</p></div>')
             continue
+        # ── 조작 단계 — `**① …**`. 학생이 실제로 하는 것이라 제일 세워 둔다
+        elif m := re.fullmatch(r"\*\*([①-⑳])\s*(.+?)\*\*", line.strip()):
+            out.append(f'<p class="step">{m.group(1)} {인라인(m.group(2))}</p>')
+
+        # ── 구역 이름 — `**안 되면**`, `**나오는 화면** — 덧말`
+        elif m := re.fullmatch(r"\*\*(" + "|".join(구역이름) + r")\*\*(.*)", line.strip()):
+            덧말 = m.group(2).strip()
+            꼬리 = f' <span class="x">{인라인(덧말)}</span>' if 덧말 else ""
+            out.append(f'<p class="label">{m.group(1)}{꼬리}</p>')
+
+        # ── 마무리 한 문장 — 줄 전체가 굵고 위 둘이 아닌 것.
+        #    코드만 굵은 것(에러 카드 제목)은 여기 안 온다 — 위에서 이미 소비된다.
+        elif (re.fullmatch(r"\*\*[^*].*\*\*", line.strip())
+              and not line.strip().startswith("**`")):
+            out.append(f'<p class="punch">{인라인(line.strip()[2:-2])}</p>')
+
         elif re.match(r"^\s*---+\s*$", line):
             out.append("<hr>")
+
+        # ── 보통 문단 — **이어지는 줄은 한 문단으로 붙인다.**
+        #    한 줄이 곧 한 문단이 되면, 원본에서 보기 좋게 줄바꿈한 자리가
+        #    지면에서 문단 나눔이 되어 **한 문장이 중간에서 벌어진다.**
+        elif line.strip():
+            묶음 = [line.strip()]
+            i += 1
+            while i < len(줄들) and 줄들[i].strip() and not 특수한줄(줄들[i]):
+                묶음.append(줄들[i].strip())
+                i += 1
+            out.append(f"<p>{인라인(' '.join(묶음))}</p>")
+            continue
         elif line.strip():
             out.append(f"<p>{인라인(line)}</p>")
         i += 1
