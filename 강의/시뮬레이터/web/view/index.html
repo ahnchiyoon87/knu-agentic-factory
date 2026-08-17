@@ -135,13 +135,20 @@
 <header>
   <h1>K-정밀 팩토리 시뮬레이터<small>경남대 RISE 피지컬AI 사관학교 · 8월 Agentic AI 특강</small></h1>
   <div class="spacer"></div>
-  <label>네임스페이스 <select id="tenant"></select></label>
-  <label>폴링 <select id="interval">
-      <option value="1000" selected>1초</option>
-      <option value="2000">2초</option>
-      <option value="3000">3초</option>
-      <option value="5000">5초</option>
-  </select></label>
+  <!-- 「네임스페이스」 고르는 칸과 「폴링」 칸은 **강사만** 본다.
+       학생 화면에 두면 ① 남의 공장을 골라 볼 수 있고(바로 아래 패널의 「자기 몫의 공장입니다」와
+       모순된다) ② 「네임스페이스」는 학생이 배우는 말이 아니며(학생은 「내 번호」로 배운다)
+       ③ 폴링을 1초로 당기면 39명이 그만큼 서버를 두드린다.
+       주소에 ?강사=1 을 붙였을 때만 나타난다. -->
+  <span id="강사칸" hidden>
+    <label>공장 <select id="tenant"></select></label>
+    <label>폴링 <select id="interval">
+        <option value="1000">1초</option>
+        <option value="2000" selected>2초</option>
+        <option value="3000">3초</option>
+        <option value="5000">5초</option>
+    </select></label>
+  </span>
   <span class="pill"><span class="dot" id="dot"></span><span id="status">연결 중</span></span>
 </header>
 
@@ -281,8 +288,15 @@ async function boot(){
     .join('');
 
   // URL 로 고정 가능:  /view?tenant=S07   (학생에게 개인 링크를 줄 때)
-  const want = new URLSearchParams(location.search).get('tenant');
+  const 물음 = new URLSearchParams(location.search);
+  const want = 물음.get('tenant');
   if (want && list.tenants.some(t => t.tenant_id === want)) sel.value = want;
+
+  // 공장 고르는 칸·폴링 칸은 **강사만** 본다 —  /view?tenant=S00&강사=1
+  //   학생 화면에 두면 남의 공장을 골라 볼 수 있고, 바로 아래 「자기 몫의 공장입니다」와 모순된다.
+  if (물음.has('강사') || 물음.has('instructor')) {
+    document.getElementById('강사칸').hidden = false;
+  }
   tenant = sel.value;
   document.getElementById('apiHint').textContent = `GET /api/v1/${tenant}/state`;
   showNamespace(sel);
@@ -446,7 +460,8 @@ async function poll(){
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     render(await res.json());
     failures = 0;
-    setStatus(true, '수신 중 · ' + new Date().toLocaleTimeString('ko-KR'));
+    // 시각은 아래 시계 띠에 「실제 시각」으로 이미 있다. 여기 또 찍으면 같은 값이 두 곳이다.
+    setStatus(true, '수신 중');
   }catch(err){
     failures++;
     setStatus(false, `연결 실패 (${failures}회) — ${err.message}`);

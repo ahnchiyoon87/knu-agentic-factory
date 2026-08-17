@@ -361,6 +361,21 @@ async function 보기() {
                       + `${i.tenant_id === '*' ? ' (전체)' : ` (${i.tenant_id})`}`).join(' / ')
       : '없음';
     $('c주입').style.color = 목록.length ? 'var(--warn)' : 'var(--dim)';
+
+    // ★ 배속은 **서버가 재시작되면 기본값(×60)으로 조용히 돌아간다.**
+    //   수업 중 서버가 한 번 죽으면 강사가 모르는 채 느린 시계로 진행하게 된다.
+    //   그래서 「고장은 도는데 배속이 ×60」·「고장은 없는데 ×120」 두 어긋남을 여기서 잡아 준다.
+    const 배속숫자 = Number(배속) || 0;
+    if (목록.length && 배속숫자 < 120) {
+      $('c배속').textContent = `×${배속} — 고장이 도는데 느립니다. 다시 [고장 넣기]`;
+      $('c배속').style.color = 'var(--warn)';
+    } else if (!목록.length && 배속숫자 >= 120) {
+      $('c배속').textContent = `×${배속} — 되돌리세요. [수업 끝내기]`;
+      $('c배속').style.color = 'var(--warn)';
+    } else {
+      $('c배속').style.color = '';
+    }
+
     const t = await call('/api/instructor/tenants');
     const ts = t.tenants || [];
     공장목록 = ts.filter(x => x.tenant_type === 'individual').map(x => x.tenant_id);
