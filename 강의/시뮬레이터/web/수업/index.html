@@ -238,8 +238,11 @@ async function 보기() {
     $('c공장').textContent = (s.tenants ?? '—') + '개';
     const 배속 = s.clock?.time_scale ?? s.time_scale;
     $('c배속').textContent = '×' + (배속 ?? '—');
-    const 주입 = s.injections?.length ?? s.active_injections ?? 0;
-    $('c주입').textContent = 주입 ? `${주입}건` : '없음';
+    // `active_injections` 는 **배열**이다. 빈 배열은 JS 에서 참이라
+    // 그대로 쓰면 「0건」이 아니라 숫자 없이 「건」만 찍힌다.
+    const 주입 = (s.active_injections || []).length;
+    $('c주입').textContent = 주입 ? `${주입}건 진행 중` : '없음';
+    $('c주입').style.color = 주입 ? 'var(--warn)' : 'var(--dim)';
     const t = await call('/api/instructor/tenants');
     const ts = t.tenants || [];
     공장목록 = ts.filter(x => x.tenant_type === 'individual').map(x => x.tenant_id);
