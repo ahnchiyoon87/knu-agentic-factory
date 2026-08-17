@@ -102,19 +102,24 @@ async def view() -> FileResponse:
     return FileResponse(WEB_DIR / "view" / "index.html")
 
 
-# 강사 화면은 **하나뿐이다.** 옛 `/console` 은 시뮬레이터를 시험하려고 만든
-# 개발자 판이라 버튼이 스무 개였고, 수업 중 누를 것은 셋뿐인데 그것을 못 찾았다.
-# 화면을 둘로 두면 「어느 걸 열지」부터 헷갈리므로 `/console` 은 여기로 넘긴다.
-# 옛 판에 있던 기능(스파이크·결측·배속·리셋·접속키)은 접어 둔 「그 밖에」로 옮겼다.
+# 강사 화면은 **여기 하나뿐이다.**
+#   전에는 시뮬레이터를 시험하려고 만든 개발자 판이 있었다. 버튼이 스무 개인데
+#   수업 중 누를 것은 셋뿐이라 강사가 그 셋을 못 찾았다. 그래서 **오늘 할 일만**
+#   순서대로 큰 카드로 두고, 나머지(스파이크·결측·배속·리셋)는 접어 두었다.
+#
+#   주소는 `/console` 을 그대로 쓴다 — 진행 문서·운영 문서·절차서에 이미
+#   이 주소로 적혀 있고, 한글 경로는 주소창에서 %EC%88%98%EC%97%85 로 깨져
+#   손으로 칠 수도 없다.
+@app.get("/console", include_in_schema=False)
+async def console() -> FileResponse:
+    return FileResponse(WEB_DIR / "console" / "index.html")
+
+
+# 한동안 `/수업` 으로 안내한 적이 있어 별칭만 남긴다.
 @app.get("/수업", include_in_schema=False)
 @app.get("/class", include_in_schema=False)
-async def 수업() -> FileResponse:
-    return FileResponse(WEB_DIR / "수업" / "index.html")
-
-
-@app.get("/console", include_in_schema=False)
-async def console() -> RedirectResponse:
-    return RedirectResponse("/수업")
+async def 수업() -> RedirectResponse:
+    return RedirectResponse("/console")
 
 
 @app.get("/fallback", include_in_schema=False)
