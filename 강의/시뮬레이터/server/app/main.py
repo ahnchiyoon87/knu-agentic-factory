@@ -102,18 +102,19 @@ async def view() -> FileResponse:
     return FileResponse(WEB_DIR / "view" / "index.html")
 
 
-@app.get("/console", include_in_schema=False)
-async def console() -> FileResponse:
-    return FileResponse(WEB_DIR / "console" / "index.html")
-
-
-# 수업 중에 강사가 보는 화면. `/console` 은 시뮬레이터를 시험하려고 만든
-# 개발자 판이라 버튼이 스무 개다 — 수업 중 누를 것은 셋뿐인데 그것을 못 찾는다.
-# 여기는 **오늘 할 일만** 순서대로 큰 카드로 둔다. 영문 경로도 같이 받는다.
+# 강사 화면은 **하나뿐이다.** 옛 `/console` 은 시뮬레이터를 시험하려고 만든
+# 개발자 판이라 버튼이 스무 개였고, 수업 중 누를 것은 셋뿐인데 그것을 못 찾았다.
+# 화면을 둘로 두면 「어느 걸 열지」부터 헷갈리므로 `/console` 은 여기로 넘긴다.
+# 옛 판에 있던 기능(스파이크·결측·배속·리셋·접속키)은 접어 둔 「그 밖에」로 옮겼다.
 @app.get("/수업", include_in_schema=False)
 @app.get("/class", include_in_schema=False)
 async def 수업() -> FileResponse:
     return FileResponse(WEB_DIR / "수업" / "index.html")
+
+
+@app.get("/console", include_in_schema=False)
+async def console() -> RedirectResponse:
+    return RedirectResponse("/수업")
 
 
 @app.get("/fallback", include_in_schema=False)

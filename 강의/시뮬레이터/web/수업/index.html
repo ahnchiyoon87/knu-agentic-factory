@@ -82,7 +82,30 @@
   #현황 .v{font-weight:700}
   #기록{margin-top:14px;font-size:13px;color:var(--dim);min-height:20px}
   #기록 .e{color:#f08a8a}
-  a{color:#7ab7ff}
+  a{color:#7ab7ff;text-decoration:none}
+
+  /* 접어 둔 것 — 평소엔 안 쓴다 */
+  #그밖에{margin:22px 0 0}
+  #그밖에 summary{cursor:pointer;color:var(--dim);font-size:14px;padding:11px 0;
+                  list-style:none;border-top:1px solid var(--line)}
+  #그밖에 summary::before{content:'▸ ';color:#5b6672}
+  #그밖에[open] summary::before{content:'▾ '}
+  #그밖에 summary:hover{color:var(--txt)}
+  .칸{background:#12171d;border:1px solid var(--line);border-radius:11px;
+      padding:15px 18px;margin:0 0 11px}
+  .칸 h3{font-size:14.5px;font-weight:800;margin-bottom:8px}
+  .ㅅ{font-size:13px;color:var(--dim);margin:0 0 11px}
+  .줄{display:flex;gap:8px;align-items:center;margin:7px 0;flex-wrap:wrap}
+  .줄 label{min-width:52px;font-size:13.5px;color:var(--dim)}
+  .줄 input{max-width:120px;padding:8px 10px;font-size:14px}
+  .줄 select{min-width:150px;padding:8px 10px;font-size:14px}
+  .줄 button{padding:8px 15px;font-size:14px}
+  .목록{font-size:13.5px;color:var(--dim)}
+  .목록 .i{display:flex;gap:10px;align-items:center;padding:7px 0;
+           border-top:1px solid #1e252d}
+  .목록 .i:first-child{border-top:0}
+  .목록 .g{flex:1;color:var(--txt)}
+  .목록 button{padding:5px 12px;font-size:13px}
 </style>
 
 <header>
@@ -116,6 +139,67 @@
     <div class="l"><span>진행 중인 고장</span><span class="v" id="c주입">—</span></div>
     <div id="기록"></div>
   </section>
+
+  <!-- 평소엔 안 쓰는 것. 접어 두어 위 카드 셋이 가려지지 않게 한다. -->
+  <details id="그밖에" hidden>
+    <summary>그 밖에 — 다른 고장 종류 · 배속 · 초기화</summary>
+
+    <div class="칸">
+      <h3>진행 중인 고장</h3>
+      <div id="주입목록" class="목록">없음</div>
+    </div>
+
+    <div class="칸">
+      <h3>다른 고장 넣기</h3>
+      <p class="ㅅ">2일차 21장에서 스파이크·결측을 보여 줄 때. 빈 칸은 기본값이 쓰입니다.</p>
+      <div class="줄"><label>대상</label><select id="k대상"></select></div>
+      <div class="줄"><label>종류</label>
+        <select id="k종류">
+          <option value="temp_drift">온도 드리프트</option>
+          <option value="vibration_spike">진동 스파이크</option>
+          <option value="sensor_dropout">센서 결측</option>
+        </select></div>
+      <div class="줄"><label>설비</label>
+        <select id="k설비"><option value="">(종류별 기본)</option>
+          <option>EQ-01</option><option>EQ-02</option><option>EQ-03</option>
+          <option>EQ-04</option><option>EQ-05</option><option>EQ-06</option>
+        </select></div>
+      <div id="k값들"></div>
+      <div class="줄"><label>지연</label><input id="k지연" type="number" value="0" min="0"> 초 뒤</div>
+      <div class="줄"><button class="b-on" id="k넣기">넣기</button>
+        <button class="b-danger" id="k모두중단">전체 중단</button></div>
+    </div>
+
+    <div class="칸">
+      <h3>배속</h3>
+      <p class="ㅅ">시연 중에 ×1 로 내리면 감속·로봇 파견을 실시간으로 보여 줄 수 있습니다.</p>
+      <div class="줄" id="배속줄">
+        <button data-s="1">×1 실시간</button>
+        <button data-s="60">×60</button>
+        <button data-s="80">×80</button>
+        <button data-s="120">×120</button>
+      </div>
+    </div>
+
+    <div class="칸">
+      <h3>제어 통로 · 초기화</h3>
+      <div class="줄"><label>대상</label><select id="z대상"></select>
+        <button id="z개방">개방</button><button class="b-danger" id="z잠금">잠금</button></div>
+      <p class="ㅅ">한 학생 공장이 엉켰을 때 그 번호만 처음 상태로 되돌립니다.
+         이력·알람·명령·고장이 지워집니다.</p>
+      <div class="줄"><label>초기화</label><select id="r대상"></select>
+        <button class="b-danger" id="r리셋">이 공장만 리셋</button></div>
+    </div>
+
+    <div class="칸">
+      <h3>그 밖에</h3>
+      <div class="줄">
+        <a href="/view" target="_blank"><button>학생 화면 열기</button></a>
+        <button id="db">DB 사용량</button>
+        <button id="정리">보존정책 즉시 실행</button>
+      </div>
+    </div>
+  </details>
 </main>
 
 <script>
@@ -249,11 +333,107 @@ async function 보기() {
     const 열림 = ts.filter(x => x.control_unlocked).length;
     $('c제어').textContent = 열림 ? `열림 (${열림}개)` : '잠김';
     $('c제어').style.color = 열림 ? 'var(--ok)' : 'var(--dim)';
+
+    // 접어 둔 칸의 드롭다운도 같이 채운다
+    목록채우기($('k대상'), true);
+    목록채우기($('z대상'), true);
+    목록채우기($('r대상'), false);
+
+    // 진행 중인 고장 — 하나씩 멈출 수 있게
+    const 것들 = s.active_injections || [];
+    $('주입목록').innerHTML = 것들.length ? 것들.map(i =>
+      `<div class="i"><span class="g">${i.tenant_id} · ${i.equipment_id} · ` +
+      `${고장이름[i.kind] || i.kind}</span>` +
+      `<button class="b-danger" data-id="${i.id}">멈추기</button></div>`).join('')
+      : '없음';
+    $('주입목록').querySelectorAll('button').forEach(b => b.onclick = () =>
+      눌러(() => call('/api/instructor/inject/' + b.dataset.id, {method: 'DELETE'}),
+           '그 고장을 멈췄습니다'));
   } catch (e) {
     $('불').className = 'dot bad';
     $('상태').textContent = '서버에 닿지 못했습니다';
     적기('서버 확인 실패 — ' + e.message, true);
   }
+}
+
+// ── 접어 둔 「그 밖에」 ────────────────────────────────────────────────────
+// /console 에만 있던 것을 여기로 옮겼다. 화면을 둘로 두면 「어느 걸 열지」부터
+// 헷갈리므로 하나로 합친다. 평소 안 쓰는 것이라 접어 둔다.
+const 값칸 = {
+  temp_drift: [['slope_c_per_hour', '기울기(℃/시간)', 0.5],
+               ['duration_hours', '상승 지속(시간)', 4],
+               ['hold_hours', '최고점 유지(시간)', 1]],
+  vibration_spike: [['magnitude_sigma', '진폭(노이즈 σ 배수)', 6],
+                    ['duration_seconds', '1회 지속(초)', 3],
+                    ['repeat_count', '반복 횟수', 1],
+                    ['repeat_interval_seconds', '반복 간격(초)', 20]],
+  sensor_dropout: [['duration_seconds', '결측 지속(초)', 120]],
+};
+const 고장이름 = {temp_drift: '온도 드리프트', vibration_spike: '진동 스파이크',
+                sensor_dropout: '센서 결측'};
+
+function 값칸그리기() {
+  $('k값들').innerHTML = 값칸[$('k종류').value].map(([k, 라벨, 기본]) =>
+    `<div class="줄"><label style="min-width:150px">${라벨}</label>` +
+    `<input data-k="${k}" value="${기본}"></div>`).join('');
+}
+
+function 목록채우기(sel, 전체표시) {
+  const 옛 = sel.value;
+  sel.innerHTML = (전체표시 ? `<option value="*">전체</option>` : '') +
+    공장목록.map(t => `<option value="${t}">${t}</option>`).join('');
+  if (옛) sel.value = 옛;
+}
+
+async function 눌러(fn, 말) {
+  try { await fn(); 적기(말); } catch (e) { 적기('안 됐습니다 — ' + e.message, true); }
+  보기(); 그리기();
+}
+
+function 그밖에붙이기() {
+  $('k종류').onchange = 값칸그리기;
+  값칸그리기();
+
+  $('k넣기').onclick = () => 눌러(async () => {
+    const params = {};
+    $('k값들').querySelectorAll('input').forEach(i => {
+      if (i.value !== '') params[i.dataset.k] = Number(i.value);
+    });
+    await call('/api/instructor/inject', {method: 'POST', body: JSON.stringify({
+      tenant_id: $('k대상').value, kind: $('k종류').value,
+      equipment_id: $('k설비').value || null, params,
+      delay_seconds: Number($('k지연').value || 0)})});
+  }, `${고장이름[$('k종류').value]} 를 넣었습니다`);
+
+  $('k모두중단').onclick = () => {
+    if (!confirm('진행 중인 고장을 모두 멈춥니다. 계속할까요?')) return;
+    눌러(() => call('/api/instructor/inject', {method: 'DELETE'}), '고장을 모두 멈췄습니다');
+  };
+
+  document.querySelectorAll('#배속줄 button').forEach(b => b.onclick = () =>
+    눌러(() => call(`/api/instructor/time-scale?scale=${b.dataset.s}`, {method: 'POST'}),
+         `배속을 ×${b.dataset.s} 로 바꿨습니다`));
+
+  $('z개방').onclick = () => 눌러(() => call(
+    `/api/instructor/control-lock?unlocked=true&tenant_id=${$('z대상').value}`,
+    {method: 'POST'}), '제어를 열었습니다');
+  $('z잠금').onclick = () => 눌러(() => call(
+    `/api/instructor/control-lock?unlocked=false&tenant_id=${$('z대상').value}`,
+    {method: 'POST'}), '제어를 잠갔습니다');
+
+  $('r리셋').onclick = () => {
+    const t = $('r대상').value;
+    if (!confirm(`${t} 공장을 처음 상태로 되돌립니다. 이력·알람·명령·고장이 지워집니다.`)) return;
+    눌러(() => call(`/api/instructor/reset?tenant_id=${t}`, {method: 'POST'}),
+         `${t} 를 초기화했습니다`);
+  };
+
+  $('db').onclick = () => 눌러(async () => {
+    const r = await call('/api/instructor/db-size');
+    적기(`DB ${r.total_mb ?? r.mb ?? '—'} MB`);
+  }, '');
+  $('정리').onclick = () => 눌러(() => call('/api/instructor/prune', {method: 'POST'}),
+                                '보존정책을 실행했습니다');
 }
 
 async function 들어가기() {
@@ -265,7 +445,9 @@ async function 들어가기() {
     return 적기('토큰이 맞지 않습니다.', true);
   }
   localStorage.setItem('수업토큰', TOKEN);
-  $('문').hidden = true; $('판').hidden = false; $('현황').hidden = false;
+  $('문').hidden = true;
+  $('판').hidden = false; $('현황').hidden = false; $('그밖에').hidden = false;
+  그밖에붙이기();
   await 보기(); 그리기();
   setInterval(보기, 5000);
 }
