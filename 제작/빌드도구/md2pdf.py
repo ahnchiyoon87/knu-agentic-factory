@@ -30,67 +30,111 @@ import sys
 from pathlib import Path
 
 CSS = """
-@page { size: A4; margin: 18mm 16mm; }
+/* ─────────────────────────────────────────────────────────────────────────
+   역할마다 생김새가 달라야 한다.
+   전에는 큰 단계·작은 단계·터미널 명령·파일에 쓰는 코드가 **전부 같은 회색 상자**라
+   학생이 「치는 것」과 「쓰는 것」을 구별하지 못했다.
+   ───────────────────────────────────────────────────────────────────────── */
+
+@page { size: A4; margin: 20mm 17mm 18mm; }
+
 body { font-family: "Malgun Gothic","맑은 고딕",sans-serif; font-size: 10.5pt;
-       line-height: 1.75; color: #1a1a1a;
-       /* 한국어는 어절 단위로 끊는다 — 안 두면 낱말이 두 줄로 쪼개진다.
-          break-word 는 안전판(긴 코드 조각만 끊는다). 슬라이드 쪽도 같은 규칙이다. */
+       line-height: 1.85; color: #1f2429;
+       /* 한국어는 어절 단위로 끊는다 — 안 두면 낱말이 두 줄로 쪼개진다. */
        word-break: keep-all; overflow-wrap: break-word; }
-h1 { font-size: 19pt; border-bottom: 2.5px solid #1b4b8f; padding-bottom: 7px;
-     margin: 0 0 16px; color: #14335e; }
-h2 { font-size: 14.5pt; margin: 26px 0 10px; color: #1b4b8f;
-     border-left: 5px solid #1b4b8f; padding-left: 9px; }
-h3 { font-size: 12pt; margin: 18px 0 7px; color: #24405f; }
-p { margin: 8px 0; }
-code { font-family: Consolas,monospace; font-size: 9.5pt; background: #f0f2f5;
-       padding: 1px 4px; border-radius: 3px; color: #b03030; }
-pre { background: #f7f8fa; border: 1px solid #dde1e6; border-left: 4px solid #1b4b8f;
-      padding: 10px 13px; border-radius: 4px; overflow-x: auto;
-      page-break-inside: avoid; margin: 10px 0; }
-pre code { background: none; padding: 0; color: #1a1a1a; font-size: 9.5pt; }
-table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 9.5pt;
-        page-break-inside: avoid; }
-th { background: #eef2f7; border: 1px solid #c9d2dc; padding: 7px 9px;
-     text-align: left; font-weight: 600; }
-td { border: 1px solid #d8dee6; padding: 6px 9px; vertical-align: top; }
-blockquote { border-left: 4px solid #f0a500; background: #fffaf0; margin: 12px 0;
-             padding: 9px 14px; page-break-inside: avoid; }
-img { max-width: 100%; border: 1px solid #c9d2dc; border-radius: 5px;
-      margin: 10px 0; page-break-inside: avoid; }
-.cap { font-size: 9pt; color: #5a6672; margin: -6px 0 12px; }
 
-/* ── 굵은 글씨가 세 가지 다른 일을 하고 있었다 ────────────────────────────
-   ①②③ 조작 단계 · 「안 되면」 같은 구역 이름 · 마무리 한 문장.
-   전부 같은 모양이라 어디가 「할 일」이고 어디가 「읽을 것」인지 안 갈렸다.
-   셋을 눈으로 구분되게 나눈다. */
+/* 한글이 든 명령을 Consolas 로만 찍으면 한글이 다른 글꼴로 튀어 자간이 벌어진다.
+   («cd 2일차/실습» 이 «cd  2일차 /실 습» 으로 보이던 자리)
+   DotumChe(돋움체)는 한글 고정폭이라 폭이 맞는다. */
+:root { --mono: Consolas,"DotumChe","돋움체","Cascadia Mono",monospace; }
 
-/* 학생이 실제로 하는 것 — 제일 눈에 띄어야 한다 */
-.step { margin: 15px 0 7px; padding: 7px 12px; font-size: 11pt; font-weight: 700;
-        color: #14335e; background: #eaf1f8; border-left: 4px solid #1b4b8f;
-        border-radius: 3px; page-break-after: avoid; }
+h1 { font-size: 20pt; margin: 0 0 26px; padding-bottom: 10px; color: #14335e;
+     border-bottom: 3px solid #1b4b8f; letter-spacing: -.01em; }
 
-/* 구역 이름 — 작고 조용하게, 위에 선을 그어 구역을 뗀다 */
-.label { margin: 20px 0 7px; padding-top: 9px; font-size: 9.5pt; font-weight: 700;
-         color: #67717c; letter-spacing: .03em;
-         border-top: 1px solid #e2e7ec; page-break-after: avoid; }
-.label .x { color: #67717c; font-weight: 400; }
+/* 큰 단계 — 여기서 확실히 끊긴다. 위에 굵은 줄, 아래위로 넉넉히. */
+h2 { font-size: 15.5pt; color: #14335e; letter-spacing: -.01em;
+     margin: 40px 0 16px; padding: 15px 0 0;
+     border-top: 2.5px solid #1b4b8f; }
 
-/* 마무리 한 문장 — 그 단계에서 남길 것 */
-.punch { margin: 13px 0; padding: 8px 13px; font-weight: 700; color: #1f4636;
-         background: #f2f8f4; border-left: 4px solid #4f8f68; border-radius: 3px; }
-.punch code { background: #e6f0ea; color: #1f4636; }
-/* 「안 되면」 카드 — 한 덩어리가 눈에 보이게 박스로 묶는다.
-   두 줄이 그냥 <p> 로 흩어지면 어디까지가 한 항목인지 안 보인다. */
+h3 { font-size: 12pt; margin: 26px 0 9px; color: #24405f; }
+
+p  { margin: 11px 0; }
+ul, ol { margin: 11px 0; padding-left: 25px; }
+li { margin: 6px 0; }
+
+/* 글 속의 짧은 코드 */
+code { font-family: var(--mono); font-size: 9.5pt; background: #eef1f5;
+       padding: 1px 5px; border-radius: 3px; color: #a83232;
+       letter-spacing: 0; }
+
+/* ── 터미널에 치는 것 — 검은 화면. 한눈에 「이건 친다」 ─────────────────── */
+.term { background: #1b2029; border-radius: 7px; margin: 14px 0 20px;
+        padding: 11px 15px 13px; page-break-inside: avoid; }
+.term .h { font-size: 8pt; color: #7f93ad; letter-spacing: .09em;
+           margin: 0 0 7px; font-weight: 700; }
+.term pre { margin: 0; padding: 0; background: none; border: 0; }
+.term code { background: none; padding: 0; color: #eaf0f7; font-size: 10pt;
+             white-space: pre; letter-spacing: 0; }
+.term .g { color: #63d68f; }                      /* > 프롬프트 */
+
+/* ── 파일에 쓰는 코드 — 밝은 카드 + 위에 라벨 ────────────────────────────── */
+.codecard { border: 1px solid #d5dbe3; border-radius: 7px; margin: 14px 0 20px;
+            overflow: hidden; page-break-inside: avoid; }
+.codecard .h { background: #eef2f7; border-bottom: 1px solid #d5dbe3;
+               font-size: 8pt; color: #46587a; letter-spacing: .09em;
+               font-weight: 700; padding: 6px 14px; }
+.codecard pre { margin: 0; border: 0; border-radius: 0; background: #fbfcfe;
+                padding: 12px 15px; }
+.codecard code { background: none; padding: 0; color: #1f2429; font-size: 9.5pt;
+                 white-space: pre; }
+
+/* 위 둘에 안 걸린 나머지 */
+pre { background: #f7f8fa; border: 1px solid #dde1e6; border-radius: 5px;
+      padding: 11px 14px; margin: 14px 0; page-break-inside: avoid; }
+pre code { font-family: var(--mono); background: none; padding: 0; color: #1f2429; }
+
+table { border-collapse: collapse; width: 100%; margin: 16px 0 20px;
+        font-size: 9.5pt; page-break-inside: avoid; }
+th { background: #eef2f7; border: 1px solid #c9d2dc; padding: 8px 10px;
+     text-align: left; font-weight: 700; color: #24405f; }
+td { border: 1px solid #d8dee6; padding: 8px 10px; vertical-align: top; }
+
+blockquote { border-left: 4px solid #f0a500; background: #fffaf0; margin: 16px 0;
+             padding: 11px 16px; page-break-inside: avoid; }
+blockquote p { margin: 5px 0; }
+
+img { max-width: 100%; border: 1px solid #c9d2dc; border-radius: 6px;
+      margin: 14px 0 4px; page-break-inside: avoid; }
+.cap { font-size: 9pt; color: #5a6672; margin: 0 0 18px; }
+
+/* 작은 단계 ①②③ — 상자를 없앤다. 숨 막히던 원인이 이것이다.
+   왼쪽에 짧은 막대 하나만 두고 글씨로 승부한다. */
+.step { margin: 24px 0 10px; padding: 0 0 0 13px; font-size: 11.5pt;
+        font-weight: 700; color: #14335e; letter-spacing: -.01em;
+        border-left: 4px solid #f0a500; page-break-after: avoid; }
+
+/* 구역 이름 — 조용하게 */
+.label { margin: 24px 0 8px; font-size: 9pt; font-weight: 700;
+         color: #7a848f; letter-spacing: .09em; page-break-after: avoid; }
+.label .x { color: #7a848f; font-weight: 400; }
+
+/* 마무리 한 문장 */
+.punch { margin: 18px 0; padding: 11px 15px; font-weight: 700; color: #1f4636;
+         background: #f2f8f4; border-left: 4px solid #4f8f68; border-radius: 5px; }
+.punch code { background: #e2efe7; color: #1f4636; }
+
 .trouble { border: 1px solid #e6d2d2; border-left: 5px solid #c0392b;
-           background: #fdf8f7; border-radius: 4px; padding: 9px 13px;
-           margin: 9px 0; page-break-inside: avoid; }
-.trouble .t { margin: 0 0 4px; font-weight: 700; color: #8a2020; font-size: 10pt; }
+           background: #fdf8f7; border-radius: 5px; padding: 10px 14px;
+           margin: 10px 0; page-break-inside: avoid; }
+.trouble .t { margin: 0 0 5px; font-weight: 700; color: #8a2020; font-size: 10pt; }
 .trouble .t code { background: #f6e7e7; color: #8a2020; }
 .trouble .b { margin: 0; font-size: 10pt; }
-blockquote p { margin: 4px 0; }
-ul, ol { margin: 8px 0; padding-left: 24px; }
-li { margin: 4px 0; }
-hr { border: 0; border-top: 1px solid #dde1e6; margin: 22px 0; }
+
+hr { border: 0; border-top: 1px solid #e4e8ed; margin: 30px 0; }
+hr:has(+ h2) { display: none; }        /* 큰 단계가 제 윗줄을 갖는다 */
+h1 + hr { display: none; }
+/* 제목 바로 밑 큰 단계는 제 윗줄을 안 그린다 — h1 밑줄과 겹쳐 빈 띠로 보인다 */
+h1 + h2, h1 + hr + h2 { border-top: 0; margin-top: 24px; padding-top: 0; }
 strong { color: #14335e; }
 h1, h2, h3 { page-break-after: avoid; }
 """
@@ -132,7 +176,50 @@ def 특수한줄(l: str) -> bool:
             or bool(re.match(r"^\s*\d+\.\s+", l)))
 
 
-def md2html(md: str, 제목: str, 기준폴더: Path | None = None) -> str:
+# 명령·출력·파일코드·수식·지시문은 **하는 일이 다르다.**
+# 전에는 전부 같은 회색 상자라 학생이 명령을 파일에 붙여넣는 일이 났다.
+명령시작 = ("uv ", "cd ", "python ", "py ", "git ", "pip ", "code ", "npx ")
+
+# 말머리(``` 뒤에 적는 것) → (칸 종류, 위에 붙일 라벨)
+칸종류 = {
+    "python": ("codecard", "파일에 씁니다"),
+    "py":     ("codecard", "파일에 씁니다"),
+    "json":   ("codecard", "파일에 이렇게 있습니다"),
+    "모양":    ("codecard", "이런 모양으로 돌려줍니다"),
+    "지시문":  ("codecard", "AI 에게 주는 말 — 그대로 씁니다"),
+    "주소":    ("term",     "크롬 주소창에 붙여넣습니다"),
+    "수식":    ("plain",    ""),
+}
+
+
+def 코드칸(줄: list[str], 말: str) -> str:
+    """말머리로 갈라 놓고, 안 적었으면 명령인지 화면 출력인지 스스로 가른다."""
+    본문 = "\n".join(줄).rstrip()
+    안전 = html.escape(본문)
+    종류, 라벨 = 칸종류.get(말, (None, None))
+
+    if 종류 == "plain":
+        return f"<pre><code>{안전}</code></pre>"
+    if 종류 == "codecard":
+        return (f'<div class="codecard"><div class="h">{라벨}</div>'
+                f'<pre><code>{안전}</code></pre></div>')
+    if 종류 == "term":
+        return (f'<div class="term"><div class="h">{라벨}</div>'
+                f'<pre><code>{안전}</code></pre></div>')
+
+    쓸것 = [x for x in 줄 if x.strip()]
+    if 쓸것 and all(x.lstrip().startswith(명령시작) for x in 쓸것):
+        몸 = "\n".join(f'<span class="g">&gt;</span> {html.escape(x.strip())}'
+                      for x in 쓸것)
+        return ('<div class="term"><div class="h">터미널에 칩니다</div>'
+                f'<pre><code>{몸}</code></pre></div>')
+
+    return ('<div class="term"><div class="h">화면에 이렇게 나옵니다</div>'
+            f'<pre><code>{안전}</code></pre></div>')
+
+
+def md2html(
+md: str, 제목: str, 기준폴더: Path | None = None) -> str:
     out: list[str] = []
     줄들 = md.splitlines()
     i = 0
@@ -155,13 +242,14 @@ def md2html(md: str, 제목: str, 기준폴더: Path | None = None) -> str:
             continue
 
         if line.startswith("```"):                                  # 코드블록
+            말 = line[3:].strip().lower()
             i += 1
             buf = []
             while i < len(줄들) and not 줄들[i].startswith("```"):
                 buf.append(줄들[i])
                 i += 1
-            out.append("<pre><code>" + html.escape("\n".join(buf)) + "</code></pre>")
             i += 1
+            out.append(코드칸(buf, 말))
             continue
 
         # 주석 — `<!-- 사진 … -->`. 아직 안 찍은 화면의 자리를 가이드에 표시해 둔 것이다.

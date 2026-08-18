@@ -51,13 +51,12 @@ DATA = 데이터폴더()
 
 
 def 안채운자리(모듈이름: str) -> list[str]:
-    """소스를 읽어 **속이 빈** 함수 이름을 돌려준다.
+    """소스를 읽어 **아직 안 채운** 함수인지 본다.
 
-    전에는 `raise NotImplementedError` 를 잡아서 판정했는데, 그 줄을 없애면서
-    학생이 「지울지 고칠지」 헷갈리던 것이 사라진 대신 판정 근거도 같이 사라졌다.
-    이제는 **설명글(docstring)과 주석 말고 실행되는 줄이 하나도 없으면** 안 채운 것으로 본다.
+    판정 근거는 `...`(Ellipsis) 다. 뼈대에 `mean = ...` 처럼 박아 두고,
+    학생이 그 줄을 고치면 사라진다. 함수 속이 통째로 빈 경우도 안 채운 것으로 본다.
 
-    ※ `점검.py` 의 `_아직안채움()` 과 같은 규칙이다. 두 곳이 어긋나면 판정이 거짓말이 된다.
+    ※ `점검.py` 의 `_아직안채움()` 와 같은 규칙이다. 두 곳이 어긋나면 판정이 거짓말이 된다.
     """
     import ast
 
@@ -70,6 +69,9 @@ def 안채운자리(모듈이름: str) -> list[str]:
     for n in ast.walk(나무):
         if isinstance(n, ast.FunctionDef) and n.name in (
                 "window_stats", "is_anomaly", "handle_missing"):
+            if any(isinstance(x, ast.Constant) and x.value is Ellipsis
+                   for x in ast.walk(n)):
+                빈것.append(n.name); continue
             몸 = [x for x in n.body
                   if not (isinstance(x, ast.Expr) and isinstance(x.value, ast.Constant)
                           and isinstance(x.value.value, str))]
@@ -128,7 +130,7 @@ def main() -> int:
         번호 = {"window_stats": 1, "is_anomaly": 2, "handle_missing": 3}
         적을것 = " · ".join(f"TODO {번호[x]}({x})" for x in 빈것)
         print(f"\n  아직 채우지 않은 TODO 가 있습니다 — {적을것}")
-        print("  detect.py 의 「여기부터 구현합니다」 주석 아래에 씁니다.")
+        print("  detect.py 에서 그 함수의 `...` 줄을 고칩니다.")
         print("  어디가 왜 막혔는지 —  uv run 점검.py")
         return 1
 
