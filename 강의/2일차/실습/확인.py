@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """내 코드가 어디까지 됐는지 스스로 확인한다.
 
-    uv run 점검.py              지금 상태를 짚어 준다 (답은 알려주지 않는다)
-    uv run 점검.py --정답 1     ★ 막혔을 때. TODO 1 자리만 정답으로 채운다
+    uv run 확인.py              지금 상태를 짚어 준다 (답은 알려주지 않는다)
+    uv run 확인.py --정답 1     ★ 막혔을 때. TODO 1 자리만 정답으로 채운다
 
-`run.py` 는 7일치 전체를 돌려 결과를 보여 주는 것이고,
+`돌려보기.py` 는 7일치 전체를 돌려 결과를 보여 주는 것이고,
 이 도구는 **작은 예제로 함수 하나하나가 제대로 도는지**만 봅니다. 훨씬 빠릅니다.
 """
 from __future__ import annotations
@@ -55,7 +55,7 @@ def _아직안채움(이름: str) -> bool:
     판정 근거는 `...`(Ellipsis) 다. 뼈대에 `mean = ...` 처럼 박아 두고,
     학생이 그 줄을 고치면 사라진다. 함수 속이 통째로 빈 경우도 안 채운 것으로 본다.
 
-    ※ `run.py` 의 `안채운자리()` 와 같은 규칙이다. 두 곳이 어긋나면 판정이 거짓말이 된다.
+    ※ `돌려보기.py` 의 `안채운자리()` 와 같은 규칙이다. 두 곳이 어긋나면 판정이 거짓말이 된다.
     """
     import ast
     try:
@@ -212,14 +212,14 @@ def 열기(n: int) -> int:
     tgt.write_text(cur[:m2.start()] + 새함수 + "\n\n" + cur[m2.end():], encoding="utf-8")
 
     print(f"\n  TODO {n} ({name}) 만 완성본으로 채웠습니다. 나머지는 그대로입니다.")
-    print("  이어서 —  uv run 점검.py")
+    print("  이어서 —  uv run 확인.py")
     print("  되돌리려면 detect_내가짠것.py 를 detect.py 로 복사하세요.\n")
     print("  ※ 채운 함수를 한 번 읽어 보세요. 내가 막혔던 자리가 어디였는지 보입니다.")
     return 0
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="내 코드 점검")
+    ap = argparse.ArgumentParser(description="내가 채운 게 맞는지 확인한다")
     ap.add_argument("--정답", "--열기", dest="정답", type=int, choices=[1, 2, 3],
                     metavar="TODO번호",
                     help="★ 막혔을 때. 그 자리 하나만 정답으로 채운다 "
@@ -234,7 +234,7 @@ def main() -> int:
     통과 = sum(1 for ok, _ in 결과 if ok)
 
     print("=" * 62)
-    print(f"내 코드 점검   —   3개 중 {통과}개 통과")
+    print(f"내 코드 확인   —   3개 중 {통과}개 통과")
     print("=" * 62)
     막힌곳 = None
     for i, (ok, msgs) in enumerate(결과, 1):
@@ -246,7 +246,7 @@ def main() -> int:
 
     print()
     if 통과 == 3:
-        print("  세 개 다 됐습니다.  이제 —  uv run run.py")
+        print("  세 개 다 됐습니다.  이제 —  uv run 돌려보기.py")
         print("  숫자를 적어 두고,  --k 2.0  --k 4.0  --window 30  으로 흔들어 보세요.")
         return 0
 

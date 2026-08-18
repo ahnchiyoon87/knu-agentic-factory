@@ -1,9 +1,9 @@
 """2일차 실습 Step 2 — 내 구현을 7일치 데이터에 돌려 본다.
 
-    uv run run.py                 기본 (윈도 60분, 임계 k=3.0)
-    uv run run.py --k 2.0         임계값을 낮춰서 — 오탐이 얼마나 느는가
-    uv run run.py --window 30     윈도를 짧게
-    uv run run.py --impl 정답     참고 구현으로 (강사용)
+    uv run 돌려보기.py                 기본 (윈도 60분, 임계 k=3.0)
+    uv run 돌려보기.py --k 2.0         임계값을 낮춰서 — 오탐이 얼마나 느는가
+    uv run 돌려보기.py --window 30     윈도를 짧게
+    uv run 돌려보기.py --impl 정답     참고 구현으로 (강사용)
 
 심어 둔 이상은 세 가지입니다. 몇 개를 잡아냈는지, 그리고 그 대가로
 아닌 것을 몇 개나 잡았는지(오탐) 함께 봅니다.
@@ -56,7 +56,7 @@ def 안채운자리(모듈이름: str) -> list[str]:
     판정 근거는 `...`(Ellipsis) 다. 뼈대에 `mean = ...` 처럼 박아 두고,
     학생이 그 줄을 고치면 사라진다. 함수 속이 통째로 빈 경우도 안 채운 것으로 본다.
 
-    ※ `점검.py` 의 `_아직안채움()` 와 같은 규칙이다. 두 곳이 어긋나면 판정이 거짓말이 된다.
+    ※ `확인.py` 의 `_아직안채움()` 와 같은 규칙이다. 두 곳이 어긋나면 판정이 거짓말이 된다.
     """
     import ast
 
@@ -114,9 +114,9 @@ def main() -> int:
     except SyntaxError as e:
         # 채우다 만 문법 오류 — 역추적 대신 자리를 짚어 준다.
         sys.exit(f"{mod_name}.py {e.lineno}행에 문법 오류가 있습니다 — {e.msg}\n"
-                 f"  괄호·따옴표·들여쓰기를 그 줄에서 확인하세요. uv run 점검.py 도 같이 짚어 줍니다.")
+                 f"  괄호·따옴표·들여쓰기를 그 줄에서 확인하세요. uv run 확인.py 도 같이 짚어 줍니다.")
 
-    # run.py 가 부르는 것은 `detect()` 하나다. 없으면 여기서 멈춰야
+    # 돌려보기.py 가 부르는 것은 `detect()` 하나다. 없으면 여기서 멈춰야
     # 시연 도중 AttributeError 로 깨지지 않는다.
     if not hasattr(mod, "detect"):
         sys.exit(f"{mod_name}.py 에 detect() 가 없습니다.\n"
@@ -131,7 +131,7 @@ def main() -> int:
         적을것 = " · ".join(f"TODO {번호[x]}({x})" for x in 빈것)
         print(f"\n  아직 채우지 않은 TODO 가 있습니다 — {적을것}")
         print("  detect.py 에서 그 함수의 `...` 줄을 고칩니다.")
-        print("  어디가 왜 막혔는지 —  uv run 점검.py")
+        print("  어디가 왜 막혔는지 —  uv run 확인.py")
         return 1
 
     df, labels = load()
@@ -214,9 +214,9 @@ def main() -> int:
 
     print("\n" + "=" * 74)
     print("해 볼 것 — 임계값을 바꾸면 어떻게 달라지는가")
-    print("    uv run run.py --k 2.0     낮추면 더 잡히지만 오탐이 는다")
-    print("    uv run run.py --k 4.0     올리면 오탐이 줄지만 놓치는 게 는다")
-    print("    uv run run.py --window 30 윈도를 짧게 하면?")
+    print("    uv run 돌려보기.py --k 2.0     낮추면 더 잡히지만 오탐이 는다")
+    print("    uv run 돌려보기.py --k 4.0     올리면 오탐이 줄지만 놓치는 게 는다")
+    print("    uv run 돌려보기.py --window 30 윈도를 짧게 하면?")
     print("\n온도 드리프트가 안 잡힌다면 — 그게 정상입니다. 왜 그런지 생각해 보세요.")
     return 0
 

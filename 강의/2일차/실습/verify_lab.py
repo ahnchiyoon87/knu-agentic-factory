@@ -36,7 +36,7 @@ ROOT = Path(__file__).resolve().parent
 
 
 def 데이터폴더() -> Path:
-    """run.py 와 같은 규칙으로 찾는다 — 배포본(`데이터/`)과 강사본 둘 다."""
+    """돌려보기.py 와 같은 규칙으로 찾는다 — 배포본(`데이터/`)과 강사본 둘 다."""
     for base in (ROOT, *list(ROOT.parents)[:4]):
         for cand in (base / "데이터", base / "제작" / "검증도구" / "센서데이터" / "데이터"):
             if (cand / "sensor_readings_7days.csv").is_file():
@@ -89,7 +89,7 @@ def main() -> int:
     # 채울 자리는 `raise` 가 아니라 **주석 블록**이다. 그래서 「막혀 있는가」를
     # 예외로 못 본다 — 빈 함수는 조용히 None 을 돌려준다. 소스를 읽어 판정한다.
     #   (학생이 그 줄을 지울지 고칠지 판단해야 했고, 지우다 들여쓰기를 무너뜨리는 일이 잦았다)
-    import run as 실행
+    import 돌려보기 as 실행
     빈것 = 실행.안채운자리("detect")
     check("채울 자리 3군데가 빈 채로 나간다 (학생이 처음 여는 상태)",
           sorted(빈것) == sorted(["window_stats", "is_anomaly", "handle_missing"]),
@@ -106,7 +106,7 @@ def main() -> int:
     check("`raise NotImplementedError` 가 남아 있지 않다 — 지울 것도 고칠 것도 없다",
           "NotImplementedError" not in src)
 
-    r = subprocess.run([sys.executable, "run.py"], capture_output=True, text=True,
+    r = subprocess.run([sys.executable, "돌려보기.py"], capture_output=True, text=True,
                        cwd=ROOT, encoding="utf-8", errors="replace")
     check("빈 뼈대로 실행하면 무엇을 채워야 하는지 알려준다",
           "TODO" in r.stdout and r.returncode == 1,

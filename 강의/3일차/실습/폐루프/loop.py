@@ -161,8 +161,8 @@ def _append(record: dict) -> None:
 # =============================================================================
 def main() -> int:
     ap = argparse.ArgumentParser(description="폐루프 오케스트레이터")
-    ap.add_argument("--check", action="store_true", help="공장에 닿는지만 확인한다")
-    ap.add_argument("--once", action="store_true", help="한 바퀴만 돈다")
+    ap.add_argument("--확인", "--check", dest="확인", action="store_true", help="공장에 닿는지만 확인한다")
+    ap.add_argument("--한바퀴", "--once", dest="한바퀴", action="store_true", help="한 바퀴만 돈다")
     ap.add_argument("--rounds", type=int, default=None, help="몇 바퀴 돌지")
     ap.add_argument("--tenant", default=None, help="네임스페이스 (기본: config.json)")
     ap.add_argument("--base-url", default=None, help="시뮬레이터 주소")
@@ -275,7 +275,7 @@ def main() -> int:
         print("     온도가 시간당 0.5℃ 씩 오르는 이상이라, 1배로 두면 실제로 4시간이 걸립니다.", file=sys.stderr)
         print("     코드가 맞아도 화면에는 「감지  이상 없음」만 나옵니다.", file=sys.stderr)
         print("     강사에게 **배속을 120으로 올려 달라고** 요청하세요.\n", file=sys.stderr)
-    if args.check:
+    if args.확인:
         if not info["제어_개방"]:
             return 2
         return 4 if info["배속_경고"] else 0
@@ -283,7 +283,7 @@ def main() -> int:
     control = open_control(CFG, api)
     ctx = Context(api=api, cfg=CFG, control=control, slow_clock=info["배속_경고"])
     interval = float(CFG["watch"]["interval_seconds"])
-    limit = 1 if args.once else (args.rounds if args.rounds is not None
+    limit = 1 if args.한바퀴 else (args.rounds if args.rounds is not None
                                  else int(CFG["watch"]["max_rounds"]))
 
     try:
@@ -306,7 +306,7 @@ def main() -> int:
                 print(f"  {path} 의 {exc.이름}() 을 채우세요.", file=sys.stderr)
                 print("  그 함수의 `...` 줄을 고칩니다.", file=sys.stderr)
                 print(f"  순서는 {agents.FILL_ORDER} 입니다.", file=sys.stderr)
-                print("  시간이 다 됐으면 —  uv run loop.py --열기 1"
+                print("  시간이 다 됐으면 —  uv run loop.py --정답 1"
                       "   (1 감지 · 2 진단 · 3 조치)", file=sys.stderr)
                 return 3
             if limit and ctx.round_no >= limit:

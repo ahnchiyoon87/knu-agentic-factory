@@ -226,7 +226,7 @@ def install() -> None:
 
 
 # 학생이 막혔을 때 여는 것 — 막힌 자리 **하나만** 채운다.
-# 나머지는 학생이 쓴 것 그대로 돈다. 2일차 `점검.py --정답` 와 같은 규칙이다.
+# 나머지는 학생이 쓴 것 그대로 돈다. 2일차 `확인.py --정답` 와 같은 규칙이다.
 ONE = {
     1: ("judge", "agents/detector.py", "감지"),
     2: ("build_prompt", "agents/diagnoser.py", "진단"),

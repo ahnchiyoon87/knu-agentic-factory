@@ -395,16 +395,16 @@ def 일일차_이상감지() -> None:
     # 학생이 아무것도 안 채우고 그냥 실행했을 때 — 여기서 죽으면 첫 5분에 전원이 이탈한다.
     # **마지막 줄이 아니라 화면 전체**를 본다. 안내는 세 줄이고 어느 줄에 놓든
     # 학생에게는 다 보이는데, 마지막 줄만 보면 문구를 조금 바꿨다고 실패로 뜬다.
-    ok, msg, out = run_script(LAB1 / "run.py", [], 300)
+    ok, msg, out = run_script(LAB1 / "돌려보기.py", [], 300)
     check("빈 뼈대로 실행해도 무엇을 채워야 하는지 알려주고 끝난다 (죽지 않는다)",
           (not ok) and "TODO" in out and 살아있나(out), msg)
 
-    # 점검.py 는 아직 못 채웠으면 종료코드 1 이 정상이다. 종료코드가 아니라
+    # 확인.py 는 아직 못 채웠으면 종료코드 1 이 정상이다. 종료코드가 아니라
     # "학생에게 무엇을 보여 주는가"로 판정한다.
-    _, msg, out = run_script(LAB1 / "점검.py", [], 120)
-    check("점검.py 가 빈 뼈대에서도 죽지 않고 어디가 막혔는지 짚는다 (이탈 방지 1단계)",
+    _, msg, out = run_script(LAB1 / "확인.py", [], 120)
+    check("확인.py 가 빈 뼈대에서도 죽지 않고 어디가 막혔는지 짚는다 (이탈 방지 1단계)",
           살아있나(out) and "3개 중 0개 통과" in out and "다음에 볼 곳" in out, msg)
-    check("점검.py 가 답을 알려주지 않는다 (짚어 주기만 한다)",
+    check("확인.py 가 답을 알려주지 않는다 (짚어 주기만 한다)",
           "values[i-window:i]" not in out and "abs((value" not in out)
     # 힌트를 단계로 주던 것(`--힌트 1/2`)은 없앴다. 세 군데에 흩어져 있어 학생이
     # 어디를 볼지 몰랐고, 필요한 것은 처음부터 그 자리 주석에 다 있다.
@@ -425,18 +425,18 @@ def 일일차_열기() -> None:
     원본 = tgt.read_bytes()
     try:
         for n in (1, 2, 3):
-            ok, msg, out = run_script(LAB1 / "점검.py", ["--정답", str(n)], 120)
+            ok, msg, out = run_script(LAB1 / "확인.py", ["--정답", str(n)], 120)
             check(f"--정답 {n} 이 함수 하나만 채운다", ok and 살아있나(out), msg)
 
-        ok, msg, out = run_script(LAB1 / "점검.py", [], 120)
+        ok, msg, out = run_script(LAB1 / "확인.py", [], 120)
         check("세 개를 다 열면 점검이 3/3 이 된다", ok and "3개 중 3개 통과" in out, msg)
 
-        ok, msg, out = run_script(LAB1 / "run.py", [], 600)
-        check("★ --정답 를 쓴 뒤 run.py 가 끝까지 간다 (또 막히지 않는다)", ok, msg)
+        ok, msg, out = run_script(LAB1 / "돌려보기.py", [], 600)
+        check("★ --정답 를 쓴 뒤 돌려보기.py 가 끝까지 간다 (또 막히지 않는다)", ok, msg)
         # 반전은 학생이 발견한다. 리허설은 그 장면이 나오는지만 본다.
         check("스파이크는 잡히고 드리프트는 안 잡히는 장면이 실제로 나온다",
               "3개 중 3개" in out and "노이즈 수준" in out,
-              "run.py 출력에 두 장면이 다 있다")
+              "돌려보기.py 출력에 두 장면이 다 있다")
     finally:
         tgt.write_bytes(원본)
         bak.unlink(missing_ok=True)
@@ -463,8 +463,8 @@ def 이일차_도구(s: Sim) -> None:
     check("도구가 읽을 CSV 를 실제로 찾는다", csv_path.is_file(),
           f"csv_path={설정} → {csv_path}")
 
-    _, msg, out = run_script(LAB2 / "점검.py", [], 180, {"SHARED_API": s.base})
-    check("점검.py 가 빈 템플릿에서도 죽지 않는다 (이탈 방지)", 살아있나(out), msg)
+    _, msg, out = run_script(LAB2 / "확인.py", [], 180, {"SHARED_API": s.base})
+    check("확인.py 가 빈 템플릿에서도 죽지 않는다 (이탈 방지)", 살아있나(out), msg)
     # 실패했으면 「왜」가 보여야 한다 — 0-1 줄 다음에 이어지는 설명을 그대로 옮긴다.
     _설명 = []
     _줄들 = out.splitlines()
@@ -472,7 +472,7 @@ def 이일차_도구(s: Sim) -> None:
         if "0-1" in _l and "config.json" in _l:
             _설명 = [x.strip() for x in _줄들[_i + 1:_i + 5] if x.strip()]
             break
-    check("점검.py 가 강사 서버에 실제로 닿아 정비 이력을 확인한다",
+    check("확인.py 가 강사 서버에 실제로 닿아 정비 이력을 확인한다",
           "정비 이력 확인" in out, " / ".join(_설명)[:200] or msg)
     check("2일차 detect.py 가 비면 그 사실을 먼저 알려 준다 (엉뚱한 데서 헤매지 않게)",
           "2일차" in out and "detect.py" in out, msg)
@@ -490,9 +490,9 @@ def 이일차_열기(s: Sim, ns: str = "S01") -> None:
     try:
         # 도구는 2일차 detect.py 를 그대로 불러 쓴다 — 그쪽이 비어 있으면 도구도 못 돈다
         for n in (1, 2, 3):
-            run_script(LAB1 / "점검.py", ["--정답", str(n)], 120)
+            run_script(LAB1 / "확인.py", ["--정답", str(n)], 120)
         for n in (1, 2):
-            ok, msg, _ = run_script(LAB2 / "점검.py", ["--정답", str(n)], 120)
+            ok, msg, _ = run_script(LAB2 / "확인.py", ["--정답", str(n)], 120)
             check(f"--정답 {n} 이 도구 본문만 채운다", ok, msg)
 
         ok, msg, out = run_script(LAB2 / "mcp_server.py", ["--check"], 300,

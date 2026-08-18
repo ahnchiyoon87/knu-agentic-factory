@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """내 도구가 어디까지 됐는지 스스로 확인한다.
 
-    uv run 점검.py              지금 상태를 짚어 준다 (답은 알려주지 않는다)
-    uv run 점검.py --정답 1     ★ 막혔을 때. 그 도구 자리만 정답으로 채운다
+    uv run 확인.py              지금 상태를 짚어 준다 (답은 알려주지 않는다)
+    uv run 확인.py --정답 1     ★ 막혔을 때. 그 도구 자리만 정답으로 채운다
 
 `mcp_server.py --check` 는 서버 없이 도구를 한 번 불러 보는 것이고,
 이 도구는 **연결 상태부터 도구 응답 모양까지** 순서대로 짚어 줍니다.
@@ -91,7 +91,7 @@ def 검사_설정() -> tuple[bool, list[str]]:
         msg.append(f'data_source 가 "{c.get("data_source")}" 입니다. "fallback" 으로 두세요.')
     fb = c.get("fallback", {})
     # `mcp_server.py` 는 환경변수(SHARED_API·W6_TENANT)를 먼저 본다. 여기가 config.json 만
-    # 보면 **도구는 붙는데 점검만 「서버에 못 닿습니다」라고 하는** 어긋남이 생긴다.
+    # 보면 **도구는 붙는데 확인만 「서버에 못 닿습니다」라고 하는** 어긋남이 생긴다.
     # 실제로 리허설이 그렇게 걸렸다. 두 곳이 같은 규칙을 써야 판정이 거짓말이 안 된다.
     import os
     api = str(os.environ.get("SHARED_API") or fb.get("shared_api", ""))
@@ -156,8 +156,8 @@ def 검사_어제코드() -> tuple[bool, list[str]]:
     빈것 = _빈함수(어제 / "detect.py", ("window_stats", "is_anomaly", "handle_missing"))
     if 빈것:
         return False, [f"2일차의 {' · '.join(빈것)} 이(가) 아직 비어 있습니다.",
-                       "`2일차/실습` 폴더에서 `uv run 점검.py` 로 먼저 끝내세요.",
-                       "시간이 없으면 `uv run 점검.py --열기 1` 부터 쓰세요."]
+                       "`2일차/실습` 폴더에서 `uv run 확인.py` 로 먼저 끝내세요.",
+                       "시간이 없으면 `uv run 확인.py --정답 1` 로 그 자리만 채우고 가세요."]
     try:
         out = d.detect([1.0] * 70 + [99.0], window=60, k=3.0)
     except Exception as e:                                       # noqa: BLE001
@@ -243,7 +243,7 @@ def 검사_2(m) -> tuple[bool, list[str]]:
 def 열기(n: int) -> int:
     """★ 마지막 수단 — 도구 하나만 완성본으로 채운다.
 
-    2일차 `점검.py --열기` 와 같은 규칙이다 — **함수를 통째로 갈아 끼운다.**
+    2일차 `확인.py --정답` 과 같은 규칙이다 — **함수를 통째로 갈아 끼운다.**
     전에는 `raise` 줄 하나를 찾아 그 자리에 본문을 끼워 넣었는데, 그 줄을 없앤 뒤로는
     찾을 것이 사라져 **안 채운 학생에게 「이미 채워져 있습니다」라고 답했다.**
     막혀서 마지막 수단을 쓴 사람에게 정확히 반대로 답하던 자리다.
@@ -264,7 +264,7 @@ def 열기(n: int) -> int:
     # 두 번 누르는 일이 흔하다. 이미 채운 것을 덮어써서 학생이 쓴 것을 지우면 안 된다.
     if name not in _빈함수(tgt, (name,)):
         print(f"  {name} 은 이미 채워져 있습니다. 다시 열 것이 없습니다.")
-        print("  이어서 —  uv run 점검.py")
+        print("  이어서 —  uv run 확인.py")
         return 0
 
     bak = ROOT / "mcp_server_내가짠것.py"
@@ -283,13 +283,13 @@ def 열기(n: int) -> int:
     tgt.write_text(cur[:m2.start()] + 새함수 + "\n\n" + cur[m2.end():], encoding="utf-8")
 
     print(f"\n  도구 {n} ({name}) 만 완성본으로 채웠습니다. 나머지는 그대로입니다.")
-    print("  이어서 —  uv run 점검.py")
+    print("  이어서 —  uv run 확인.py")
     print("  되돌리려면 mcp_server_내가짠것.py 를 mcp_server.py 로 복사하세요.\n")
     return 0
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="내 도구 점검")
+    ap = argparse.ArgumentParser(description="내가 채운 도구가 맞는지 확인한다")
     ap.add_argument("--정답", "--열기", dest="정답", type=int, choices=[1, 2],
                     metavar="도구번호",
                     help="★ 막혔을 때. 그 도구 하나만 정답으로 채운다 "
@@ -300,7 +300,7 @@ def main() -> int:
         return 열기(args.정답)
 
     print("=" * 62)
-    print("내 도구 점검")
+    print("내 도구 확인")
     print("=" * 62)
 
     설정ok, 설정msg = 검사_설정()

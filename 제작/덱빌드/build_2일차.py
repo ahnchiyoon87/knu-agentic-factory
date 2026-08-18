@@ -162,7 +162,7 @@ S.append(D.tbl("오늘은 세 도막입니다",
                ["", "무엇을 하나", "쓰는 것"],
                [["본다", "내 공장을 열고 여섯 대가 도는 것을 눈으로 본다", "브라우저"],
                 ["잡아본다", "이상을 찾아내는 알고리즘을 직접 짠다", "<code>detect.py</code>"],
-                ["확인한다", "기준 숫자를 바꿔 가며 무엇이 늘고 무엇이 주는지 잰다", "<code>run.py</code>"]],
+                ["확인한다", "기준 숫자를 바꿔 가며 무엇이 늘고 무엇이 주는지 잰다", "<code>돌려보기.py</code>"]],
                foot='마지막 20분은 <b>오늘 겪은 것을 노션에 정리</b>한다.'))
 
 S.append(D.rail("공장은 한 사람에 하나씩입니다",
@@ -298,7 +298,7 @@ S.append(D.sect("이상감지 알고리즘을 직접 짭니다",
                 "앞에서 손으로 재 본 그 계산을, 이제 코드로 옮깁니다.", V.BYHAND,
                 "실습 2", "50분 · 각자",
                 ["2일차 / 실습 폴더를 연다. 고칠 파일은 <code>detect.py</code> 하나다.",
-                 "막히면 <code>uv run 점검.py</code> — 어디가 왜 틀렸는지 짚어 준다. 답은 안 준다.",
+                 "막히면 <code>uv run 확인.py</code> — 어디가 왜 틀렸는지 짚어 준다. 답은 안 준다.",
                  "자세한 순서는 2일차 실습 가이드 에 다 적혀 있다."],
                 '데이터는 <b>7일치 60,480행</b>. 이상 세 가지가 심어져 있다.'))
 
@@ -312,9 +312,9 @@ S.append(D.rail("채울 곳은 세 함수입니다",
 S.append(D.tbl("돌려 보는 법",
                "고칠 때마다 다시 돌립니다. 숫자가 어떻게 움직이는지 보는 것이 목적입니다.",
                ["명령", "무엇을 하나"],
-               [['<span style="white-space:nowrap"><code>uv run run.py</code></span>', "내 구현을 7일치 데이터에 돌린다"],
-                ['<span style="white-space:nowrap"><code>uv run run.py --k 2.0</code></span>', "더 예민하게 — k 를 낮춰서 다시 돌린다"],
-                ['<span style="white-space:nowrap"><code>uv run run.py --window 30</code></span>', "보는 구간을 짧게 — W 를 줄여서 다시 돌린다"]],
+               [['<span style="white-space:nowrap"><code>uv run 돌려보기.py</code></span>', "내 구현을 7일치 데이터에 돌린다"],
+                ['<span style="white-space:nowrap"><code>uv run 돌려보기.py --k 2.0</code></span>', "더 예민하게 — k 를 낮춰서 다시 돌린다"],
+                ['<span style="white-space:nowrap"><code>uv run 돌려보기.py --window 30</code></span>', "보는 구간을 짧게 — W 를 줄여서 다시 돌린다"]],
                foot='한 번 돌리는 데 <b>몇 초</b>면 된다. 아끼지 말고 여러 번 돌리세요.'))
 
 S.append(D.rail("50분을 이렇게 씁니다",

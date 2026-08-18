@@ -70,7 +70,7 @@ except ModuleNotFoundError:              # 2일차 폴더가 없어졌다
     sys.exit(1)
 except Exception as exc:                 # noqa: BLE001
     print(f"2일차의 detect.py 를 불러오지 못했습니다: {exc}", file=sys.stderr)
-    print("  `2일차/실습` 에서 `uv run 점검.py` 로 먼저 확인해 보세요.", file=sys.stderr)
+    print("  `2일차/실습` 에서 `uv run 확인.py` 로 먼저 확인해 보세요.", file=sys.stderr)
     sys.exit(1)
 
 mcp = MCPServer(
@@ -310,7 +310,7 @@ def 안채운도구() -> list[str]:
     안 그러면 빈 함수가 조용히 None 을 돌려주고, `--check` 는 「정상」이라 찍는다.
     학생은 다 된 줄 알고 다음으로 넘어간다 — 조용히 실패하면 안 된다.
 
-    ※ `점검.py` 의 `_빈함수()` 와 같은 규칙이다. 두 곳이 어긋나면 판정이 거짓말이 된다.
+    ※ `확인.py` 의 `_빈함수()` 와 같은 규칙이다. 두 곳이 어긋나면 판정이 거짓말이 된다.
     """
     import ast
 
@@ -337,11 +337,11 @@ def 안채운도구() -> list[str]:
 # =============================================================================
 def main() -> None:
     ap = argparse.ArgumentParser(description="MCP 도구 서버 — 3일차 오전")
-    ap.add_argument("--check", action="store_true", help="서버 없이 도구만 호출해 본다")
+    ap.add_argument("--확인", "--check", dest="확인", action="store_true", help="서버 없이 도구만 호출해 본다")
     ap.add_argument("--equipment", default="EQ-03", help="--check 에서 쓸 설비")
     args = ap.parse_args()
 
-    if args.check:
+    if args.확인:
         print(f"설정  transport={CFG['transport']} · 데이터={CFG['data_source']}")
         빈것 = 안채운도구()
         for name, fn in (("detect_anomaly", lambda: detect_anomaly(args.equipment)),

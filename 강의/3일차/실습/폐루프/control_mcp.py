@@ -141,10 +141,10 @@ def ack_alarm(alarm_id: int, note: str | None = None) -> dict:
 # =============================================================================
 def main() -> int:
     ap = argparse.ArgumentParser(description="3일차 제어 MCP 서버")
-    ap.add_argument("--check", action="store_true", help="서버 없이 연결·도구 목록만 확인")
+    ap.add_argument("--확인", "--check", dest="확인", action="store_true", help="서버 없이 연결·도구 목록만 확인")
     args = ap.parse_args()
 
-    if args.check:
+    if args.확인:
         # 설정을 안 채웠으면 여기서 잡힌다 — 역추적 대신 사람이 읽을 말로 세운다
         try:
             info = api().preflight()
