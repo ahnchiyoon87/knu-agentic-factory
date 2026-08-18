@@ -64,7 +64,10 @@
   #demoCard.on{display:block}
 
   #stageWrap{background:var(--panel); border:1px solid var(--line); border-radius:10px; overflow:hidden}
-  #stage{display:block; margin:0 auto}
+  /* Konva 가 이 div 안에 canvas 를 넣는다. div 에 margin:0 auto 를 걸어도
+     div 자체가 폭을 꽉 채우므로 canvas 는 **왼쪽에 붙는다.** 화면이 세로로 제한되면
+     오른쪽에 죽은 공간이 20%까지 생겼다. canvas 를 직접 가운데로 보낸다. */
+  #stage{display:flex; justify-content:center}
 
   aside{display:flex; flex-direction:column; gap:12px; min-width:0}
   .card{background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:12px 14px}
