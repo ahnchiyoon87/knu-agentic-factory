@@ -127,10 +127,10 @@ def main() -> int:
     # TypeError 로 터지고, 학생은 **자기가 안 짠 코드를 디버깅하려 든다.**
     빈것 = 안채운자리(mod_name)
     if 빈것:
-        번호 = {"window_stats": 1, "is_anomaly": 2, "handle_missing": 3}
-        적을것 = " · ".join(f"TODO {번호[x]}({x})" for x in 빈것)
-        print(f"\n  아직 채우지 않은 TODO 가 있습니다 — {적을것}")
-        print("  detect.py 에서 그 함수의 `...` 줄을 고칩니다.")
+        빈칸표 = {"window_stats": "빈칸 1·2", "is_anomaly": "빈칸 3·4", "handle_missing": "빈칸 5"}
+        적을것 = " · ".join(f"{x}({빈칸표[x]})" for x in 빈것)
+        print(f"\n  아직 안 채운 빈칸이 있습니다 — {적을것}")
+        print("  detect.py 에서 그 빈칸의 `...` 를 고칩니다.")
         print("  어디가 왜 막혔는지 —  uv run 확인.py")
         return 1
 
@@ -155,11 +155,11 @@ def main() -> int:
                     if f:
                         hits[(eid, ts)] = True
     except ZeroDivisionError:
-        print("\n  0 으로 나눴습니다. 표준편차가 0 인 구간을 어떻게 다룰지 정하세요 (TODO 2).")
+        print("\n  0 으로 나눴습니다. 표준편차가 0 인 구간을 어떻게 다룰지 정하세요 (빈칸 2).")
         return 1
     except TypeError as e:
         print(f"\n  값이 없는 자리(None)를 계산에 넣은 것 같습니다 — {e}")
-        print("  결측 처리를 먼저 정하세요 (TODO 3).")
+        print("  결측 처리를 먼저 정하세요 (빈칸 3).")
         return 1
     elapsed = time.time() - t0
 

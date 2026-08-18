@@ -91,7 +91,7 @@ def part_template() -> None:
         src = (ROOT / 파일).read_text(encoding="utf-8")
         빈칸 = sum(1 for l in src.splitlines() if l.strip().endswith("..."))
         check(f"{역할} — 채울 빈칸(`...`)이 있고 `raise` 가 없다 ({파일})",
-              "TODO " in src and 빈칸 >= 1 and "NotImplementedError" not in src,
+              "빈칸 " in src and 빈칸 >= 1 and "NotImplementedError" not in src,
               f"빈칸 {빈칸}개")
     # 안 채운 자리를 만나면 **멈춰서 어디인지 알려 줘야** 한다.
     # 조용히 「이상 없음」·「실행할 조치가 없습니다」로 넘어가면 학생은 자기 코드를 의심한다.

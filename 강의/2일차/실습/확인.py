@@ -2,7 +2,7 @@
 """내 코드가 어디까지 됐는지 스스로 확인한다.
 
     uv run 확인.py              지금 상태를 짚어 준다 (답은 알려주지 않는다)
-    uv run 확인.py --정답 1     ★ 막혔을 때. TODO 1 자리만 정답으로 채운다
+    uv run 확인.py --정답 1     ★ 막혔을 때. 그 함수 자리만 정답으로 채운다 (1·2·3)
 
 `돌려보기.py` 는 7일치 전체를 돌려 결과를 보여 주는 것이고,
 이 도구는 **작은 예제로 함수 하나하나가 제대로 도는지**만 봅니다. 훨씬 빠릅니다.
@@ -32,6 +32,8 @@ sys.path.insert(0, str(ROOT))
 
 OK, NO, WARN = "  [O]", "  [ ]", "  [!]"
 NAMES = {1: "window_stats", 2: "is_anomaly", 3: "handle_missing"}
+빈칸들 = {1: "빈칸 1 · 2", 2: "빈칸 3 · 4", 3: "빈칸 5"}
+첫빈칸 = {1: 1, 2: 3, 3: 5}
 
 
 # ══════════════════════════════════════════════ 검사
@@ -77,7 +79,7 @@ def _아직안채움(이름: str) -> bool:
 def 검사_1(d) -> tuple[bool, list[str]]:
     """window_stats — 앞 W개로 (평균, 표준편차)"""
     if _아직안채움("window_stats"):
-        return False, ["아직 안 채웠습니다 — 그 함수의 `...` 줄을 고칩니다."]
+        return False, ["아직 안 채웠습니다 — 빈칸의 `...` 를 고칩니다."]
     msg = []
     try:
         r = d.window_stats([1.0, 2.0, 3.0, 4.0, 5.0, 99.0], 5, 5)
@@ -120,7 +122,7 @@ def 검사_1(d) -> tuple[bool, list[str]]:
 def 검사_2(d) -> tuple[bool, list[str]]:
     """is_anomaly — |z| > k"""
     if _아직안채움("is_anomaly"):
-        return False, ["아직 안 채웠습니다 — 그 함수의 `...` 줄을 고칩니다."]
+        return False, ["아직 안 채웠습니다 — 빈칸의 `...` 를 고칩니다."]
     try:
         d.is_anomaly(10.0, 0.0, 1.0, 3.0)
     except Exception as e:                                      # noqa: BLE001
@@ -145,7 +147,7 @@ def 검사_2(d) -> tuple[bool, list[str]]:
 def 검사_3(d) -> tuple[bool, list[str]]:
     """handle_missing — 방침은 자유, 형태만 본다"""
     if _아직안채움("handle_missing"):
-        return False, ["아직 안 채웠습니다 — 그 함수의 `...` 줄을 고칩니다."]
+        return False, ["아직 안 채웠습니다 — 빈칸의 `...` 를 고칩니다."]
     src = [1.0, 2.0, None, 4.0, None, None, 7.0]
     try:
         out = d.handle_missing(list(src))
@@ -211,7 +213,7 @@ def 열기(n: int) -> int:
         return 1
     tgt.write_text(cur[:m2.start()] + 새함수 + "\n\n" + cur[m2.end():], encoding="utf-8")
 
-    print(f"\n  TODO {n} ({name}) 만 완성본으로 채웠습니다. 나머지는 그대로입니다.")
+    print(f"\n  {name} 자리만 완성본으로 채웠습니다. 나머지는 그대로입니다.")
     print("  이어서 —  uv run 확인.py")
     print("  되돌리려면 detect_내가짠것.py 를 detect.py 로 복사하세요.\n")
     print("  ※ 채운 함수를 한 번 읽어 보세요. 내가 막혔던 자리가 어디였는지 보입니다.")
@@ -221,7 +223,7 @@ def 열기(n: int) -> int:
 def main() -> int:
     ap = argparse.ArgumentParser(description="내가 채운 게 맞는지 확인한다")
     ap.add_argument("--정답", "--열기", dest="정답", type=int, choices=[1, 2, 3],
-                    metavar="TODO번호",
+                    metavar="번호",
                     help="★ 막혔을 때. 그 자리 하나만 정답으로 채운다 "
                          "(`--열기` 는 옛 이름, 그대로 받는다)")
     args = ap.parse_args()
@@ -238,7 +240,7 @@ def main() -> int:
     print("=" * 62)
     막힌곳 = None
     for i, (ok, msgs) in enumerate(결과, 1):
-        print(f"\n{OK if ok else NO} TODO {i} · {NAMES[i]}")
+        print(f"\n{OK if ok else NO} {i} · {NAMES[i]}  ({빈칸들[i]})")
         for m in msgs:
             print(f"       {m}")
         if not ok and 막힌곳 is None:
@@ -251,7 +253,7 @@ def main() -> int:
         return 0
 
     else:
-        print(f"  다음에 볼 곳 — TODO {막힌곳}")
+        print(f"  다음에 볼 곳 — 빈칸 {첫빈칸[막힌곳]}")
     return 1
 
 

@@ -397,10 +397,12 @@ BYHAND = _s(520, 380, "0 0 520 380", f"""
 <rect x="76" y="182" width="196" height="12" rx="6"/>
 <rect x="76" y="238" width="164" height="12" rx="6"/></g>
 <g stroke="{O}" stroke-width="7" fill="none">
-<rect x="286" y="118" width="130" height="28" rx="6"/>
-<rect x="286" y="174" width="130" height="28" rx="6"/>
-<rect x="286" y="230" width="130" height="28" rx="6"/></g>
-<text class="lbl-o" x="286" y="330">채울 곳 셋</text>
+<rect x="286" y="118" width="62" height="28" rx="6"/>
+<rect x="356" y="118" width="62" height="28" rx="6"/>
+<rect x="286" y="174" width="62" height="28" rx="6"/>
+<rect x="356" y="174" width="62" height="28" rx="6"/>
+<rect x="286" y="230" width="62" height="28" rx="6"/></g>
+<text class="lbl-o" x="286" y="330">함수 셋 · 빈칸 다섯</text>
 """)
 
 # ── TODO 아이콘 3

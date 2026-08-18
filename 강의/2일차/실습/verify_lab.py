@@ -95,10 +95,10 @@ def main() -> int:
           sorted(빈것) == sorted(["window_stats", "is_anomaly", "handle_missing"]),
           f"{len(빈것)}/3 — {' · '.join(빈것) or '없음'}")
     src = (ROOT / "detect.py").read_text(encoding="utf-8")
-    자리 = ("TODO 1-A", "TODO 1-B", "TODO 2-A", "TODO 2-B", "TODO 3")
-    check("다섯 자리 표시가 전부 있다 (`TODO 1-A` … `TODO 3`)",
-          all(t in src for t in 자리),
-          " · ".join(t for t in 자리 if t not in src) or "다 있음")
+    자리 = ("빈칸 1", "빈칸 2", "빈칸 3", "빈칸 4", "빈칸 5")
+    check("빈칸 표식이 자리마다 하나씩 걸린다 (`빈칸 1` … `빈칸 5`)",
+          all(src.count(t) == 1 for t in 자리),
+          " · ".join(f"{t}:{src.count(t)}" for t in 자리))
     check("채울 빈칸(`...`)이 다섯 개다 — 학생이 고칠 줄의 수",
           sum(1 for l in src.splitlines()
               if l.strip().endswith("...") or l.strip().endswith("...,")) == 5,
@@ -109,7 +109,7 @@ def main() -> int:
     r = subprocess.run([sys.executable, "돌려보기.py"], capture_output=True, text=True,
                        cwd=ROOT, encoding="utf-8", errors="replace")
     check("빈 뼈대로 실행하면 무엇을 채워야 하는지 알려준다",
-          "TODO" in r.stdout and r.returncode == 1,
+          "빈칸" in r.stdout and r.returncode == 1,
           (r.stdout.strip().splitlines() or ["(출력 없음)"])[-1][:60])
 
     # ------------------------------------------------------- 2. 참고 정답

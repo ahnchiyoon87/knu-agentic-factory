@@ -79,7 +79,7 @@ def to_commands(diagnosis: dict, finding: dict, cfg: dict) -> list[dict]:
         if kind == "slow_down" and "stop" in kinds:
             continue
 
-        # ── TODO 3-A ────────────────────────────────────────────────────────
+        # ── 빈칸 4 ───────────────────────────────────────────────────────────
         #   진단이 낸 이름(kind)을 **실제 명령 이름**으로 바꾼다.
         #   위쪽 COMMAND_OF 가 그 대응표다. 모르는 것이면 None 이 나온다.
         #   쓸 것 :  COMMAND_OF.get(kind)
@@ -97,7 +97,7 @@ def to_commands(diagnosis: dict, finding: dict, cfg: dict) -> list[dict]:
                 if not current:
                     continue              # 기준 삼을 rpm 이 없다
 
-                # ── TODO 3-B ────────────────────────────────────────────────
+                # ── 빈칸 5 ───────────────────────────────────────────────────
                 #   진단이 rpm 을 안 줬을 때 얼마로 낮출지 스스로 정한다.
                 #   지금 회전수에 cfg["slow_down_ratio"] 를 곱한다.
                 #   쓸 것 :  float(current)   float(cfg["slow_down_ratio"])
