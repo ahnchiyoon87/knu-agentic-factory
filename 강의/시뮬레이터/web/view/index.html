@@ -373,8 +373,10 @@ function drawBackground(){
   ['WH','DOCK'].forEach(n => {
     const p = layout.nodes[n];
     bgLayer.add(new Konva.Rect({
-      x:S(p.x-55), y:S(p.y-32), width:S(110), height:S(64),
-      fill:'#1A222C', stroke:'#323C49', strokeWidth:1, cornerRadius:S(6)
+      // 로봇 원(반지름 15) 아래에 이름(+17)과 배터리(+30) 두 줄이 붙어 **아래로 43** 까지 간다.
+      // 예전 높이 64(중심에서 아래로 32)로는 배터리 줄이 카드 밖으로 삐져나왔다.
+      x:S(p.x-58), y:S(p.y-34), width:S(116), height:S(88),
+      fill:'#1A222C', stroke:'#323C49', strokeWidth:1, cornerRadius:S(8)
     }));
     // 라벨은 박스 위쪽 가장자리에 둔다. 로봇이 노드 중앙에 서기 때문에
     // 가운데에 두면 로봇·배터리 표시와 겹친다.
@@ -436,7 +438,7 @@ function drawRobots(){
       fontFamily:'Pretendard, Malgun Gothic, sans-serif'
     });
     const bat = new Konva.Text({
-      x:-S(30), y:S(30), width:S(60), align:'center', text:'',
+      x:-S(40), y:S(31), width:S(80), align:'center', text:'',
       fontSize:Math.max(8,S(11)), fill:'#7C8794',
       fontFamily:'Pretendard, Malgun Gothic, sans-serif'
     });
