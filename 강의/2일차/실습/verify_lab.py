@@ -95,9 +95,14 @@ def main() -> int:
           sorted(빈것) == sorted(["window_stats", "is_anomaly", "handle_missing"]),
           f"{len(빈것)}/3 — {' · '.join(빈것) or '없음'}")
     src = (ROOT / "detect.py").read_text(encoding="utf-8")
-    check("찾는 말이 정확히 세 곳만 걸린다 (`여기부터 구현합니다`)",
-          src.count("여기부터 구현합니다") == 3,
-          f"{src.count('여기부터 구현합니다')}곳")
+    자리 = ("TODO 1-A", "TODO 1-B", "TODO 2-A", "TODO 2-B", "TODO 3")
+    check("다섯 자리 표시가 전부 있다 (`TODO 1-A` … `TODO 3`)",
+          all(t in src for t in 자리),
+          " · ".join(t for t in 자리 if t not in src) or "다 있음")
+    check("채울 빈칸(`...`)이 다섯 개다 — 학생이 고칠 줄의 수",
+          sum(1 for l in src.splitlines()
+              if l.strip().endswith("...") or l.strip().endswith("...,")) == 5,
+          f"{sum(1 for l in src.splitlines() if l.strip().endswith('...') or l.strip().endswith('...,'))}개")
     check("`raise NotImplementedError` 가 남아 있지 않다 — 지울 것도 고칠 것도 없다",
           "NotImplementedError" not in src)
 

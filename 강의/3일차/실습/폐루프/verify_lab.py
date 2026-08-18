@@ -89,9 +89,10 @@ def part_template() -> None:
           f"{len(빈것)}/3 — {' · '.join(빈것) or '없음'}")
     for 이름, 파일, 역할 in [(n, *agents.BLANKS[n]) for n in agents.BLANKS]:
         src = (ROOT / 파일).read_text(encoding="utf-8")
-        check(f"{역할} — 찾는 말이 한 곳만 걸리고 `raise` 가 없다 ({파일})",
-              src.count("여기부터 구현합니다") == 1 and "NotImplementedError" not in src,
-              f"{src.count('여기부터 구현합니다')}곳")
+        빈칸 = sum(1 for l in src.splitlines() if l.strip().endswith("..."))
+        check(f"{역할} — 채울 빈칸(`...`)이 있고 `raise` 가 없다 ({파일})",
+              "TODO " in src and 빈칸 >= 1 and "NotImplementedError" not in src,
+              f"빈칸 {빈칸}개")
     # 안 채운 자리를 만나면 **멈춰서 어디인지 알려 줘야** 한다.
     # 조용히 「이상 없음」·「실행할 조치가 없습니다」로 넘어가면 학생은 자기 코드를 의심한다.
     for 역할, 파일 in (("감지", "agents/detector.py"), ("진단", "agents/diagnoser.py"),

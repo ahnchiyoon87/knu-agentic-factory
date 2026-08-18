@@ -109,9 +109,11 @@ def main() -> int:
               sorted(빈것) == ["detect_anomaly", "query_equipment"],
               f"{len(빈것)}/2 — {' · '.join(빈것) or '없음'}")
         서버소스 = (ROOT / "mcp_server.py").read_text(encoding="utf-8")
-        check("찾는 말이 정확히 두 곳만 걸린다 (`여기부터 구현합니다`)",
-              서버소스.count("여기부터 구현합니다") == 2,
-              f"{서버소스.count('여기부터 구현합니다')}곳")
+        check("찾는 말이 자리마다 하나씩 걸린다 (`TODO 1-A` … `TODO 2-B`)",
+              all(서버소스.count(t) == 1
+                  for t in ("TODO 1-A", "TODO 1-B", "TODO 2-A", "TODO 2-B")),
+              " · ".join(f"{t}:{서버소스.count(t)}"
+                         for t in ("TODO 1-A", "TODO 1-B", "TODO 2-A", "TODO 2-B")))
         check("`--check` 가 빈 도구를 「정상」이라 하지 않는다 (조용한 실패 금지)",
               "안채운도구()" in 서버소스 and "아직 안 채움" in 서버소스)
         check("2일차의 detect() 를 그대로 가져다 쓴다 — '내가 짠 알고리즘을 AI가 쓴다'",

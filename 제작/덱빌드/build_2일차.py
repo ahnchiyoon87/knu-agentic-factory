@@ -302,8 +302,8 @@ S.append(D.sect("이상감지 알고리즘을 직접 짭니다",
                  "자세한 순서는 2일차 실습 가이드 에 다 적혀 있다."],
                 '데이터는 <b>7일치 60,480행</b>. 이상 세 가지가 심어져 있다.'))
 
-S.append(D.rail("채울 곳은 세 군데입니다",
-                "<code>detect.py</code> 안에서 「여기부터 구현합니다」 라고 적힌 자리를 찾으세요.",
+S.append(D.rail("채울 곳은 세 함수입니다",
+                "<code>detect.py</code> 안에서 <code>TODO</code> 를 찾으세요. 고칠 것은 <code>...</code> 이라 적힌 다섯 줄뿐입니다.",
                 [(V.T1, "01", "<code>window_stats</code>()", "앞 W개로 평균과 표준편차를 구한다."),
                  (V.T2, "02", "<code>is_anomaly</code>()", "z-score 가 k 를 넘는지 판정한다."),
                  (V.T3, "03", "<code>handle_missing</code>()", "값이 안 들어온 자리를 어떻게 다룰지 정한다.")],

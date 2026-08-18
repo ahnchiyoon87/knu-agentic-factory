@@ -115,7 +115,7 @@ def cmp(h1, sub, left, right, foot=""):
             + f'</div>{_foot(foot)}</section>')
 
 
-def tbl(h1, sub, head, rows, on=None, foot="", dense=False):
+def tbl(h1, sub, head, rows, on=None, foot="", dense=False, 키폭=None):
     # dense — 행이 여섯을 넘는 표만 쓴다. 기본 규격으로는 7행 표가 세로를 넘쳐
     # 제목·각주와 겹친다 (3일차 「폐루프는 일곱 걸음」에서 실제로 깨졌다).
     LOG.append(dict(t="tbl", n=6, h1=h1, sub=sub, head=head, rows=rows, on=on, foot=foot))
@@ -123,7 +123,8 @@ def tbl(h1, sub, head, rows, on=None, foot="", dense=False):
     tb = ""
     for i, r in enumerate(rows):
         cls = ' class="on"' if on is not None and i == on else ""
-        cells = "".join((f'<td class="k">{c}</td>' if j == 0 else f"<td>{c}</td>")
+        칸폭 = f' style="width:{키폭}px"' if 키폭 else ""
+        cells = "".join((f'<td class="k"{칸폭}>{c}</td>' if j == 0 else f"<td>{c}</td>")
                         for j, c in enumerate(r))
         tb += f"<tr{cls}>{cells}</tr>"
     klass = "s dense" if dense else "s"

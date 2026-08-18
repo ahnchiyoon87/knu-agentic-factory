@@ -175,7 +175,7 @@ def _tools():
 
 def 검사_1(m) -> tuple[bool, list[str]]:
     if "detect_anomaly" in _빈함수(ROOT / "mcp_server.py", ("detect_anomaly",)):
-        return False, ["아직 안 채웠습니다 — `여기부터 구현합니다` 주석 아래에 씁니다."]
+        return False, ["아직 안 채웠습니다 — 그 함수의 `...` 줄을 고칩니다."]
     fn = getattr(m, "detect_anomaly", None)
     fn = getattr(fn, "fn", fn)          # @mcp.tool() 로 감싸인 경우
     try:
@@ -206,7 +206,7 @@ def 검사_1(m) -> tuple[bool, list[str]]:
 
 def 검사_2(m) -> tuple[bool, list[str]]:
     if "query_equipment" in _빈함수(ROOT / "mcp_server.py", ("query_equipment",)):
-        return False, ["아직 안 채웠습니다 — `여기부터 구현합니다` 주석 아래에 씁니다."]
+        return False, ["아직 안 채웠습니다 — 그 함수의 `...` 줄을 고칩니다."]
     fn = getattr(m, "query_equipment", None)
     fn = getattr(fn, "fn", fn)
     try:
