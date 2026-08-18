@@ -151,14 +151,18 @@ async def 현황() -> dict:
         장부 = _장부읽기()
     쓰는중 = {v["tenant_id"]: k for k, v in 장부.items() if v.get("tenant_id")}
     전체 = _개인공장()
+    학생 = {tid: 표 for tid, 표 in 쓰는중.items() if tid in 전체}
+    남은것 = [t for t in 전체 if t not in 학생]
     return {
         "전체": len(전체),
-        "배정됨": len(쓰는중),
-        "남음": len([t for t in 전체 if t not in 쓰는중]),
-        "안_나간_번호": [t for t in 전체 if t not in 쓰는중],
+        "배정됨": len(학생),
+        "남음": len(남은것),
+        "안_나간_번호": 남은것,
         "배정": [
             {"tenant_id": tid, "번호표": 표[:10] + "…",
              "표시": 장부[표].get("label") or "", "받은_시각": 장부[표].get("at")}
-            for tid, 표 in sorted(쓰는중.items())
+            for tid, 표 in sorted(학생.items())
         ],
+        # 강사 공장(S00)처럼 학생 자리가 아닌 것. 세지는 않고 보여만 준다.
+        "학생자리_아닌_것": sorted(t for t in 쓰는중 if t not in 전체),
     }
