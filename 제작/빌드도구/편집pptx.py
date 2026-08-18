@@ -396,12 +396,21 @@ def main() -> int:
             결과["ops"] = _한상자로(결과["ops"])
             # 삽화(SVG)는 도형으로 못 옮긴다 — 그 자리만 2배로 찍어 그림으로 넣는다
             삽화 = {}
+            # el.screenshot() 은 **바운딩 박스**를 찍는다. 표지처럼 삽화가 화면을 크게 덮으면
+            # 그 상자 안에 들어온 옆 글자가 같이 구워진다 — 3일차 표지 배경에 꼬리말의
+            # 「기」 가 박혀 있던 것이 그것이다. 찍는 동안만 HTML 글자를 지운다.
+            # (svg 안의 <text> 는 fill 로 칠하므로 color 를 지워도 영향이 없다)
+            가림 = pg.add_style_tag(content=(
+                "section.s h1, section.s h2, section.s h3, section.s p, section.s div,"
+                "section.s span, section.s td, section.s th, section.s li"
+                "{ color: transparent !important; }"))
             for el in pg.query_selector_all("svg[data-svgn]"):
                 n = int(el.get_attribute("data-svgn"))
                 try:
                     삽화[n] = el.screenshot(omit_background=True, timeout=5000)
                 except Exception:
                     삽화[n] = pg.screenshot(clip=el.bounding_box())
+            가림.evaluate("s => s.remove()")
             한장(prs, 결과["ops"], 결과["bg"], 삽화)
             print(f"    {i + 1:>2}/{수}", end="\r")
         b.close()

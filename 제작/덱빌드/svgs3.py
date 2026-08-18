@@ -121,6 +121,26 @@ PLUG = _s(520, 400, "0 0 520 400", f"""
 <text x="290" y="336" font-size="32" font-weight="700" fill="{O}">내 도구</text>
 """)
 
+# ── 구간을 둘로 갈라 앞쪽을 기준으로 — judge() 의 핵심
+#    어제 z-score 는 「바로 앞 60개」를 기준으로 삼아 온도가 오르면 기준도 같이 올랐다.
+#    오늘은 기준을 **과거에 묶어** 둔다. 그래서 거리가 벌어진다.
+TWOHALF = _s(520, 400, "0 0 520 400", f"""
+<path d="M30 330h460" stroke="{G}" stroke-width="2"/>
+<rect x="40" y="150" width="200" height="150" rx="8" stroke="{G}" stroke-width="4"
+      stroke-dasharray="10 8" fill="{G}" fill-opacity=".07"/>
+<text x="140" y="132" font-size="24" font-weight="700" fill="{G}" text-anchor="middle">앞쪽 — 기준</text>
+<rect x="260" y="60" width="220" height="150" rx="8" stroke="{O}" stroke-width="5"
+      fill="{O}" fill-opacity=".09"/>
+<text x="370" y="42" font-size="24" font-weight="700" fill="{O}" text-anchor="middle">최근</text>
+<path d="M50 258C110 252 180 244 240 232C320 214 400 168 476 132"
+      stroke="{N}" stroke-width="7" stroke-linecap="round"/>
+<path d="M40 244h200" stroke="{G}" stroke-width="3" stroke-dasharray="9 7"/>
+<path d="M260 158h220" stroke="{O}" stroke-width="3" stroke-dasharray="9 7"/>
+<g stroke="{N2}" stroke-width="3" stroke-linecap="round">
+<path d="M250 244v-86M250 158l-8 12M250 158l8 12M250 244l-8-12M250 244l8-12"/></g>
+<text x="238" y="212" font-size="26" font-weight="700" fill="{N2}" text-anchor="end">차이</text>
+""")
+
 # ── 전부 자동과 전부 승인 사이 어디에 선을 긋나
 #    전에는 앞 장(승인 관문)과 **같은 그림**을 연속으로 썼다. 이 장의 주장은 관문이 아니라
 #    「양 끝이 다 틀렸고 우리는 가운데 어딘가에 선을 그었다」는 것이다.
