@@ -353,7 +353,9 @@ GATE = _s(520, 400, "0 0 520 400", f"""
 </g>
 <path d="M180 150h160" stroke="{O}" stroke-width="12" stroke-linecap="round"/>
 <circle cx="260" cy="222" r="46" stroke="{N2}" stroke-width="9"/>
-<path d="M260 196v30l20 12" stroke="{N2}" stroke-width="7" stroke-linecap="round"/>
+<path d="M243 206a17 17 0 1 1 17 24v12" stroke="{N2}" stroke-width="8"
+      fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="260" cy="252" r="4.5" fill="{N2}"/>
 <text class="lbl-o" x="260" y="106" text-anchor="middle">사람</text>
 <text class="lbl-g" x="40" y="356">에이전트</text>
 <text class="lbl-g" x="392" y="356">설비</text>
