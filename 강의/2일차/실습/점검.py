@@ -2,8 +2,6 @@
 """내 코드가 어디까지 됐는지 스스로 확인한다.
 
     uv run 점검.py              지금 상태를 짚어 준다 (답은 알려주지 않는다)
-    uv run 점검.py --힌트 1     막힌 곳의 힌트 (개념)
-    uv run 점검.py --힌트 2     막힌 곳의 힌트 (의사코드)
     uv run 점검.py --열기 1     ★ 시간이 다 됐을 때만. TODO 1 하나만 완성본으로 채운다
 
 `run.py` 는 7일치 전체를 돌려 결과를 보여 주는 것이고,
@@ -51,8 +49,31 @@ def _load():
         raise SystemExit(1)
 
 
+def _아직안채움(이름: str) -> bool:
+    """detect.py 소스를 읽어 그 함수 속이 비어 있는지 본다.
+
+    전에는 `raise NotImplementedError` 를 잡아서 판정했는데, 그 줄을 없애면서
+    학생이 「지울지 고칠지」 헷갈리던 것이 사라진 대신 판정 근거도 같이 사라졌다.
+    이제는 **설명글(docstring)과 주석 말고 실행되는 줄이 하나도 없으면** 안 채운 것으로 본다.
+    """
+    import ast
+    try:
+        나무 = ast.parse(Path(__file__).with_name("detect.py").read_text(encoding="utf-8"))
+    except SyntaxError:
+        return False
+    for n in ast.walk(나무):
+        if isinstance(n, ast.FunctionDef) and n.name == 이름:
+            몸 = [x for x in n.body
+                  if not (isinstance(x, ast.Expr) and isinstance(x.value, ast.Constant)
+                          and isinstance(x.value.value, str))]
+            return len(몸) == 0
+    return False
+
+
 def 검사_1(d) -> tuple[bool, list[str]]:
     """window_stats — 앞 W개로 (평균, 표준편차)"""
+    if _아직안채움("window_stats"):
+        return False, ["아직 안 채웠습니다 — `여기부터 구현합니다` 주석 아래에 씁니다."]
     msg = []
     try:
         r = d.window_stats([1.0, 2.0, 3.0, 4.0, 5.0, 99.0], 5, 5)
@@ -96,6 +117,8 @@ def 검사_1(d) -> tuple[bool, list[str]]:
 
 def 검사_2(d) -> tuple[bool, list[str]]:
     """is_anomaly — |z| > k"""
+    if _아직안채움("is_anomaly"):
+        return False, ["아직 안 채웠습니다 — `여기부터 구현합니다` 주석 아래에 씁니다."]
     try:
         d.is_anomaly(10.0, 0.0, 1.0, 3.0)
     except NotImplementedError:
@@ -121,6 +144,8 @@ def 검사_2(d) -> tuple[bool, list[str]]:
 
 def 검사_3(d) -> tuple[bool, list[str]]:
     """handle_missing — 방침은 자유, 형태만 본다"""
+    if _아직안채움("handle_missing"):
+        return False, ["아직 안 채웠습니다 — `여기부터 구현합니다` 주석 아래에 씁니다."]
     src = [1.0, 2.0, None, 4.0, None, None, 7.0]
     try:
         out = d.handle_missing(list(src))
@@ -148,14 +173,6 @@ def 검사_3(d) -> tuple[bool, list[str]]:
     return ok, msg
 
 
-힌트 = {
-    1: {1: "지금 값은 빼고, 그 '앞' window 개만 씁니다. 앞이 모자라면 아직 판단할 수 없습니다.",
-        2: "구간 = values[i-window:i] · 평균 = 합/개수 · 분산 = Σ(x-평균)²/(개수-1) · 표준편차 = 분산**0.5"},
-    2: {1: "위로 벗어난 것도, 아래로 벗어난 것도 이상입니다. 그리고 표준편차가 0 인 순간이 실제로 있습니다.",
-        2: "std 가 0 이면 먼저 결정한 값을 돌려주고, 아니면  abs((value-mean)/std) > k"},
-    3: {1: "정답이 하나가 아닙니다. 중요한 건 **길이를 유지하는 것**과, 왜 그 방침을 골랐는지 말할 수 있는 것입니다.",
-        2: "새 리스트를 만들어 하나씩 넣습니다. 그대로 둘 거면 그냥 v, 메울 거면 직전 값을 기억해 두었다가 넣습니다."},
-}
 
 
 def 열기(n: int) -> int:
@@ -205,7 +222,6 @@ def 열기(n: int) -> int:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="내 코드 점검")
-    ap.add_argument("--힌트", type=int, choices=[1, 2], metavar="단계")
     ap.add_argument("--열기", type=int, choices=[1, 2, 3], metavar="TODO번호")
     args = ap.parse_args()
 
@@ -233,12 +249,8 @@ def main() -> int:
         print("  숫자를 적어 두고,  --k 2.0  --k 4.0  --window 30  으로 흔들어 보세요.")
         return 0
 
-    if args.힌트:
-        print(f"  힌트 {args.힌트} · TODO {막힌곳}")
-        print(f"       {힌트[막힌곳][args.힌트]}")
     else:
         print(f"  다음에 볼 곳 — TODO {막힌곳}")
-        print("  힌트가 필요하면 —  uv run 점검.py --힌트 1")
     return 1
 
 

@@ -91,6 +91,39 @@ MXN = _s(540, 400, "0 0 540 400", f"""
 # ↑ 이 삽화는 **나란히 비교형(cmp)** 의 반 칸에 들어가 실제로는 절반 크기로 그려진다.
 #   공용 라벨 크기(lbl-*)를 그대로 쓰면 슬라이드에서 12px 언저리가 되어 뒷자리에서 안 읽힌다.
 
+# ── 한 문장에 이미 네 가지가 들어 있는데, 여기에 「움직이기」가 하나 더 얹힌다
+FOURPLUS = _s(540, 400, "0 0 540 400", f"""
+<rect x="40" y="86" width="300" height="216" rx="12" stroke="{N}" stroke-width="7"/>
+<g stroke="{N2}" stroke-width="8" stroke-linecap="round">
+<path d="M76 130h228M76 174h228M76 218h228M76 262h170"/></g>
+<text x="190" y="66" font-size="25" font-weight="700" fill="{N}" text-anchor="middle">지시 한 문장 — 네 가지</text>
+<rect x="368" y="150" width="132" height="88" rx="12" stroke="{O}" stroke-width="7"
+      fill="{O}" fill-opacity=".10"/>
+<text x="434" y="202" font-size="26" font-weight="700" fill="{O}" text-anchor="middle">움직이기</text>
+<path d="M434 138V96M434 96l-11 15M434 96l11 15" stroke="{O}" stroke-width="6" stroke-linecap="round"/>
+<text x="434" y="76" font-size="23" font-weight="700" fill="{O}" text-anchor="middle">＋ 하나 더</text>
+<text x="270" y="352" font-size="24" font-weight="700" fill="{G}" text-anchor="middle">다섯째가 얹히면 어떻게 될까</text>
+""")
+
+# ── 생각이 화면에 글로 남는다 — 터미널에 찍히는 줄
+THOUGHTLOG = _s(540, 400, "0 0 540 400", f"""
+<rect x="30" y="50" width="480" height="300" rx="12" stroke="{N}" stroke-width="7"
+      fill="{N}" fill-opacity=".04"/>
+<path d="M30 96h480" stroke="{N}" stroke-width="4"/>
+<g fill="{G}"><circle cx="58" cy="73" r="7"/><circle cx="82" cy="73" r="7"/><circle cx="106" cy="73" r="7"/></g>
+<g fill="{G}" opacity=".55">
+<rect x="60" y="126" width="120" height="12" rx="6"/>
+<rect x="60" y="212" width="150" height="12" rx="6"/>
+<rect x="60" y="296" width="110" height="12" rx="6"/></g>
+<g fill="{N2}" opacity=".75">
+<rect x="196" y="126" width="270" height="12" rx="6"/>
+<rect x="226" y="296" width="240" height="12" rx="6"/></g>
+<rect x="52" y="158" width="436" height="38" rx="7" stroke="{O}" stroke-width="5"
+      fill="{O}" fill-opacity=".10"/>
+<text x="70" y="184" font-size="22" font-weight="700" fill="{O}">도구 호출  query_equipment(EQ-03)</text>
+<text x="270" y="378" font-size="24" font-weight="700" fill="{N}" text-anchor="middle">어느 도구를 왜 불렀는지가 남는다</text>
+""")
+
 # ── 셋으로 쪼갠다 + 총괄
 SPLIT3 = _s(540, 420, "0 0 540 420", f"""
 <circle cx="270" cy="76" r="48" stroke="{N}" stroke-width="9"/>
