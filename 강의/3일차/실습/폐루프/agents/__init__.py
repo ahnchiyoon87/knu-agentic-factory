@@ -69,7 +69,8 @@ def 비었나(이름: str) -> bool:
 
     전에는 `raise NotImplementedError` 를 잡아서 판정했는데, 그 줄을 없애면서
     학생이 「지울지 고칠지」 헷갈리던 것이 사라진 대신 판정 근거도 같이 사라졌다.
-    **설명글(docstring)과 주석 말고 실행되는 줄이 하나도 없으면** 안 채운 것으로 본다.
+    판정 근거는 뼈대에 박아 둔 **`...`(Ellipsis)** 다. 학생이 그 줄을 고치면 사라진다.
+    함수 속이 통째로 빈 경우도 안 채운 것으로 본다.
 
     안 그러면 빈 함수가 조용히 None 을 돌려주고, 감지는 「이상 없음」으로만 찍힌다.
     학생은 몇 분을 기다리다 **자기가 뭘 안 했는지도 모른 채** 코드를 의심하게 된다.
@@ -96,6 +97,10 @@ def 비었나(이름: str) -> bool:
         return False                         # 없거나 깨진 파일은 부르는 쪽이 따로 짚는다
     for n in ast.walk(나무):
         if isinstance(n, ast.FunctionDef) and n.name == 이름:
+            # 뼈대에 박아 둔 `...`(Ellipsis) 가 남아 있으면 아직 안 채운 것이다.
+            if any(isinstance(x, ast.Constant) and x.value is Ellipsis
+                   for x in ast.walk(n)):
+                return True
             몸 = [x for x in n.body
                   if not (isinstance(x, ast.Expr) and isinstance(x.value, ast.Constant)
                           and isinstance(x.value.value, str))]

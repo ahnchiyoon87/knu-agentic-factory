@@ -51,6 +51,9 @@ def _빈함수(경로: Path, 이름들: tuple[str, ...]) -> list[str]:
     빈것 = []
     for n in ast.walk(나무):
         if isinstance(n, ast.FunctionDef) and n.name in 이름들:
+            if any(isinstance(x, ast.Constant) and x.value is Ellipsis
+                   for x in ast.walk(n)):
+                빈것.append(n.name); continue
             몸 = [x for x in n.body
                   if not (isinstance(x, ast.Expr) and isinstance(x.value, ast.Constant)
                           and isinstance(x.value.value, str))]

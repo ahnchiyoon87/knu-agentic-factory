@@ -187,20 +187,50 @@ def detect_anomaly(equipment_id: str, hours: int = 168, k: float | None = None) 
         anomaly_count, anomalies[{timestamp, metric, value}]
 
     """
-    # ─────────────────────────────────────────────────────────
-    #  여기부터 구현합니다
-    #
-    # 할 일은 네 가지입니다.
-    #   1. _fetch_readings(equipment_id, hours) 로 데이터를 가져온다
-    #   2. temperature 와 vibration 각각을 리스트로 뽑는다
-    #      (값이 없는 자리는 None 으로 둔다 — 2일차의 결측 처리가 받아 준다)
-    #   3. 2일차의 detect(values, window, k) 를 각각 돌린다
-    #   4. True 로 나온 자리를 위 Returns 모양으로 정리해 돌려준다
-    #
-    # 주의 — 에이전트가 읽을 결과입니다.
-    #   · anomalies 가 너무 길면 에이전트가 다 못 읽습니다. 최근 것 위주로 추리세요
-    #   · 값이 없으면 빈 리스트를 돌려주고, 예외를 밖으로 던지지 마세요
-    # ─────────────────────────────────────────────────────────
+    rows = _fetch_readings(equipment_id, hours)
+    if not rows:
+        return {"equipment_id": equipment_id, "checked_hours": hours,
+                "sample_count": 0, "anomaly_count": 0, "anomalies": [],
+                "note": "해당 구간에 데이터가 없습니다."}
+
+    window = int(CFG["detect"]["window"])
+    kk = float(k if k is not None else CFG["detect"]["k"])
+
+    found: list[dict] = []
+    for metric in ("temperature", "vibration"):
+
+        # ── TODO 1-A ────────────────────────────────────────────────────────
+        #   이 항목(metric)의 값만 순서대로 뽑는다. 값이 없는 자리는 None 으로 둔다.
+        #   (2일차에 만든 결측 처리가 그 None 을 받아 준다)
+        #   쓸 것 :  r.get(metric)   float(...)   [ ... for r in rows ]
+        values = ...
+
+        # ── TODO 1-B ────────────────────────────────────────────────────────
+        #   ★ 오늘의 핵심 — 어제 짠 detect() 를 여기서 부른다.
+        #   values 와 같은 길이의 True/False 목록이 나온다.
+        #   쓸 것 :  detect(values, window=window, k=kk)
+        플래그 = ...
+
+        for row, flag in zip(rows, 플래그):
+            if flag:
+                found.append({"timestamp": str(row["timestamp"]),
+                              "metric": metric,
+                              "value": row.get(metric)})
+
+    found.sort(key=lambda x: x["timestamp"], reverse=True)
+
+    # 에이전트가 읽을 결과다. 다 넣으면 길어서 못 읽는다 — 최근 것 위주로 추린다.
+    LIMIT = 30
+    return {
+        "equipment_id": equipment_id,
+        "checked_hours": hours,
+        "k": kk,
+        "window": window,
+        "sample_count": len(rows),
+        "anomaly_count": len(found),
+        "anomalies": found[:LIMIT],
+        "truncated": len(found) > LIMIT,
+    }
 
 
 # =============================================================================
@@ -222,19 +252,48 @@ def query_equipment(equipment_id: str, hours: int = 24) -> dict:
         open_work_orders[ … ]      ← status 가 DONE 이 아닌 작업지시만 추린 것
 
     """
-    # ─────────────────────────────────────────────────────────
-    #  여기부터 구현합니다
-    #
-    # 할 일은 세 가지입니다.
-    #   1. _fetch_readings 로 최근 구간 요약을 만든다 (평균·최대·결측 수)
-    #   2. _fetch_maintenance 로 정비 이력을 가져온다
-    #   3. 위 Returns 모양으로 합쳐 돌려준다
-    #
-    # 주의 — 이 도구가 진단의 재료입니다.
-    #   · 정비 이력의 note 를 빠뜨리지 마세요. 원인 추정이 거기서 나옵니다
-    #   · status 가 DONE 이 아닌 작업지시(미완)는 특히 중요합니다
-    #   · 결측이 있으면 그 사실 자체가 정보입니다. 조용히 빼지 마세요
-    # ─────────────────────────────────────────────────────────
+    rows = _fetch_readings(equipment_id, hours)
+
+    def stat(metric: str) -> dict:
+        vals = [float(r[metric]) for r in rows if r.get(metric) is not None]
+        if not vals:
+            return {"avg": None, "max": None}
+        return {"avg": round(sum(vals) / len(vals), 2), "max": round(max(vals), 2)}
+
+    missing = sum(1 for r in rows if r.get("temperature") is None)
+    maint = _fetch_maintenance(equipment_id)
+
+    trimmed = [{
+        "work_order_no": m.get("work_order_no"),
+        "issued_at": str(m.get("issued_at")),
+        "status": m.get("status"),
+        "action": m.get("action"),
+
+        # ── TODO 2-A ────────────────────────────────────────────────────────
+        #   ★ 정비 메모. **원인 추정이 여기서 나온다.** 빠뜨리면 잠시 뒤
+        #     AI 리포트가 "원인 불명" 으로 끝난다.
+        #   쓸 것 :  m.get("note")
+        "note": ...,
+    } for m in maint[:10]]
+
+    # ── TODO 2-B ────────────────────────────────────────────────────────────
+    #   아직 안 끝난 작업지시만 추린다. status 가 "DONE" 이 아닌 것.
+    #   이게 오늘 AI 가 붙잡을 실마리다.
+    #   쓸 것 :  [m for m in trimmed if ... ]
+    미완 = ...
+
+    return {
+        "equipment_id": equipment_id,
+        "recent": {
+            "hours": hours,
+            "sample_count": len(rows),
+            "temperature": stat("temperature"),
+            "vibration": stat("vibration"),
+            "missing_count": missing,
+        },
+        "maintenance": trimmed,
+        "open_work_orders": 미완,
+    }
 
 
 # =============================================================================
@@ -262,6 +321,9 @@ def 안채운도구() -> list[str]:
         return []                       # 문법 오류는 부르는 쪽이 따로 짚어 준다
     for n in ast.walk(나무):
         if isinstance(n, ast.FunctionDef) and n.name in ("detect_anomaly", "query_equipment"):
+            if any(isinstance(x, ast.Constant) and x.value is Ellipsis
+                   for x in ast.walk(n)):
+                빈것.append(n.name); continue
             몸 = [x for x in n.body
                   if not (isinstance(x, ast.Expr) and isinstance(x.value, ast.Constant)
                           and isinstance(x.value.value, str))]
@@ -289,7 +351,7 @@ def main() -> None:
             # 안내 문구에 **찾는 말을 그대로 쓰지 않는다.** 학생이 Ctrl+F 로 찾을 때
             # 이 print 까지 걸려 「두 곳」이 세 곳이 된다. 채울 자리만 걸려야 한다.
             if name in 빈것:
-                print(f"\n[{name}] 아직 안 채움 — 그 자리 주석 아래에 통으로 씁니다.")
+                print(f"\n[{name}] 아직 안 채움 — 그 함수의 `...` 줄을 고칩니다.")
                 continue
             try:
                 out = fn()

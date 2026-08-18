@@ -79,17 +79,41 @@ def judge(values: list[float | None], cfg: dict) -> dict | None:
       · detail 은 사람이 읽습니다. "EQ-03 최근 63.9℃ (기준 62.0℃, +1.9℃)" 처럼
     ──────────────────────────────────────────────────────────────────
     """
-    # ─────────────────────────────────────────────────────────
-    #  여기부터 구현합니다
-    #
-    #    · 결측(None)을 빼고 **가장 최근 window_samples 의 2배**만 남긴다
-    #    · 남은 값이 min_samples 보다 적으면 None
-    #    · 앞뒤 반으로 갈라 뒤쪽 평균 − 앞쪽 평균
-    #    · 그 차이가 drift_delta_c 를 넘으면 DRIFT
-    #
-    #    뒤에서 N개   vals[-N:]
-    #    반으로       half = len(vals) // 2
-    # ─────────────────────────────────────────────────────────
+    vals = [v for v in values if v is not None]
+
+    # ── TODO 1-A ────────────────────────────────────────────────────────────
+    #   ★ 최근 것만 남긴다 — window_samples 의 2배까지.
+    #     안 자르면 이상이 끝나 온도가 내려간 뒤에도 그 구간이 남아 계속 울린다
+    #     (실측 : 300분 뒤에도 +0.52℃ 로 울렸다). 그러면 감속이 먹혔는지 확인할 수 없다.
+    #   쓸 것 :  int(cfg.get("window_samples", 300)) * 2      vals[-cap:]
+    cap = ...
+    vals = ...
+
+    if len(vals) < int(cfg["min_samples"]):
+        return None
+
+    # 창 안이 아니라 창 밖과 비교한다.
+    # 드리프트는 창까지 같이 올라가므로 z-score 로는 안 잡힌다 (어제의 결론).
+    half = len(vals) // 2
+
+    # ── TODO 1-B ────────────────────────────────────────────────────────────
+    #   앞 절반의 평균(기준)과 뒤 절반의 평균(최근)을 낸다.
+    #   쓸 것 :  vals[:half]   vals[half:]   sum(...)   len(...)
+    baseline = ...
+    recent = ...
+
+    delta = recent - baseline
+
+    if delta < float(cfg["drift_delta_c"]):
+        return None                      # 내려가는 것은 이상이 아니다. 조치가 먹힌 것이다
+
+    return {
+        "kind": "DRIFT",
+        "delta": round(delta, 2),
+        "recent": round(recent, 2),
+        "baseline": round(baseline, 2),
+        "detail": f"최근 {recent:.1f}℃ (기준 {baseline:.1f}℃, +{delta:.1f}℃ 상승)",
+    }
 
 
 # =============================================================================

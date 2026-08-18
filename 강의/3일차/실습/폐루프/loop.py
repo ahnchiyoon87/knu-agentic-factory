@@ -304,7 +304,7 @@ def main() -> int:
                 path, role = agents.where(exc.이름)
                 print(f"\n아직 안 채운 자리가 있습니다 — {role} 에이전트", file=sys.stderr)
                 print(f"  {path} 의 {exc.이름}() 을 채우세요.", file=sys.stderr)
-                print("  「여기부터 구현합니다」 주석 아래에 씁니다.", file=sys.stderr)
+                print("  그 함수의 `...` 줄을 고칩니다.", file=sys.stderr)
                 print(f"  순서는 {agents.FILL_ORDER} 입니다.", file=sys.stderr)
                 print("  시간이 다 됐으면 —  uv run loop.py --열기 1"
                       "   (1 감지 · 2 진단 · 3 조치)", file=sys.stderr)

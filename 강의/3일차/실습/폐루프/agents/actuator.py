@@ -66,16 +66,72 @@ def to_commands(diagnosis: dict, finding: dict, cfg: dict) -> list[dict]:
       · 진단이 이상한 값을 줘도 여기서 걸러야 합니다. 실제 설비가 움직입니다
     ──────────────────────────────────────────────────────────────────
     """
-    # ─────────────────────────────────────────────────────────
-    #  여기부터 구현합니다
-    #
-    #    · diagnosis["actions"] 를 하나씩 본다. type 이 "none" 이면 건너뛴다
-    #    · COMMAND_OF 로 실제 명령 이름을 찾는다. 모르는 type 은 버린다
-    #    · 명령마다 필요한 값을 채워 위 Returns 모양으로 담는다
-    #    · 실행할 게 없으면 빈 리스트
-    #
-    #    대응표에서 찾기   COMMAND_OF.get(kind)
-    # ─────────────────────────────────────────────────────────
+    eq = finding["equipment_id"]
+    actions = diagnosis.get("actions") or []
+    kinds = {a.get("type") for a in actions}
+    cmds: list[dict] = []
+
+    for a in actions:
+        kind = a.get("type")
+        if not kind or kind == "none":
+            continue
+        # 정지가 함께 나왔으면 감속은 의미가 없다. 정지만 남긴다.
+        if kind == "slow_down" and "stop" in kinds:
+            continue
+
+        # ── TODO 3-A ────────────────────────────────────────────────────────
+        #   진단이 낸 이름(kind)을 **실제 명령 이름**으로 바꾼다.
+        #   위쪽 COMMAND_OF 가 그 대응표다. 모르는 것이면 None 이 나온다.
+        #   쓸 것 :  COMMAND_OF.get(kind)
+        name = ...
+
+        if name is None:
+            continue                      # 진단이 모르는 조치를 냈다. 버린다
+        why = a.get("why", "")
+
+        if name == "set_equipment_speed":
+            target_eq = a.get("equipment_id") or eq
+            rpm = a.get("rpm")
+            if rpm is None:
+                current = finding.get("current_rpm")
+                if not current:
+                    continue              # 기준 삼을 rpm 이 없다
+
+                # ── TODO 3-B ────────────────────────────────────────────────
+                #   진단이 rpm 을 안 줬을 때 얼마로 낮출지 스스로 정한다.
+                #   지금 회전수에 cfg["slow_down_ratio"] 를 곱한다.
+                #   쓸 것 :  float(current)   float(cfg["slow_down_ratio"])
+                rpm = ...
+
+            rpm = max(float(cfg["min_rpm"]), round(float(rpm)))
+            current = finding.get("current_rpm")
+            detail = (f"{float(current):.0f} → {rpm:.0f} rpm" if current
+                      else f"{rpm:.0f} rpm 으로 조정")
+            cmds.append({"command": name, "target": target_eq,
+                         "args": {"rpm": rpm}, "detail": detail, "why": why})
+
+        elif name == "stop_equipment":
+            cmds.append({"command": name, "target": a.get("equipment_id") or eq,
+                         "args": {"reason": why},
+                         "detail": "라인 정지 — 되돌리려면 다시 기동해야 합니다",
+                         "why": why})
+
+        elif name == "dispatch_robot":
+            robot = a.get("robot_id") or cfg["maintenance_robot"]
+            target = a.get("target") or a.get("equipment_id") or eq
+            cmds.append({"command": name, "target": robot,
+                         "args": {"target": target},
+                         "detail": f"{robot} → {target} 로 이동",
+                         "why": why})
+
+        elif name == "ack_alarm":
+            alarm_id = a.get("target")
+            if not alarm_id:
+                continue                  # 어느 알람인지 모르면 못 보낸다
+            cmds.append({"command": name, "target": str(alarm_id),
+                         "args": {}, "detail": f"알람 {alarm_id} 확인 처리", "why": why})
+
+    return cmds
 
 
 # =============================================================================

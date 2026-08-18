@@ -136,16 +136,63 @@ def build_prompt(evidence: dict, cfg: dict) -> tuple[str, str]:
       · 되돌릴 수 없는 조치(정지·파견)는 최소로. 라인을 다 세우는 진단은 좋지 않습니다
     ──────────────────────────────────────────────────────────────────
     """
-    # ─────────────────────────────────────────────────────────
-    #  여기부터 구현합니다
+    # ── TODO 2-A ────────────────────────────────────────────────────────────
+    #   ★ AI 에게 주는 지시문. **세 문장**이 들어가야 오늘 볼 장면이 나온다.
     #
-    #    · (system, user) 두 문자열을 돌려준다
-    #    · user 에 evidence 를 사람이 읽게 풀어 넣는다
-    #      — 정비 이력의 note 와 미완 작업지시를 빼지 않는다
-    #    · system 에 위 ★ 를 넣는다 — 지금 작아도 계속 오르는 이상이라는 것
+    #     ① 이 변화는 지금 작아도 계속 오른다 — 그렇게 보고 판단할 것
+    #     ② 원인이 정비 보류·지연이면 감속과 **함께** 로봇 파견 요청까지 낼 것
+    #     ③ 근거(evidence)에는 작업지시 번호를 그대로 인용할 것
     #
-    #    줄을 쌓아 붙이기   "\n".join(lines)
-    # ─────────────────────────────────────────────────────────
+    #   ①이 빠지면 「아직 작으니 지켜보자」로 끝나고,
+    #   ②가 빠지면 승인 화면이 안 뜨고, ③이 빠지면 근거에 번호가 안 붙는다.
+    #   여러 줄로 쓰려면 따옴표 세 개(\"\"\" … \"\"\")로 감싼다.
+    system = ...
+
+    # 아래는 자료를 사람이 읽게 풀어 놓는 부분이다. 이미 다 돼 있다.
+    f = evidence["finding"]
+    lines = [
+        "# 감지된 이상",
+        f"설비: {f['equipment_id']}",
+        f"지표: {f.get('metric')}  종류: {f.get('kind')}",
+        f"내용: {f.get('detail')}",
+        f"현재 회전수: {f.get('current_rpm')} rpm   운전 상태: {f.get('run_state')}",
+        f"표본 수: {f.get('sample_count')}",
+        "",
+        "# 이 설비의 정비 이력",
+    ]
+    if evidence["maintenance"]:
+        for m in evidence["maintenance"]:
+            lines.append(
+                f"- {m.get('work_order_no')} [{m.get('status')}] {m.get('issued_at')} "
+                f"{m.get('action')} / 비고: {m.get('note') or '없음'}"
+            )
+    else:
+        lines.append("- 없음")
+
+    lines += ["", "# 아직 끝나지 않은 작업지시"]
+    if evidence["open_work_orders"]:
+        for m in evidence["open_work_orders"]:
+            lines.append(
+                f"- {m.get('work_order_no')} [{m.get('status')}] {m.get('action')} "
+                f"/ 비고: {m.get('note') or '없음'}"
+            )
+    else:
+        lines.append("- 없음")
+
+    lines += [
+        "",
+        "# 쓸 수 있는 조치",
+        f"- slow_down      감속. rpm 을 함께 낼 것 (권장: 현재의 {cfg['slow_down_ratio']}배, "
+        f"{cfg['min_rpm']} rpm 미만은 불가)",
+        "- stop           정지. 사람 승인 필요",
+        f"- dispatch_robot 로봇 파견. robot_id 와 target(설비ID)을 함께 낼 것 "
+        f"(정비 로봇: {cfg['maintenance_robot']}). 사람 승인 필요",
+        "- ack_alarm      알람 확인 처리",
+        "- none           할 조치 없음",
+        "",
+        "위 자료로 원인을 추정하고 조치를 제안하십시오.",
+    ]
+    return system, "\n".join(lines)
 
 
 # =============================================================================
