@@ -418,21 +418,21 @@ def 일일차_이상감지() -> None:
 
 def 일일차_열기() -> None:
     """★ 마지막 수단이 정말로 마지막 수단인가 — 쓰고 나서 또 막히면 최악이다."""
-    phase("2일차 — 이탈 방지 마지막 수단 (--열기 를 실제로 써 본다)")
+    phase("2일차 — 이탈 방지 마지막 수단 (--정답 를 실제로 써 본다)")
 
     tgt = LAB1 / "detect.py"
     bak = LAB1 / "detect_내가짠것.py"
     원본 = tgt.read_bytes()
     try:
         for n in (1, 2, 3):
-            ok, msg, out = run_script(LAB1 / "점검.py", ["--열기", str(n)], 120)
-            check(f"--열기 {n} 이 함수 하나만 채운다", ok and 살아있나(out), msg)
+            ok, msg, out = run_script(LAB1 / "점검.py", ["--정답", str(n)], 120)
+            check(f"--정답 {n} 이 함수 하나만 채운다", ok and 살아있나(out), msg)
 
         ok, msg, out = run_script(LAB1 / "점검.py", [], 120)
         check("세 개를 다 열면 점검이 3/3 이 된다", ok and "3개 중 3개 통과" in out, msg)
 
         ok, msg, out = run_script(LAB1 / "run.py", [], 600)
-        check("★ --열기 를 쓴 뒤 run.py 가 끝까지 간다 (또 막히지 않는다)", ok, msg)
+        check("★ --정답 를 쓴 뒤 run.py 가 끝까지 간다 (또 막히지 않는다)", ok, msg)
         # 반전은 학생이 발견한다. 리허설은 그 장면이 나오는지만 본다.
         check("스파이크는 잡히고 드리프트는 안 잡히는 장면이 실제로 나온다",
               "3개 중 3개" in out and "노이즈 수준" in out,
@@ -482,7 +482,7 @@ def 이일차_도구(s: Sim) -> None:
 
 
 def 이일차_열기(s: Sim, ns: str = "S01") -> None:
-    phase("3일차 — 이탈 방지 마지막 수단 (--열기 를 실제로 써 본다)")
+    phase("3일차 — 이탈 방지 마지막 수단 (--정답 를 실제로 써 본다)")
 
     detect_tgt, detect_bak = LAB1 / "detect.py", LAB1 / "detect_내가짠것.py"
     mcp_tgt, mcp_bak = LAB2 / "mcp_server.py", LAB2 / "mcp_server_내가짠것.py"
@@ -490,14 +490,14 @@ def 이일차_열기(s: Sim, ns: str = "S01") -> None:
     try:
         # 도구는 2일차 detect.py 를 그대로 불러 쓴다 — 그쪽이 비어 있으면 도구도 못 돈다
         for n in (1, 2, 3):
-            run_script(LAB1 / "점검.py", ["--열기", str(n)], 120)
+            run_script(LAB1 / "점검.py", ["--정답", str(n)], 120)
         for n in (1, 2):
-            ok, msg, _ = run_script(LAB2 / "점검.py", ["--열기", str(n)], 120)
-            check(f"--열기 {n} 이 도구 본문만 채운다", ok, msg)
+            ok, msg, _ = run_script(LAB2 / "점검.py", ["--정답", str(n)], 120)
+            check(f"--정답 {n} 이 도구 본문만 채운다", ok, msg)
 
         ok, msg, out = run_script(LAB2 / "mcp_server.py", ["--check"], 300,
                                   {"SHARED_API": s.base})
-        check("★ --열기 를 쓴 뒤 도구 2개가 실제로 돈다 (또 막히지 않는다)",
+        check("★ --정답 를 쓴 뒤 도구 2개가 실제로 돈다 (또 막히지 않는다)",
               ok and "아직 안 채움" not in out and "오류" not in out, msg)
         check("도구가 2일차에 짠 detect() 를 그대로 쓴다 — 오늘의 핵심 장면",
               "sample_count" in out and "anomaly_count" in out)

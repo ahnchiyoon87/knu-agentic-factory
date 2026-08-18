@@ -2,7 +2,7 @@
 """내 도구가 어디까지 됐는지 스스로 확인한다.
 
     uv run 점검.py              지금 상태를 짚어 준다 (답은 알려주지 않는다)
-    uv run 점검.py --열기 1     ★ 시간이 다 됐을 때만. 도구 하나만 완성본으로 채운다
+    uv run 점검.py --정답 1     ★ 막혔을 때. 그 도구 자리만 정답으로 채운다
 
 `mcp_server.py --check` 는 서버 없이 도구를 한 번 불러 보는 것이고,
 이 도구는 **연결 상태부터 도구 응답 모양까지** 순서대로 짚어 줍니다.
@@ -290,11 +290,14 @@ def 열기(n: int) -> int:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="내 도구 점검")
-    ap.add_argument("--열기", type=int, choices=[1, 2], metavar="도구번호")
+    ap.add_argument("--정답", "--열기", dest="정답", type=int, choices=[1, 2],
+                    metavar="도구번호",
+                    help="★ 막혔을 때. 그 도구 하나만 정답으로 채운다 "
+                         "(`--열기` 는 옛 이름, 그대로 받는다)")
     args = ap.parse_args()
 
-    if args.열기:
-        return 열기(args.열기)
+    if args.정답:
+        return 열기(args.정답)
 
     print("=" * 62)
     print("내 도구 점검")

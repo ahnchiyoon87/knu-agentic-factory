@@ -169,10 +169,10 @@ def main() -> int:
     ap.add_argument("--규칙으로", dest="rules", action="store_true",
                     help="AI 없이 규칙으로 돌린다. **강사 안내가 있을 때만 쓰세요.** "
                          "오늘의 핵심 장면(AI 가 정비 이력을 근거로 원인을 대는 것)을 못 봅니다")
-    ap.add_argument("--열기", nargs="+", metavar="번호",
-                    help="★ 시간이 다 됐을 때만 — 막힌 자리를 완성본으로 채워서 돌린다. "
-                         "1 감지 · 2 진단 · 3 조치. 여러 개를 한 번에: --열기 1 2 · "
-                         "세 자리 다 막혔으면: --열기 전부. 나머지는 내가 쓴 것 그대로 돕니다")
+    ap.add_argument("--정답", "--열기", dest="정답", nargs="+", metavar="번호",
+                    help="★ 막혔을 때 — 막힌 자리를 정답으로 채워서 돌린다. "
+                         "1 감지 · 2 진단 · 3 조치. 여러 개를 한 번에: --정답 1 2 · "
+                         "세 자리 다 막혔으면: --정답 전부. `--열기` 는 옛 이름, 그대로 받습니다")
     # 강사 시연용. --help 에 안 띄운다 — 학생이 보면 실습을 통째로 건너뛰게 된다.
     # 막힌 학생에게 주는 것은 `--열기` 다 (막힌 자리 하나만).
     ap.add_argument("--use-answers", action="store_true", help=argparse.SUPPRESS)
@@ -187,14 +187,14 @@ def main() -> int:
             return 1
         agent_bodies.install()
         print("참고 답안으로 실행합니다 (강사 시연 모드)")
-    elif args.열기:
+    elif args.정답:
         번호들 = []
-        for a in args.열기:
+        for a in args.정답:
             if str(a).strip() in ("전부", "다", "all"):
                 번호들 = [1, 2, 3]
                 break
             if not str(a).isdigit() or int(a) not in (1, 2, 3):
-                print(f"--열기 에는 1 2 3 또는 '전부' 를 주세요 (받은 값: {a})", file=sys.stderr)
+                print(f"--정답 에는 1 2 3 또는 '전부' 를 주세요 (받은 값: {a})", file=sys.stderr)
                 return 2
             번호들.append(int(a))
         번호들 = sorted(set(번호들))

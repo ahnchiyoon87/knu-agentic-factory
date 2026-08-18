@@ -2,7 +2,7 @@
 """내 코드가 어디까지 됐는지 스스로 확인한다.
 
     uv run 점검.py              지금 상태를 짚어 준다 (답은 알려주지 않는다)
-    uv run 점검.py --열기 1     ★ 시간이 다 됐을 때만. TODO 1 하나만 완성본으로 채운다
+    uv run 점검.py --정답 1     ★ 막혔을 때. TODO 1 자리만 정답으로 채운다
 
 `run.py` 는 7일치 전체를 돌려 결과를 보여 주는 것이고,
 이 도구는 **작은 예제로 함수 하나하나가 제대로 도는지**만 봅니다. 훨씬 빠릅니다.
@@ -220,11 +220,14 @@ def 열기(n: int) -> int:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="내 코드 점검")
-    ap.add_argument("--열기", type=int, choices=[1, 2, 3], metavar="TODO번호")
+    ap.add_argument("--정답", "--열기", dest="정답", type=int, choices=[1, 2, 3],
+                    metavar="TODO번호",
+                    help="★ 막혔을 때. 그 자리 하나만 정답으로 채운다 "
+                         "(`--열기` 는 옛 이름, 그대로 받는다)")
     args = ap.parse_args()
 
-    if args.열기:
-        return 열기(args.열기)
+    if args.정답:
+        return 열기(args.정답)
 
     d = _load()
     결과 = [검사_1(d), 검사_2(d), 검사_3(d)]
