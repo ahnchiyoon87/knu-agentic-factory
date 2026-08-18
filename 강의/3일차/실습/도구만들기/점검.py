@@ -2,8 +2,6 @@
 """내 도구가 어디까지 됐는지 스스로 확인한다.
 
     uv run 점검.py              지금 상태를 짚어 준다 (답은 알려주지 않는다)
-    uv run 점검.py --힌트 1     막힌 곳의 힌트 (개념)
-    uv run 점검.py --힌트 2     막힌 곳의 힌트 (의사코드)
     uv run 점검.py --열기 1     ★ 시간이 다 됐을 때만. 도구 하나만 완성본으로 채운다
 
 `mcp_server.py --check` 는 서버 없이 도구를 한 번 불러 보는 것이고,
@@ -35,6 +33,32 @@ OK, NO = "  [O]", "  [ ]"
 NAMES = {1: "detect_anomaly", 2: "query_equipment"}
 
 
+def _빈함수(경로: Path, 이름들: tuple[str, ...]) -> list[str]:
+    """소스를 읽어 **속이 빈** 함수 이름을 돌려준다.
+
+    전에는 `raise NotImplementedError` 를 잡아서 판정했는데, 그 줄을 없애면서
+    학생이 「지울지 고칠지」 헷갈리던 것이 사라진 대신 판정 근거도 같이 사라졌다.
+    이제는 **설명글(docstring)과 주석 말고 실행되는 줄이 하나도 없으면** 안 채운 것으로 본다.
+
+    ※ `mcp_server.py` 의 `안채운도구()` 와 같은 규칙이다. 두 곳이 어긋나면 판정이 거짓말이 된다.
+    """
+    import ast
+
+    try:
+        나무 = ast.parse(경로.read_text(encoding="utf-8"))
+    except (OSError, SyntaxError):
+        return []                       # 없거나 깨진 파일은 부르는 쪽이 따로 짚어 준다
+    빈것 = []
+    for n in ast.walk(나무):
+        if isinstance(n, ast.FunctionDef) and n.name in 이름들:
+            몸 = [x for x in n.body
+                  if not (isinstance(x, ast.Expr) and isinstance(x.value, ast.Constant)
+                          and isinstance(x.value.value, str))]
+            if not 몸:
+                빈것.append(n.name)
+    return 빈것
+
+
 # ══════════════════════════════════════════════ 0. 준비 상태
 def _csv_경로(fb: dict) -> Path:
     """mcp_server.py 의 _csv_경로() 와 같은 규칙. 두 곳이 어긋나면 판정이 거짓말이 된다."""
@@ -63,8 +87,12 @@ def 검사_설정() -> tuple[bool, list[str]]:
         ok = False
         msg.append(f'data_source 가 "{c.get("data_source")}" 입니다. "fallback" 으로 두세요.')
     fb = c.get("fallback", {})
-    api = str(fb.get("shared_api", ""))
-    ten = str(fb.get("tenant", ""))
+    # `mcp_server.py` 는 환경변수(SHARED_API·W6_TENANT)를 먼저 본다. 여기가 config.json 만
+    # 보면 **도구는 붙는데 점검만 「서버에 못 닿습니다」라고 하는** 어긋남이 생긴다.
+    # 실제로 리허설이 그렇게 걸렸다. 두 곳이 같은 규칙을 써야 판정이 거짓말이 안 된다.
+    import os
+    api = str(os.environ.get("SHARED_API") or fb.get("shared_api", ""))
+    ten = str(os.environ.get("W6_TENANT") or fb.get("tenant", ""))
 
     # 둘 다 `내번호.py` 가 채웁니다. 학생이 손으로 적을 값이 아닙니다.
     if not api.strip() or not ten.strip():
@@ -120,12 +148,15 @@ def 검사_어제코드() -> tuple[bool, list[str]]:
                        "실습 저장소의 `2일차` 폴더가 그대로 있어야 합니다 "
                        "(오늘 도구가 어제 코드를 그대로 불러 씁니다).",
                        "폴더가 없으면 손 드세요 — 다시 받아 드립니다."]
-    try:
-        out = d.detect([1.0] * 70 + [99.0], window=60, k=3.0)
-    except NotImplementedError:
-        return False, ["2일차 TODO 세 곳이 아직 비어 있습니다.",
+    # 안 채운 자리는 조용히 None 을 돌려준다. 그대로 부르면 엉뚱한 예외로 튀어
+    # 학생이 어제 코드가 아니라 오늘 도구를 의심하게 된다 — 소스로 먼저 가른다.
+    빈것 = _빈함수(어제 / "detect.py", ("window_stats", "is_anomaly", "handle_missing"))
+    if 빈것:
+        return False, [f"2일차의 {' · '.join(빈것)} 이(가) 아직 비어 있습니다.",
                        "`2일차/실습` 폴더에서 `uv run 점검.py` 로 먼저 끝내세요.",
                        "시간이 없으면 `uv run 점검.py --열기 1` 부터 쓰세요."]
+    try:
+        out = d.detect([1.0] * 70 + [99.0], window=60, k=3.0)
     except Exception as e:                                       # noqa: BLE001
         return False, [f"detect() 가 터집니다 — {type(e).__name__}: {e}"]
     if not isinstance(out, list) or len(out) != 71:
@@ -140,12 +171,12 @@ def _tools():
 
 
 def 검사_1(m) -> tuple[bool, list[str]]:
+    if "detect_anomaly" in _빈함수(ROOT / "mcp_server.py", ("detect_anomaly",)):
+        return False, ["아직 안 채웠습니다 — `여기부터 구현합니다` 주석 아래에 씁니다."]
     fn = getattr(m, "detect_anomaly", None)
     fn = getattr(fn, "fn", fn)          # @mcp.tool() 로 감싸인 경우
     try:
         out = fn("EQ-03", hours=24)
-    except NotImplementedError:
-        return False, ["아직 안 채웠습니다."]
     except Exception as e:                                       # noqa: BLE001
         return False, [f"실행 중 터집니다 — {type(e).__name__}: {e}"]
 
@@ -171,12 +202,12 @@ def 검사_1(m) -> tuple[bool, list[str]]:
 
 
 def 검사_2(m) -> tuple[bool, list[str]]:
+    if "query_equipment" in _빈함수(ROOT / "mcp_server.py", ("query_equipment",)):
+        return False, ["아직 안 채웠습니다 — `여기부터 구현합니다` 주석 아래에 씁니다."]
     fn = getattr(m, "query_equipment", None)
     fn = getattr(fn, "fn", fn)
     try:
         out = fn("EQ-03", hours=24)
-    except NotImplementedError:
-        return False, ["아직 안 채웠습니다."]
     except Exception as e:                                       # noqa: BLE001
         return False, [f"실행 중 터집니다 — {type(e).__name__}: {e}"]
 
@@ -204,17 +235,16 @@ def 검사_2(m) -> tuple[bool, list[str]]:
     return ok, msg
 
 
-힌트 = {
-    1: {1: "어제 만든 detect() 를 온도와 진동에 각각 돌리고, True 로 나온 자리를 모으면 됩니다.",
-        2: "rows = _fetch_readings(...) · temps = [r.get('temperature') for r in rows] · "
-           "flags = detect(temps, window, k) · True 인 index 를 anomalies 에 담기"},
-    2: {1: "센서 요약 하나, 정비 이력 하나. 둘을 합쳐 돌려주면 됩니다. note 를 빠뜨리지 마세요.",
-        2: "rows = _fetch_readings(...) 로 평균·최대·결측 수를 계산 · "
-           "mt = _fetch_maintenance(...) · return {'equipment_id':…, 'recent':…, 'maintenance': mt}"},
-}
 
 
 def 열기(n: int) -> int:
+    """★ 마지막 수단 — 도구 하나만 완성본으로 채운다.
+
+    2일차 `점검.py --열기` 와 같은 규칙이다 — **함수를 통째로 갈아 끼운다.**
+    전에는 `raise` 줄 하나를 찾아 그 자리에 본문을 끼워 넣었는데, 그 줄을 없앤 뒤로는
+    찾을 것이 사라져 **안 채운 학생에게 「이미 채워져 있습니다」라고 답했다.**
+    막혀서 마지막 수단을 쓴 사람에게 정확히 반대로 답하던 자리다.
+    """
     ans = ROOT / "정답" / "tool_bodies.py"
     if not ans.is_file():
         print(f"완성본을 못 찾았습니다: {ans}")
@@ -225,42 +255,29 @@ def 열기(n: int) -> int:
     if not m:
         print(f"완성본에서 {name} 을 못 찾았습니다.")
         return 1
+    새함수 = m.group(0).rstrip() + "\n"
 
     tgt = ROOT / "mcp_server.py"
+    # 두 번 누르는 일이 흔하다. 이미 채운 것을 덮어써서 학생이 쓴 것을 지우면 안 된다.
+    if name not in _빈함수(tgt, (name,)):
+        print(f"  {name} 은 이미 채워져 있습니다. 다시 열 것이 없습니다.")
+        print("  이어서 —  uv run 점검.py")
+        return 0
+
     bak = ROOT / "mcp_server_내가짠것.py"
     if not bak.is_file():
         shutil.copyfile(tgt, bak)
         print(f"지금까지 쓴 것을 {bak.name} 로 남겨 뒀습니다.")
 
     cur = tgt.read_text(encoding="utf-8")
-    m2 = re.search(rf'(    # TODO: 여기를 채우세요\n    raise NotImplementedError\("{name} [^"]*"\)\n)',
-                   cur)
+    # `@mcp.tool()` 데코레이터 줄은 그대로 둔다 — def 줄부터 다음 구획 앞까지만 바꾼다.
+    m2 = re.search(rf"^def {name}\(.*?(?=^# =====|^@mcp\.tool|^def |\Z)", cur, re.S | re.M)
     if not m2:
-        # 두 번 누르는 일이 흔하다. 그때 「못 찾았습니다」만 뜨면 파일이 깨진 줄 안다.
-        # 이미 채워진 것인지, 정말로 자리가 사라진 것인지를 갈라서 말해 준다.
-        if f"def {name}" in cur:
-            print(f"  {name} 은 이미 채워져 있습니다. 다시 열 것이 없습니다.")
-            print("  이어서 —  uv run 점검.py")
-            return 0
-        print(f"  mcp_server.py 안에서 {name} 을 못 찾았습니다.")
+        print(f"  mcp_server.py 에서 {name} 을 못 찾았습니다. 함수 이름을 바꾸지 마세요.")
         print("  파일을 크게 고쳤다면 mcp_server_내가짠것.py 로 되돌린 뒤 다시 해 보세요.")
         print("  그래도 안 되면 손 드세요.")
         return 1
-    # 완성본은 함수 통째로(def 부터)이고, 넣을 자리는 함수 **본문 안**이다.
-    # def 줄과 docstring 을 걷어내고, 남은 본문을 원래 들여쓰기(4칸)로 맞춘다.
-    줄 = m.group(0).split("\n")[1:]                     # def 줄 제거
-    따옴 = 줄[0].lstrip()[:3] if 줄 else ""
-    if 따옴 in ('"' * 3, "'" * 3):                       # docstring 제거
-        if 줄[0].lstrip().count(따옴) < 2:
-            끝 = next(i for i, l in enumerate(줄[1:], 1) if 따옴 in l)
-            줄 = 줄[끝 + 1:]
-        else:
-            줄 = 줄[1:]
-    while 줄 and not 줄[0].strip():
-        줄 = 줄[1:]
-    들여 = min((len(l) - len(l.lstrip()) for l in 줄 if l.strip()), default=4)
-    본문 = "\n".join(("    " + l[들여:]) if l.strip() else "" for l in 줄).rstrip() + "\n"
-    tgt.write_text(cur[:m2.start()] + 본문 + cur[m2.end():], encoding="utf-8")
+    tgt.write_text(cur[:m2.start()] + 새함수 + "\n\n" + cur[m2.end():], encoding="utf-8")
 
     print(f"\n  도구 {n} ({name}) 만 완성본으로 채웠습니다. 나머지는 그대로입니다.")
     print("  이어서 —  uv run 점검.py")
@@ -270,7 +287,6 @@ def 열기(n: int) -> int:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="내 도구 점검")
-    ap.add_argument("--힌트", type=int, choices=[1, 2], metavar="단계")
     ap.add_argument("--열기", type=int, choices=[1, 2], metavar="도구번호")
     args = ap.parse_args()
 
@@ -316,12 +332,8 @@ def main() -> int:
         print("\n  둘 다 됐습니다.  이제 —  uv run agent.py")
         print("  AI 가 이 도구들을 스스로 골라 부르는 것을 보게 됩니다.")
         return 0
-    if args.힌트:
-        print(f"\n  힌트 {args.힌트} · 도구 {막힌곳}")
-        print(f"       {힌트[막힌곳][args.힌트]}")
     else:
         print(f"  다음에 볼 곳 — 도구 {막힌곳}")
-        print("  힌트가 필요하면 —  uv run 점검.py --힌트 1")
     return 1
 
 

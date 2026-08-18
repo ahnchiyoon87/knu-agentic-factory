@@ -77,8 +77,6 @@ def 검사_1(d) -> tuple[bool, list[str]]:
     msg = []
     try:
         r = d.window_stats([1.0, 2.0, 3.0, 4.0, 5.0, 99.0], 5, 5)
-    except NotImplementedError:
-        return False, ["아직 안 채웠습니다."]
     except Exception as e:                                      # noqa: BLE001
         return False, [f"실행 중 터집니다 — {type(e).__name__}: {e}"]
 
@@ -121,8 +119,6 @@ def 검사_2(d) -> tuple[bool, list[str]]:
         return False, ["아직 안 채웠습니다 — `여기부터 구현합니다` 주석 아래에 씁니다."]
     try:
         d.is_anomaly(10.0, 0.0, 1.0, 3.0)
-    except NotImplementedError:
-        return False, ["아직 안 채웠습니다."]
     except Exception as e:                                      # noqa: BLE001
         return False, [f"실행 중 터집니다 — {type(e).__name__}: {e}"]
 
@@ -149,8 +145,6 @@ def 검사_3(d) -> tuple[bool, list[str]]:
     src = [1.0, 2.0, None, 4.0, None, None, 7.0]
     try:
         out = d.handle_missing(list(src))
-    except NotImplementedError:
-        return False, ["아직 안 채웠습니다."]
     except Exception as e:                                      # noqa: BLE001
         return False, [f"실행 중 터집니다 — {type(e).__name__}: {e}"]
 

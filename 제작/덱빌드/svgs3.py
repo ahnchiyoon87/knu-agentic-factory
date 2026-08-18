@@ -124,20 +124,54 @@ THOUGHTLOG = _s(540, 400, "0 0 540 400", f"""
 <text x="270" y="378" font-size="24" font-weight="700" fill="{N}" text-anchor="middle">어느 도구를 왜 불렀는지가 남는다</text>
 """)
 
-# ── 셋으로 쪼갠다 + 총괄
-SPLIT3 = _s(540, 420, "0 0 540 420", f"""
-<circle cx="270" cy="76" r="48" stroke="{N}" stroke-width="9"/>
-<path d="M246 76h48M270 52v48" stroke="{N2}" stroke-width="6" stroke-linecap="round"/>
-<path d="M270 124v40M270 164H96v40M270 164h174v40M270 164v40" stroke="{G}" stroke-width="4"/>
+# ── 셋으로 쪼갠다 + 총괄, 그리고 **조치에서 감지로 돌아오는 화살표**
+#    이 장이 「폐루프」라는 낱말을 처음 정의한다. 본문이 "조치가 끝나면 다시 감지로
+#    돌아간다"고 말하는데 그림에 돌아오는 선이 없으면, 정의하는 장에서 정의가 안 보인다.
+SPLIT3 = _s(540, 430, "0 0 540 430", f"""
+<circle cx="270" cy="70" r="44" stroke="{N}" stroke-width="9"/>
+<path d="M248 70h44M270 48v44" stroke="{N2}" stroke-width="6" stroke-linecap="round"/>
+<path d="M270 114v34M270 148H96v36M270 148h174v36M270 148v36" stroke="{G}" stroke-width="4"/>
 <g stroke="{N}" stroke-width="8">
-  <rect x="36" y="204" width="120" height="92" rx="10"/>
-  <rect x="210" y="204" width="120" height="92" rx="10"/>
-  <rect x="384" y="204" width="120" height="92" rx="10"/>
+  <rect x="36" y="184" width="120" height="92" rx="10"/>
+  <rect x="210" y="184" width="120" height="92" rx="10"/>
+  <rect x="384" y="184" width="120" height="92" rx="10"/>
 </g>
-<text class="lbl" x="96" y="258" text-anchor="middle">감지</text>
-<text class="lbl" x="270" y="258" text-anchor="middle">진단</text>
-<text class="lbl-o" x="444" y="258" text-anchor="middle">조치</text>
-<text class="lbl-g" x="270" y="352" text-anchor="middle">총괄이 나누고 담당이 처리한다</text>
+<text class="lbl" x="96" y="238" text-anchor="middle">감지</text>
+<text class="lbl" x="270" y="238" text-anchor="middle">진단</text>
+<text class="lbl-o" x="444" y="238" text-anchor="middle">조치</text>
+<!-- 화살촉은 「감지」 상자 **아래에서** 멈춘다. 상자 안까지 올리면 글자를 뚫는다
+     (상자 아래끝 y=276 · 화살촉 끝 y=284). -->
+<path d="M444 276v52H96v-44" stroke="{O}" stroke-width="6" fill="none"
+      stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M87 297l9 -13 9 13" stroke="{O}" stroke-width="6" fill="none"
+      stroke-linecap="round" stroke-linejoin="round"/>
+<text class="lbl-o" x="270" y="356" text-anchor="middle">다시 감지로 — 그래서 폐루프다</text>
+<text class="lbl-g" x="270" y="398" text-anchor="middle">총괄이 나누고 담당이 처리한다</text>
+""")
+
+
+# ── 지시는 한 문장 — 무엇을 몇 번 부를지는 AI 가 정한다
+#    전에는 이 장에 「사람이 쓴 메모」 아이콘을 그대로 다시 썼다. 세 장 앞에서 그 그림에
+#    **정비 메모**라는 뜻을 붙여 놨기 때문에, 같은 그림이 여기서 「지시 한 문장」으로 나오면
+#    학생이 앞의 뜻으로 읽는다.
+ONELINE = _s(520, 400, "0 0 520 400", f"""
+<rect x="24" y="150" width="212" height="104" rx="12" stroke="{N}" stroke-width="8"/>
+<path d="M56 202h148" stroke="{O}" stroke-width="10" stroke-linecap="round"/>
+<text x="130" y="130" font-size="24" font-weight="700" fill="{N}" text-anchor="middle">내가 준 것 — 한 줄</text>
+<g stroke="{G}" stroke-width="5" stroke-linecap="round">
+<path d="M248 202h44M292 202l-13-9M292 202l-13 9"/></g>
+<circle cx="348" cy="202" r="38" stroke="{N}" stroke-width="8"/>
+<path d="M330 202h36M348 184v36" stroke="{N2}" stroke-width="6" stroke-linecap="round"/>
+<g stroke="{O}" stroke-width="5" stroke-linecap="round">
+<path d="M390 168h46M436 168l-12-8M436 168l-12 8"/>
+<path d="M390 202h46M436 202l-12-8M436 202l-12 8"/>
+<path d="M390 236h46M436 236l-12-8M436 236l-12 8"/></g>
+<g stroke="{O}" stroke-width="6">
+  <rect x="446" y="150" width="50" height="36" rx="7"/>
+  <rect x="446" y="184" width="50" height="36" rx="7"/>
+  <rect x="446" y="218" width="50" height="36" rx="7"/>
+</g>
+<text x="270" y="330" font-size="24" font-weight="700" fill="{O}" text-anchor="middle">무엇을 몇 번 부를지는 AI 가 정한다</text>
 """)
 
 # ── MCP — 도구를 꽂는다
@@ -186,9 +220,11 @@ SPECTRUM = _s(520, 400, "0 0 520 400", f"""
 <text x="20" y="286" font-size="22" fill="{G}">라인이 선다</text>
 <text x="500" y="256" font-size="22" fill="{G}" text-anchor="end">무인 운전이</text>
 <text x="500" y="286" font-size="22" fill="{G}" text-anchor="end">성립 안 된다</text>
-<path d="M300 166v18" stroke="{O}" stroke-width="4"/>
+<!-- 「우리가 그은 선」을 양 끝 라벨과 **같은 높이**에 두면 오른쪽 「전부 승인」과 붙어
+     「우리가 그은 선전부 승인」으로 읽힌다. 한 단 위로 올리고 눈금을 길게 뺀다. -->
+<path d="M300 120v62" stroke="{O}" stroke-width="4"/>
 <circle cx="300" cy="200" r="18" fill="{O}"/>
-<text x="300" y="152" font-size="26" font-weight="700" fill="{O}" text-anchor="middle">우리가 그은 선</text>
+<text x="300" y="106" font-size="26" font-weight="700" fill="{O}" text-anchor="middle">우리가 그은 선</text>
 """)
 
 # ── 잠겨 있던 통로 넷이 열린다
@@ -227,6 +263,18 @@ NOHAND = _s(520, 400, "0 0 520 400", f"""
 <rect x="378" y="146" width="40" height="32" rx="5"/><rect x="428" y="146" width="40" height="32" rx="5"/>
 <rect x="378" y="200" width="40" height="32" rx="5"/><rect x="428" y="200" width="40" height="32" rx="5"/></g>
 <text x="422" y="336" font-size="25" font-weight="700" fill="{N}" text-anchor="middle">공장은 그대로</text>
+""")
+
+# ── 「이상 N건」 — 대부분은 헛울림이고 진짜는 몇 개뿐이다
+#    전에는 이 장에 다음 장(NOHAND)의 그림을 그대로 붙여 뒀다. 그건 「손이 없다」를 그리지
+#    「그중 진짜는 몇인가」를 그리지 않는다. 게다가 **다음 장 그림을 미리 써 버리는 것**이었다.
+MANYFALSE = _s(520, 400, "0 0 520 400", f"""
+""" + "".join(
+    # 12열 × 8행. 마지막 줄이 y=308 에서 끝나도록 잡아 라벨(y=356)과 안 겹치게 한다.
+    f'<rect x="{61 + (i % 12) * 34}" y="{46 + (i // 12) * 34}" width="24" height="24" rx="5" '
+    f'fill="{O if i in (17, 43, 76) else G}" fill-opacity="{"1" if i in (17, 43, 76) else ".22"}"/>'
+    for i in range(96)) + f"""
+<text x="270" y="356" font-size="26" font-weight="700" fill="{N}" text-anchor="middle">그중 진짜는 몇인가</text>
 """)
 
 # ── 값이 두 군데서 온다 — 7일치 CSV 와 강사 서버
@@ -277,6 +325,25 @@ NOUNDO = _s(400, 210, "0 0 400 210", f"""
 <path d="M118 60l112 112M230 60L118 172" stroke="{O}" stroke-width="12" stroke-linecap="round"/>
 """)
 
+# ── 사람이 쓴 메모는 자로 잴 수 없다 (4장 오른쪽 반 칸)
+#    전에는 여기에 NOUNDO(되돌리기 X)를 썼는데, 그 그림의 뜻은 34장에서 「되돌릴 수 없다」로
+#    확정된다. 미리 다른 뜻으로 쓰면 34장의 갈림선이 흐려진다.
+#    왼쪽 칸이 자(RULER)이므로, 오른쪽은 **그 자가 닿지 않는 것**으로 대비를 세운다.
+HANDNOTE = _s(400, 210, "0 0 400 210", f"""
+<rect x="40" y="26" width="196" height="158" rx="12" stroke="{N}" stroke-width="9" fill="#fff"/>
+<g stroke="{N2}" stroke-width="7" fill="none" stroke-linecap="round">
+  <path d="M68 74c13-12 26 12 39 0s26 12 39 0 26 12 39 0"/>
+  <path d="M68 114c13-12 26 12 39 0s26 12 39 0"/>
+  <path d="M68 154c13-12 26 12 39 0"/>
+</g>
+<g stroke="{G}" stroke-width="7" fill="none" stroke-dasharray="12 10">
+  <rect x="268" y="60" width="92" height="46" rx="8"/>
+</g>
+<path d="M282 106v18M304 106v18M326 106v18M348 106v18" stroke="{G}" stroke-width="5"
+      stroke-linecap="round" stroke-dasharray="6 8"/>
+<path d="M276 138l76 46M352 138l-76 46" stroke="{O}" stroke-width="11" stroke-linecap="round"/>
+""")
+
 # ── 승인 관문
 GATE = _s(520, 400, "0 0 520 400", f"""
 <path d="M40 300h140" stroke="{N}" stroke-width="10" stroke-linecap="round"/>
@@ -302,7 +369,9 @@ CLOSED = _s(460, 400, "0 0 460 400", f"""
 <text class="lbl" x="230" y="30" text-anchor="middle">인지</text>
 <text class="lbl" x="392" y="212">판단</text>
 <text class="lbl-o" x="230" y="386" text-anchor="middle">행동</text>
-<text class="lbl-g" x="24" y="212">확인</text>
+<!-- 덱의 다른 장은 전부 「인지 → 판단 → 행동 → **다시 인지**」로 말한다.
+     여기만 「확인」이었다. 고리를 정의하는 장이라 용어가 갈리면 제일 눈에 띈다. -->
+<text class="lbl-g" x="12" y="212">다시 인지</text>
 """)
 
 # ── 전부 소프트웨어 — 화면 안의 공장
@@ -321,9 +390,11 @@ f"""</g>
 ICO_BRAIN = _i('<path d="M24 20c-9 0-15 6-15 14 0 4 2 8 5 10-2 3-3 6-3 9 0 8 6 14 14 14h6V20z"/>'
                '<path d="M52 20c9 0 15 6 15 14 0 4-2 8-5 10 2 3 3 6 3 9 0 8-6 14-14 14h-6V20z"/>'
                '<path d="M38 14v50"/>')
-ICO_TOOLS = _i('<path d="M16 60l26-26"/><path d="M40 20a12 12 0 1 0 14 14l10 10-8 8-10-10a12 12 0 0 0-6-22z"/>')
+# 도구 = 렌치. 전에는 열쇠처럼 보여 「무엇을 여는 것」으로 읽혔다.
+ICO_TOOLS = _i('<path d="M50 12a16 16 0 0 0-14 24L14 58l6 6 22-22a16 16 0 0 0 20-20l-10 10-8-8 10-10a16 16 0 0 0-4-2z"/>')
 ICO_LOOP2 = _i('<path d="M62 38a24 24 0 1 1-8-18"/><path d="M56 8v14H42"/>')
-ICO_AUTO = _i('<circle cx="38" cy="38" r="24"/><path d="M38 22v16l12 8"/><path d="M38 8v6M38 62v6M8 38h6M62 38h6"/>')
+# 자율성 = 나침반(스스로 방향을 정한다). 전에는 시계였는데 「시간」으로 읽혔다.
+ICO_AUTO = _i('<circle cx="38" cy="38" r="26"/><path d="M49 27l-7 18-18 7 7-18z"/><path d="M38 6v6M38 64v6M6 38h6M64 38h6"/>')
 ICO_FIND = _i('<circle cx="32" cy="32" r="20"/><path d="M46 46l18 18"/>')
 ICO_DIAG = _i('<path d="M20 12h36v52H20z"/><path d="M28 30h20M28 42h14"/><circle cx="52" cy="52" r="8" stroke="'+O+'"/>')
 ICO_ACT = _i('<path d="M22 12l32 26-32 26z"/>')
@@ -334,3 +405,8 @@ ICO_ROBOT = _i('<rect x="16" y="26" width="44" height="32" rx="6"/><path d="M38 
 ICO_WAIT = _i('<path d="M22 12h32M22 64h32"/><path d="M26 12c0 16 12 20 12 26s-12 10-12 26"/>'
               '<path d="M50 12c0 16-12 20-12 26s12 10 12 26"/>')
 ICO_REPORT = _i('<path d="M18 10h30l12 12v44H18z"/><path d="M48 10v12h12"/><path d="M26 38h24M26 50h16"/>')
+# 「본다」 — 전에는 세로 막대 둘(비교형 아이콘)을 썼는데 **일시정지 표시**로 읽혔다.
+ICO_EYE = _i('<path d="M6 38s12-18 32-18 32 18 32 18-12 18-32 18S6 38 6 38z"/><circle cx="38" cy="38" r="9"/>')
+# 「짚는다」 — 목록에서 한 줄을 골라 가리킨다. 슬라이더를 쓰던 자리다.
+ICO_POINT = _i('<path d="M14 16h34M14 30h34M14 44h20"/>'
+               '<path d="M46 40v16l-6-4-4 10-8-4 4-10-7-2z" stroke="' + O + '"/>')

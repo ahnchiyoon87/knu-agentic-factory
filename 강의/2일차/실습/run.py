@@ -50,6 +50,34 @@ def 데이터폴더() -> Path:
 DATA = 데이터폴더()
 
 
+def 안채운자리(모듈이름: str) -> list[str]:
+    """소스를 읽어 **속이 빈** 함수 이름을 돌려준다.
+
+    전에는 `raise NotImplementedError` 를 잡아서 판정했는데, 그 줄을 없애면서
+    학생이 「지울지 고칠지」 헷갈리던 것이 사라진 대신 판정 근거도 같이 사라졌다.
+    이제는 **설명글(docstring)과 주석 말고 실행되는 줄이 하나도 없으면** 안 채운 것으로 본다.
+
+    ※ `점검.py` 의 `_아직안채움()` 과 같은 규칙이다. 두 곳이 어긋나면 판정이 거짓말이 된다.
+    """
+    import ast
+
+    경로 = ROOT / (모듈이름.replace(".", "/") + ".py")
+    try:
+        나무 = ast.parse(경로.read_text(encoding="utf-8"))
+    except (OSError, SyntaxError):
+        return []                    # 없거나 깨진 파일은 위에서 이미 짚었다
+    빈것 = []
+    for n in ast.walk(나무):
+        if isinstance(n, ast.FunctionDef) and n.name in (
+                "window_stats", "is_anomaly", "handle_missing"):
+            몸 = [x for x in n.body
+                  if not (isinstance(x, ast.Expr) and isinstance(x.value, ast.Constant)
+                          and isinstance(x.value.value, str))]
+            if not 몸:
+                빈것.append(n.name)
+    return 빈것
+
+
 def load():
     csv = DATA / "sensor_readings_7days.csv"
     lab = DATA / "labels_rowwise.csv"
@@ -92,6 +120,18 @@ def main() -> int:
         sys.exit(f"{mod_name}.py 에 detect() 가 없습니다.\n"
                  f"  detect(values, window=60, k=3.0) 이 True/False 목록을 돌려줘야 합니다.")
 
+    # 아직 안 채운 자리가 있으면 여기서 세운다.
+    # 빈 함수는 조용히 None 을 돌려주므로 그냥 돌리면 60,480줄을 돌다가 엉뚱한 데서
+    # TypeError 로 터지고, 학생은 **자기가 안 짠 코드를 디버깅하려 든다.**
+    빈것 = 안채운자리(mod_name)
+    if 빈것:
+        번호 = {"window_stats": 1, "is_anomaly": 2, "handle_missing": 3}
+        적을것 = " · ".join(f"TODO {번호[x]}({x})" for x in 빈것)
+        print(f"\n  아직 채우지 않은 TODO 가 있습니다 — {적을것}")
+        print("  detect.py 의 「여기부터 구현합니다」 주석 아래에 씁니다.")
+        print("  어디가 왜 막혔는지 —  uv run 점검.py")
+        return 1
+
     df, labels = load()
     truth = labels.set_index(["equipment_id", "timestamp"])["is_anomaly"]
 
@@ -112,10 +152,6 @@ def main() -> int:
                 for ts, f in zip(g["timestamp"], flags):
                     if f:
                         hits[(eid, ts)] = True
-    except NotImplementedError as e:
-        print(f"\n  아직 채우지 않은 TODO 가 있습니다 — {e}")
-        print("  detect.py 의 TODO 세 군데를 채운 뒤 다시 실행하세요.")
-        return 1
     except ZeroDivisionError:
         print("\n  0 으로 나눴습니다. 표준편차가 0 인 구간을 어떻게 다룰지 정하세요 (TODO 2).")
         return 1

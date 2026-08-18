@@ -28,7 +28,7 @@ COMMAND_OF = {
 
 
 # =============================================================================
-# ★ 여기를 채우세요
+# ★ 채우는 자리
 # =============================================================================
 def to_commands(diagnosis: dict, finding: dict, cfg: dict) -> list[dict]:
     """진단이 낸 조치 제안을 '실행 가능한 명령'으로 바꾼다.
@@ -66,8 +66,16 @@ def to_commands(diagnosis: dict, finding: dict, cfg: dict) -> list[dict]:
       · 진단이 이상한 값을 줘도 여기서 걸러야 합니다. 실제 설비가 움직입니다
     ──────────────────────────────────────────────────────────────────
     """
-    # TODO: 여기를 채우세요
-    raise NotImplementedError("to_commands 를 완성하세요")
+    # ─────────────────────────────────────────────────────────
+    #  여기부터 구현합니다
+    #
+    #    · diagnosis["actions"] 를 하나씩 본다. type 이 "none" 이면 건너뛴다
+    #    · COMMAND_OF 로 실제 명령 이름을 찾는다. 모르는 type 은 버린다
+    #    · 명령마다 필요한 값을 채워 위 Returns 모양으로 담는다
+    #    · 실행할 게 없으면 빈 리스트
+    #
+    #    대응표에서 찾기   COMMAND_OF.get(kind)
+    # ─────────────────────────────────────────────────────────
 
 
 # =============================================================================
@@ -98,6 +106,9 @@ def _call(control, cmd: dict) -> dict:
 
 def run(ctx, finding: dict, diagnosis: dict) -> list[dict]:
     """명령을 만들고, 승인 관문을 거쳐, 실제로 실행한다."""
+    from agents import 확인
+    확인("to_commands")    # 안 채웠으면 여기서 멈춘다 — 「실행할 조치가 없습니다」로 위장되지 않게
+
     commands = to_commands(diagnosis, finding, ctx.cfg["act"])
     results: list[dict] = []
 

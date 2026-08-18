@@ -86,20 +86,20 @@ def main() -> int:
 
     # ------------------------------------------------------------ 1. 뼈대
     print("\n1. 뼈대 — 학생이 처음 실행했을 때")
-    import detect as skeleton
-    raised = []
-    for fn, args in ((skeleton.window_stats, ([1.0] * 70, 65, 60)),
-                     (skeleton.is_anomaly, (1.0, 0.0, 1.0, 3.0)),
-                     (skeleton.handle_missing, ([1.0, None],))):
-        try:
-            fn(*args)
-            raised.append(False)
-        except NotImplementedError:
-            raised.append(True)
-        except Exception:
-            raised.append(False)
-    check("TODO 3군데가 모두 NotImplementedError 로 막혀 있다", all(raised),
-          f"{sum(raised)}/3")
+    # 채울 자리는 `raise` 가 아니라 **주석 블록**이다. 그래서 「막혀 있는가」를
+    # 예외로 못 본다 — 빈 함수는 조용히 None 을 돌려준다. 소스를 읽어 판정한다.
+    #   (학생이 그 줄을 지울지 고칠지 판단해야 했고, 지우다 들여쓰기를 무너뜨리는 일이 잦았다)
+    import run as 실행
+    빈것 = 실행.안채운자리("detect")
+    check("채울 자리 3군데가 빈 채로 나간다 (학생이 처음 여는 상태)",
+          sorted(빈것) == sorted(["window_stats", "is_anomaly", "handle_missing"]),
+          f"{len(빈것)}/3 — {' · '.join(빈것) or '없음'}")
+    src = (ROOT / "detect.py").read_text(encoding="utf-8")
+    check("찾는 말이 정확히 세 곳만 걸린다 (`여기부터 구현합니다`)",
+          src.count("여기부터 구현합니다") == 3,
+          f"{src.count('여기부터 구현합니다')}곳")
+    check("`raise NotImplementedError` 가 남아 있지 않다 — 지울 것도 고칠 것도 없다",
+          "NotImplementedError" not in src)
 
     r = subprocess.run([sys.executable, "run.py"], capture_output=True, text=True,
                        cwd=ROOT, encoding="utf-8", errors="replace")

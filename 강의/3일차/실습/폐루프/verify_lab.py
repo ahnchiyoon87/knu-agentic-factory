@@ -78,36 +78,37 @@ def series(minutes: int, drift_c_per_hour: float = 0.0, base: float = 62.0,
 def part_template() -> None:
     print("\n1. 템플릿 — 학생이 처음 열었을 때")
 
+    import agents
     import hitl
-    from agents import actuator, detector, diagnoser
 
-    blocked = []
-    try:
-        detector.judge([62.0] * 100, {"drift_delta_c": 1.2, "min_samples": 40})
-        blocked.append(False)
-    except NotImplementedError:
-        blocked.append(True)
-    except Exception:                                              # noqa: BLE001
-        blocked.append(False)
-    for fn, args in ((diagnoser.build_prompt, ({"finding": {}, "maintenance": [],
-                                                "open_work_orders": []}, {})),
-                     (actuator.to_commands, ({}, {}, {}))):
-        try:
-            fn(*args)
-            blocked.append(False)
-        except NotImplementedError:
-            blocked.append(True)
-        except Exception:                                          # noqa: BLE001
-            blocked.append(False)
-    check("채울 자리 3곳이 NotImplementedError 로 막혀 있다", all(blocked), f"{sum(blocked)}/3")
+    # 채울 자리는 `raise` 가 아니라 **주석 블록**이다. 빈 함수는 조용히 None 을 돌려주므로
+    # 「막혀 있는가」를 예외로는 못 본다 — 등록표가 소스를 읽어 판정한다.
+    빈것 = [이름 for 이름, _파일, _역할 in agents.안채운자리()]
+    check("채울 자리 3곳이 빈 채로 나간다 (학생이 처음 여는 상태)",
+          sorted(빈것) == sorted(["judge", "build_prompt", "to_commands"]),
+          f"{len(빈것)}/3 — {' · '.join(빈것) or '없음'}")
+    for 이름, 파일, 역할 in [(n, *agents.BLANKS[n]) for n in agents.BLANKS]:
+        src = (ROOT / 파일).read_text(encoding="utf-8")
+        check(f"{역할} — 찾는 말이 한 곳만 걸리고 `raise` 가 없다 ({파일})",
+              src.count("여기부터 구현합니다") == 1 and "NotImplementedError" not in src,
+              f"{src.count('여기부터 구현합니다')}곳")
+    # 안 채운 자리를 만나면 **멈춰서 어디인지 알려 줘야** 한다.
+    # 조용히 「이상 없음」·「실행할 조치가 없습니다」로 넘어가면 학생은 자기 코드를 의심한다.
+    for 역할, 파일 in (("감지", "agents/detector.py"), ("진단", "agents/diagnoser.py"),
+                      ("조치", "agents/actuator.py")):
+        src = (ROOT / 파일).read_text(encoding="utf-8")
+        check(f"{역할} 에이전트가 자기 차례에 안 채움을 잡아 세운다", "확인(" in src)
 
     loop_src = (ROOT / "loop.py").read_text(encoding="utf-8")
     check("오케스트레이터는 완성되어 있다 — 학생은 에이전트만 채운다",
           "agents.SENSE.run" in loop_src and "agents.DIAGNOSE.run" in loop_src
           and "agents.ACT.run" in loop_src)
     # 오케스트레이터가 특정 에이전트를 import 하거나 직접 부르면 갈아 끼울 수 없다.
-    coupled = [p for p in ("from agents import", "agents.detector", "agents.diagnoser",
-                           "agents.actuator", "import detector", "import diagnoser",
+    # 잡으려는 것은 **에이전트 이름**이다. `from agents import ...` 자체는 등록표를 거치는
+    # 정상 경로라 결합이 아니다 — 통째로 막으면 등록표가 내놓는 것도 못 쓰게 된다.
+    # (`from agents import detector` 는 아래 "import detector" 에 걸린다)
+    coupled = [p for p in ("agents.detector", "agents.diagnoser", "agents.actuator",
+                           "import detector", "import diagnoser",
                            "import actuator") if p in loop_src]
     check("오케스트레이터가 에이전트를 이름으로 알지 않는다 (등록표만 본다)",
           "import agents" in loop_src and not coupled, ", ".join(coupled) or "결합 없음")
@@ -153,8 +154,9 @@ def part_detect() -> None:
     check("표본이 모자라면 판정하지 않는다", detector.judge(short, cfg) is None)
 
     # ── 실습 정상 상태 — 여기서 한 번 놓쳤다. 반드시 남겨 둘 것 ─────────────
-    # 학생은 loop.py 를 실습 내내 돌린다. 창은 계속 길어지고 드리프트는 그 안의
-    # 짧은 구간일 뿐이다. 창을 안 자르면 희석돼서 미탐이 된다.
+    # 학생은 loop.py 를 실습 내내 돌린다. 드리프트는 12분치 안의 짧은 구간일 뿐이라
+    # 최근 구간만 보지 않으면 신호가 +1.2℃ 에서 +0.5℃ 로 흐려지고,
+    # **이상이 끝난 뒤에도 그 구간이 남아 계속 울린다**(실측 — 가상 300분 뒤 +0.52℃).
     RAMP, HOLD, RISE = 240, 60, 2.0        # 가상 4h 램프 + 1h 유지, 62→64℃
 
     def steady(total: int, elapsed: int, seed: int = 7) -> list[float]:
@@ -170,9 +172,9 @@ def part_detect() -> None:
 
     long_run = steady(3000, 260)           # 25분 돌린 상태에서 드리프트가 진행 중
     v_long = detector.judge(long_run, cfg)
-    check("오래 돌려 창이 길어져도 드리프트를 잡는다 (최근 구간만 본다)",
+    check("한참 돌린 뒤에도 진행 중인 드리프트를 잡는다 (최근 구간만 본다)",
           v_long is not None,
-          v_long["detail"] if v_long else "★ 미탐 — 창을 안 자르면 여기서 걸린다")
+          v_long["detail"] if v_long else "★ 미탐 — 최근 구간만 보게 안 자르면 흐려진다")
 
     fresh = steady(400, 200)               # 갓 켠 학생 — 데이터가 얼마 없다
     check("갓 켠 학생도 잡는다 (있는 만큼으로 판정)", detector.judge(fresh, cfg) is not None)

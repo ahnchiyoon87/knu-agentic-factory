@@ -76,6 +76,21 @@
   p{ font-size:29px; line-height:1.55; color:#222; }
   p + p{ margin-top:10px; }
 
+  /* ---- 코드·명령·파일 이름 ----
+     `detect_anomaly` 가 「detect_anomal / y」로, `--열기` 가 「-- 열기」로 보이던 것을 막는다.
+     원인 둘 —
+       ① 본문 서체(가변폭)로 조판되니 `--` 뒤가 벌어져 **띄어 쓴 것처럼** 보인다.
+          초보자는 보이는 대로 친다. 그래서 명령·식별자는 고정폭으로 못 박는다.
+       ② 어절이 칸보다 길면 overflow-wrap 이 **낱말 중간에서** 끊는다.
+          식별자는 끊기면 안 되므로 이 안에서만 안 끊기게 한다.
+     넘치면 레이아웃검사가 잡는다 — 몰래 잘리는 것보다 빌드가 서는 편이 낫다. */
+  code{
+    font-family:Consolas,"D2Coding","Cascadia Mono",ui-monospace,monospace;
+    font-size:.93em; letter-spacing:0;
+    white-space:nowrap; overflow-wrap:normal; word-break:keep-all;
+  }
+  .foot code{ font-weight:700; }
+
   /* ---- 삽화 안에 박는 라벨 ----
      그림만으로 알 수 없는 것에만 붙인다.
      본문에 이미 있는 말을 라벨로 되풀이하면 같은 말을 두 번 하는 것이다. */

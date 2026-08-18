@@ -35,8 +35,9 @@ from agents.actuator import COMMAND_OF  # noqa: E402
 def judge(values: list[float | None], cfg: dict) -> dict | None:
     vals = [v for v in values if v is not None]
 
-    # 최근 것만 본다. 루프를 오래 돌릴수록 창이 길어지는데, 긴 창에서는
-    # 드리프트가 희석돼 앞뒤 평균 차이가 임계를 못 넘는다(실측: 12분 뒤 +0.50℃ 로 미탐).
+    # 최근 것만 본다. 안 자르면 신호가 +1.2℃ 에서 +0.5℃ 로 흐려지고(임계 0.4 를 겨우 넘는다),
+    # **이상이 끝나 온도가 내려간 뒤에도 그 구간이 창에 남아 계속 울린다**(실측: 300분 뒤 +0.52℃).
+    # 그러면 감속이 먹혔는지를 화면에서 확인할 수 없다.
     cap = int(cfg.get("window_samples", 300)) * 2
     vals = vals[-cap:]
 

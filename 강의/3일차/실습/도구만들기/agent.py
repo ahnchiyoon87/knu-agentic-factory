@@ -46,10 +46,10 @@ ROOT = Path(__file__).resolve().parent
 CFG = json.loads((ROOT / "config.json").read_text(encoding="utf-8"))
 
 # 내가 만든 도구를 그대로 가져온다. mcp_server.py 의 ★ 두 자리가 비어 있으면
-# 여기서 NotImplementedError 가 나고, 아래에서 사람 말로 세운다.
+# 도구가 조용히 None 을 돌려주므로, 돌리기 전에 `안채운도구()` 로 먼저 세운다.
 sys.path.insert(0, str(ROOT))
 try:
-    from mcp_server import detect_anomaly, query_equipment  # noqa: E402
+    from mcp_server import detect_anomaly, query_equipment, 안채운도구  # noqa: E402
 except SyntaxError as e:
     # 채우다 만 문법 오류 — 역추적 대신 자리를 짚어 준다.
     sys.exit(f"mcp_server.py {e.lineno}행에 문법 오류가 있습니다 — {e.msg}\n"
@@ -133,6 +133,19 @@ def _접속키() -> str:
     return ""
 
 
+def 도구확인() -> None:
+    """★ 두 자리를 채웠는가. 안 채운 채 돌리면 AI 에게 빈 결과(null)가 그대로 간다.
+
+    그러면 AI 는 「데이터가 없다」는 리포트를 그럴듯하게 써 내고, 학생은
+    **자기 도구가 비어 있다는 사실 자체를 모른 채** 오전을 넘긴다.
+    """
+    빈것 = 안채운도구()
+    if 빈것:
+        sys.exit(f"{' · '.join(빈것)} 이(가) 아직 안 채워져 있습니다.\n"
+                 "    mcp_server.py 의 「여기부터 구현합니다」 주석 아래에 씁니다.\n"
+                 "    어느 자리인지 —  uv run 점검.py")
+
+
 def 설정확인() -> None:
     안내 = ("    cd ../../../2일차/실습  →  uv run 내번호.py\n"
             "    (2일차에 이미 돌렸으면 그냥 다시 치면 됩니다. 같은 번호가 나옵니다)")
@@ -148,6 +161,7 @@ def main() -> int:
     ap.add_argument("--설비", default=None, help="특정 설비만 보라고 힌트를 줄 때 (예: EQ-03)")
     args = ap.parse_args()
 
+    도구확인()
     설정확인()
 
     지시 = args.지시
@@ -208,10 +222,6 @@ def main() -> int:
             else:
                 try:
                     결과 = fn(**인자)                     # ← 내 컴퓨터에서 실행된다
-                except NotImplementedError:
-                    print(f"\n  {이름} 이 아직 안 채워져 있습니다.", file=sys.stderr)
-                    print("  uv run 점검.py 로 어느 자리인지 확인하세요.", file=sys.stderr)
-                    return 1
                 except Exception as exc:                            # noqa: BLE001
                     결과 = {"error": f"{type(exc).__name__}: {exc}"}
 

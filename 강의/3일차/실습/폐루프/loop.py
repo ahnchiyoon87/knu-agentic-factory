@@ -40,7 +40,7 @@ except SyntaxError as _e:
     _f = Path(getattr(_e, "filename", "") or "agents/").name
     raise SystemExit(f"{_f} {_e.lineno}행에 문법 오류가 있습니다 — {_e.msg}\n"
                      f"  괄호·따옴표·들여쓰기를 그 줄에서 확인하세요.") from None
-from agents.diagnoser import DiagnoseFailed
+from agents import DiagnoseFailed          # 등록표를 거친다 — 누가 진단을 맡는지 몰라야 한다
 from control_client import DirectControl, open_control
 from factory_api import CFG, ControlLocked, FactoryAPI
 
@@ -259,6 +259,14 @@ def main() -> int:
 
     print(f"연결  {info['base_url']} · {info['tenant']} · "
           f"설비 {info['설비']}대 · 로봇 {info['로봇']}대 · 배속 x{info['배속']}")
+
+    # 어디까지 채웠는지 먼저 말해 준다. 빈 함수는 조용히 None 을 돌려주므로
+    # 안 알려 주면 「이상 없음」만 보고 자기 코드를 의심하며 시간을 쓴다.
+    빈자리 = agents.안채운자리()
+    if 빈자리:
+        print("  아직 안 채운 자리 — " +
+              " · ".join(f"{역할}({이름})" for 이름, _파일, 역할 in 빈자리))
+        print("  채운 데까지만 돌립니다. 그 자리 차례가 오면 멈추고 어디인지 알려 줍니다.")
     if not info["제어_개방"]:
         print("  제어 통로가 아직 잠겨 있습니다. 강사가 이 네임스페이스를 개방해야 합니다.",
               file=sys.stderr)
@@ -290,14 +298,16 @@ def main() -> int:
                 # 다시 겁니다」). 여기서 죽으면 그 안내가 거짓말이 된다 — 감지 상태를
                 # 유지한 채 다음 회차로 넘어간다.
                 pass
-            except NotImplementedError as exc:
+            except agents.안채움 as exc:
                 # 아직 안 채운 자리다. 학생에게 traceback 을 보여 줄 이유가 없다.
                 # 어느 파일인지는 등록표가 안다 — 여기는 모른다.
-                name = str(exc).split()[0]
-                path, role = agents.where(name)
+                path, role = agents.where(exc.이름)
                 print(f"\n아직 안 채운 자리가 있습니다 — {role} 에이전트", file=sys.stderr)
-                print(f"  {path} 의 {name}() 을 채우세요.", file=sys.stderr)
+                print(f"  {path} 의 {exc.이름}() 을 채우세요.", file=sys.stderr)
+                print("  「여기부터 구현합니다」 주석 아래에 씁니다.", file=sys.stderr)
                 print(f"  순서는 {agents.FILL_ORDER} 입니다.", file=sys.stderr)
+                print("  시간이 다 됐으면 —  uv run loop.py --열기 1"
+                      "   (1 감지 · 2 진단 · 3 조치)", file=sys.stderr)
                 return 3
             if limit and ctx.round_no >= limit:
                 break

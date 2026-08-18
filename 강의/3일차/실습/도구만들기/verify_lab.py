@@ -102,17 +102,18 @@ def main() -> int:
         # ---------------------------------------------------------- 1. 템플릿
         print("\n1. 템플릿 — 학생이 처음 열었을 때")
         import mcp_server
-        blocked = []
-        for fn in (mcp_server.detect_anomaly, mcp_server.query_equipment):
-            try:
-                fn.fn("EQ-03") if hasattr(fn, "fn") else fn("EQ-03")
-                blocked.append(False)
-            except NotImplementedError:
-                blocked.append(True)
-            except Exception:
-                blocked.append(False)
-        check("채울 자리 2곳이 NotImplementedError 로 막혀 있다", all(blocked),
-              f"{sum(blocked)}/2")
+        # 채울 자리는 `raise` 가 아니라 **주석 블록**이다. 빈 함수는 조용히 None 을
+        # 돌려주므로 「막혀 있는가」를 예외로는 못 본다 — 소스를 읽어 판정한다.
+        빈것 = mcp_server.안채운도구()
+        check("채울 자리 2곳이 빈 채로 나간다 (학생이 처음 여는 상태)",
+              sorted(빈것) == ["detect_anomaly", "query_equipment"],
+              f"{len(빈것)}/2 — {' · '.join(빈것) or '없음'}")
+        서버소스 = (ROOT / "mcp_server.py").read_text(encoding="utf-8")
+        check("찾는 말이 정확히 두 곳만 걸린다 (`여기부터 구현합니다`)",
+              서버소스.count("여기부터 구현합니다") == 2,
+              f"{서버소스.count('여기부터 구현합니다')}곳")
+        check("`--check` 가 빈 도구를 「정상」이라 하지 않는다 (조용한 실패 금지)",
+              "안채운도구()" in 서버소스 and "아직 안 채움" in 서버소스)
         check("2일차의 detect() 를 그대로 가져다 쓴다 — '내가 짠 알고리즘을 AI가 쓴다'",
               "from detect import detect" in (ROOT / "mcp_server.py").read_text(encoding="utf-8"))
         check("서버 뼈대·전송 전환은 이미 되어 있다 (학생은 본문만 채우면 된다)",

@@ -155,7 +155,7 @@
 
     <div class="칸">
       <h3>다른 고장 넣기</h3>
-      <p class="ㅅ">2일차 21장에서 스파이크·결측을 보여 줄 때. 빈 칸은 기본값이 쓰입니다.</p>
+      <p class="ㅅ">2일차 23장에서 스파이크·결측을 보여 줄 때. 빈 칸은 기본값이 쓰입니다.</p>
       <div class="줄"><label>대상</label><select id="k대상"></select></div>
       <div class="줄"><label>종류</label>
         <select id="k종류">
@@ -264,14 +264,14 @@ const 할일 = {
        return `고장 ${r.stopped}건을 멈추고 배속을 ×60 으로 되돌렸습니다`; }},
   ],
   3: [
-    {id: '3열기', ttl: '제어 열기', when: '오후 시작 — 슬라이드 30장',
+    {id: '3열기', ttl: '제어 열기', when: '오후 시작 — 슬라이드 31장',
      버튼: '제어 열기 + 배속 ×120', 색: 'b-on',
      hint: '<b>이걸 안 누르면</b> 학생 <code>loop.py</code> 가 전부 403 으로 죽습니다.',
      해라: async () => {
        await call('/api/instructor/control-lock?unlocked=true&tenant_id=*', {method: 'POST'});
        await call('/api/instructor/time-scale?scale=120', {method: 'POST'});
        return '제어를 열고 배속을 ×120 으로 올렸습니다'; }},
-    {id: '3주입', ttl: '고장 넣기', when: '전원이 loop.py 를 돌린 것을 확인한 뒤 — 슬라이드 40장',
+    {id: '3주입', ttl: '고장 넣기', when: '전원이 loop.py 를 돌린 것을 확인한 뒤 — 슬라이드 42장',
      대상: true, 버튼: '고장 넣기', 색: 'b-on',
      hint: '먼저 <b>"지금 넣습니다. 1~3분 조용한 것이 정상입니다"</b> 라고 말하세요. ' +
            '순서가 뒤집히면 학생은 영영 못 봅니다.',

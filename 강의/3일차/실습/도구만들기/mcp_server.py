@@ -238,6 +238,39 @@ def query_equipment(equipment_id: str, hours: int = 24) -> dict:
 
 
 # =============================================================================
+# 어디까지 채웠는지 보기 — 여기는 고치지 않아도 됩니다.
+# =============================================================================
+def 안채운도구() -> list[str]:
+    """아직 안 채운 도구 이름을 돌려준다.
+
+    전에는 `raise NotImplementedError` 를 잡아서 판정했는데, 그 줄을 없애면서
+    학생이 「지울지 고칠지」 헷갈리던 것이 사라진 대신 판정 근거도 같이 사라졌다.
+    이제는 **이 파일을 읽어** 설명글(docstring)과 주석 말고 실행되는 줄이
+    하나도 없으면 안 채운 것으로 본다.
+
+    안 그러면 빈 함수가 조용히 None 을 돌려주고, `--check` 는 「정상」이라 찍는다.
+    학생은 다 된 줄 알고 다음으로 넘어간다 — 조용히 실패하면 안 된다.
+
+    ※ `점검.py` 의 `_빈함수()` 와 같은 규칙이다. 두 곳이 어긋나면 판정이 거짓말이 된다.
+    """
+    import ast
+
+    빈것: list[str] = []
+    try:
+        나무 = ast.parse(Path(__file__).read_text(encoding="utf-8"))
+    except SyntaxError:
+        return []                       # 문법 오류는 부르는 쪽이 따로 짚어 준다
+    for n in ast.walk(나무):
+        if isinstance(n, ast.FunctionDef) and n.name in ("detect_anomaly", "query_equipment"):
+            몸 = [x for x in n.body
+                  if not (isinstance(x, ast.Expr) and isinstance(x.value, ast.Constant)
+                          and isinstance(x.value.value, str))]
+            if not 몸:
+                빈것.append(n.name)
+    return 빈것
+
+
+# =============================================================================
 # 실행 — 여기는 고치지 않아도 됩니다.
 # =============================================================================
 def main() -> None:
@@ -248,14 +281,20 @@ def main() -> None:
 
     if args.check:
         print(f"설정  transport={CFG['transport']} · 데이터={CFG['data_source']}")
+        빈것 = 안채운도구()
         for name, fn in (("detect_anomaly", lambda: detect_anomaly(args.equipment)),
                          ("query_equipment", lambda: query_equipment(args.equipment))):
+            # 안 채운 것을 먼저 가른다. 빈 함수는 조용히 None 을 돌려주므로
+            # 그냥 부르면 「정상」이라 찍힌다 — 학생이 다 된 줄 알고 넘어간다.
+            # 안내 문구에 **찾는 말을 그대로 쓰지 않는다.** 학생이 Ctrl+F 로 찾을 때
+            # 이 print 까지 걸려 「두 곳」이 세 곳이 된다. 채울 자리만 걸려야 한다.
+            if name in 빈것:
+                print(f"\n[{name}] 아직 안 채움 — 그 자리 주석 아래에 통으로 씁니다.")
+                continue
             try:
                 out = fn()
                 print(f"\n[{name}] 정상")
                 print(json.dumps(out, ensure_ascii=False, indent=2, default=str)[:700])
-            except NotImplementedError as e:
-                print(f"\n[{name}] 아직 안 채움 — {e}")
             except Exception as e:                       # noqa: BLE001
                 print(f"\n[{name}] 오류 — {type(e).__name__}: {e}")
         return
