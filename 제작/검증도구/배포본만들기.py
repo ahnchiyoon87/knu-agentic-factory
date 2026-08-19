@@ -9,13 +9,15 @@
   2일차/실습/ · 3일차/실습/   학생이 열고 고칠 코드
   공장/                       시뮬레이터 + DB. 학생 PC 에서 docker compose 로 돈다
   데이터/                     7일치 센서 CSV. 실습이 이걸 읽는다
-  3일차준비.py                열쇠 넣기 + 제어 열기 + 재기동을 한 명령으로
+  제어열기.py                 3일차 31장 — 제어 통로를 그 자리에서 연다
   pyproject.toml · .python-version   uv 가 보고 실습 환경을 갖춘다
 
-배포본에 비밀이 하나도 없다.
-  DB 는 각자 PC 의 컨테이너라 접속줄이 비밀이 아니고, 번호는 전원이 S01 이며,
-  AI 열쇠는 3일차 아침에 단톡방으로 따로 간다. 그래도 아래 검증 게이트는
-  그대로 돌린다 — 실수로 섞이는 것을 잡는 그물이다.
+배포본에 평문 비밀이 없다.
+  DB 는 각자 PC 의 컨테이너라 접속줄이 비밀이 아니고, 번호는 전원이 S01 이다.
+  AI 열쇠는 **캡슐(난독화)로 .env 에 미리 실려** 나간다 — 학생은 3일차에
+  아무것도 안 해도 되고, 파일을 열어 봐도 sk- 원문이 없다. 진짜 방어선은
+  예산 상한과 수업 뒤 키 삭제다(절대규칙 6). 게이트는 「캡슐이 들어 있고
+  평문은 없는가」를 본다.
 
   문서(.md)는 **하나도 안 들어간다.** 읽을 것은 드라이브의 실습가이드 PDF 하나다.
   코드 옆에 문서를 같이 두면 학생이 어느 것을 봐야 하는지부터 헷갈린다.
@@ -151,14 +153,14 @@ def 설정되돌리기(out: Path) -> None:
         도구.write_text(_json.dumps(c, ensure_ascii=False, indent=2) + "\n",
                         encoding="utf-8")
 
-    # 공장/.env — 검증이 넣은 열쇠를 비우고 제어를 잠근다 (2일차 상태로).
+    # 공장/.env — 제어를 잠그고(2일차 상태), 열쇠는 캡슐로 다시 못박는다.
     env = out / "공장" / ".env"
     if env.is_file():
         줄들 = []
         for line in env.read_text(encoding="utf-8-sig").splitlines():
             k = line.strip()
             if k.startswith("OPENAI_API_KEY="):
-                줄들.append("OPENAI_API_KEY=")
+                줄들.append(f"OPENAI_API_KEY={_캡슐()}")
             elif k.startswith("CONTROL_API_ENABLED="):
                 줄들.append("CONTROL_API_ENABLED=false")
             else:
@@ -188,6 +190,21 @@ def 학생환경() -> dict[str, str]:
             if k not in ("PYTHONUTF8", "PYTHONIOENCODING")}
 
 
+
+
+def _캡슐() -> str:
+    """강사 .env 의 OPENAI_API_KEY 를 캡슐로. 이미 캡슐이면 그대로."""
+    값 = _설정("OPENAI_API_KEY").split(",")[0].strip()
+    if not 값:
+        sys.exit("시뮬레이터 .env 에 OPENAI_API_KEY 가 없습니다 — 배포본에 실을 열쇠가 필요합니다.\n"
+                 "  키를 만들어 .env 에 넣고 다시 돌리세요 (수업 뒤 그 키를 지우면 캡슐도 죽습니다).")
+    if 값.startswith("KNU1:"):
+        return 값
+    import base64
+    from itertools import cycle
+    양념 = b"K-precision-2026-knu"          # server/app/config.py 의 _열쇠풀기 와 동일
+    엮음 = bytes(a ^ b for a, b in zip(값.encode("utf-8"), cycle(양념)))
+    return "KNU1:" + base64.urlsafe_b64encode(엮음).decode("ascii")
 
 
 def _설정(이름: str) -> str:
@@ -239,7 +256,9 @@ def 검증(out: Path) -> int:
     lab3 = out / "3일차" / "실습" / "폐루프"
     공장 = out / "공장"
 
-    강사열쇠 = _설정("OPENAI_API_KEY")     # AI 검증용 — 3일차준비.py 로 넣는다
+    # AI 열쇠는 캡슐로 .env 에 이미 실려 있다 — 검증도 그 캡슐 그대로 쓴다.
+    # 이게 곧 「학생 zip 의 캡슐이 실제로 풀려서 도는가」의 검증이기도 하다.
+    열쇠있음 = bool(_설정("OPENAI_API_KEY"))
 
     # ★ 학생 여정의 맨 처음 — 공장을 켠다. 여기서 막히면 나머지가 전부 의미 없다.
     #   학생이 치는 그 명령 그대로 (첫 실행은 빌드+DB 초기화까지라 몇 분 걸린다).
@@ -285,14 +304,10 @@ def 검증(out: Path) -> int:
         print(f"  [실패] 「이상 시작」이 안 된다 — {type(exc).__name__}")
         실패.append("이상 시작")
 
-    # 3일차 아침의 한 명령(열쇠) + 오후 31장의 한 명령(제어).
-    # 뒤의 AI 검증(agent.py·loop)이 이 열쇠를 쓰므로 여기서 미리 돌린다.
-    if 강사열쇠:
-        돌린다(out, ["3일차준비.py", 강사열쇠], "★ uv run 3일차준비.py — 아침 한 명령(열쇠)",
-               "3일차 준비 끝")
-        공장확인("3일차 전환 뒤에도 공장이 답한다")
-        돌린다(out, ["제어열기.py"], "★ uv run 제어열기.py — 31장 한 명령(제어 개방)",
-               "제어가 열렸습니다")
+    # 3일차 31장의 한 명령 — 제어 개방. 열쇠는 이미 .env 캡슐로 실려 있어
+    # 아침에 할 일이 없다 (뒤의 AI 검증이 그 캡슐로 실제 모델을 부른다).
+    돌린다(out, ["제어열기.py"], "★ uv run 제어열기.py — 31장 한 명령(제어 개방)",
+           "제어가 열렸습니다")
 
     돌린다(lab1, ["돌려보기.py"], "빈 뼈대로 돌려보기.py — 무엇을 채울지 알려 준다", "빈칸")
     돌린다(lab1, ["확인.py"], "확인.py — 어디가 막혔는지 짚어 준다", "다음에 볼 곳")
@@ -387,7 +402,7 @@ def 검증(out: Path) -> int:
     # ── 3일차 오후의 심장 — 「이상 시작」을 누르고 폐루프가 실제로 잡는가 ──
     #    학생 여정 그대로: 버튼(여기서는 같은 API) → 감지 소요(배속 x120 에서
     #    약 100초 실측) 기다림 → loop 한 바퀴. AI 진단까지 실제 모델이 돈다.
-    if 강사열쇠:
+    if 열쇠있음:
         try:
             _url.urlopen(_url.Request("http://localhost:8000/api/v1/S01/drill",
                                       method="POST"), timeout=15).read()
@@ -432,19 +447,22 @@ def 검증(out: Path) -> int:
     허용 = {("3일차/실습/폐루프/loop.py", "정답 일괄 실행법"),
            ("공장/docker-compose.yml", "DB 접속 문자열")}
 
-    # ── 공장/.env — 열쇠도 접속줄도 없어야 한다 (열쇠는 3일차 아침에 따로 간다)
+    # ── 공장/.env — 캡슐은 있어야 하고, 평문(sk-)과 접속줄은 없어야 한다
     공장env = out / "공장" / ".env"
     if not 공장env.is_file():
-        print("  [실패] ★ 공장/.env 가 없다 — 3일차준비.py 가 열쇠를 넣을 곳이 없다")
+        print("  [실패] ★ 공장/.env 가 없다 — AI 열쇠(캡슐)를 실을 곳이 없다")
         실패.append("공장/.env 없음")
     else:
         내용 = 공장env.read_text(encoding="utf-8-sig")
         if "postgres" in 내용:
             print("  [실패] ★ 공장/.env 에 DB 접속줄이 들어 있다 — 로컬 모델에서는 있을 이유가 없다")
             실패.append("접속줄 유출")
-        if not _re.search(r"^OPENAI_API_KEY=\s*$", 내용, _re.M):
-            print("  [실패] ★ 공장/.env 의 OPENAI_API_KEY 가 빈 칸이 아니다")
-            실패.append("열쇠 유출")
+        if not _re.search(r"^OPENAI_API_KEY=KNU1:", 내용, _re.M):
+            print("  [실패] ★ 공장/.env 에 열쇠 캡슐(KNU1:)이 안 실렸다 — 3일차 AI 가 통째로 빈다")
+            실패.append("캡슐 누락")
+        if "sk-" in 내용:
+            print("  [실패] ★ 공장/.env 에 평문 열쇠(sk-)가 있다 — 캡슐로만 나가야 한다")
+            실패.append("평문 열쇠 유출")
 
     샌것 = []
     for p in out.rglob("*"):
@@ -551,19 +569,21 @@ def main() -> int:
         shutil.copy2(sim / 파일, out / "공장" / 파일)
         n4 += 1
 
-    # 학생 .env — 비밀이 없다. 3일차 열쇠는 3일차준비.py 가 채운다.
+    # 학생 .env — AI 열쇠가 **캡슐로 미리** 들어간다. 학생은 3일차에 열쇠 관련 할 일이 없다.
+    #   캡슐은 난독화라 파일을 열어 봐도 sk- 원문이 없다. 수업이 끝나면 강사가
+    #   OpenAI 에서 키를 지운다 — 그 순간 zip 안의 캡슐도 죽은 열쇠다.
+    #   (수업 중 키 교체가 필요하면: 새 키로 이 스크립트를 다시 돌려 나온 .env 를
+    #    드라이브에 올리고, 학생이 공장 폴더에 덮어쓰게 한다 — 진행.md 「막히면」)
     (out / "공장" / ".env").write_text(
-        "# 공장 설정 — 손으로 고칠 일이 없습니다. 3일차 아침에\n"
-        "#   uv run 3일차준비.py sk-열쇠   한 줄이 여기를 채웁니다.\n"
-        "OPENAI_API_KEY=\n"
+        "# 공장 설정 — 손으로 고칠 일이 없습니다.\n"
+        f"OPENAI_API_KEY={_캡슐()}\n"
         "DIAGNOSE_MODEL=gpt-5.4-mini\n"
         "CONTROL_API_ENABLED=false\n"
         "RETENTION_HOURS=1\n",
         encoding="utf-8")
     n4 += 1
 
-    # 3일차의 두 명령 — 아침(열쇠 넣기 + 재기동) · 오후 31장(제어 열기)
-    shutil.copy2(특강 / "3일차준비.py", out / "3일차준비.py")
+    # 3일차 31장의 한 명령 — 제어 열기 (재기동 없이 그 자리에서)
     shutil.copy2(특강 / "제어열기.py", out / "제어열기.py")
 
     # 실습 환경 정의 — uv 가 이 둘을 보고 파이썬 3.12 와 패키지를 스스로 갖춘다.

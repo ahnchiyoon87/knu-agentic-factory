@@ -41,7 +41,7 @@ def _env_int(key: str, default: int) -> int:
 def _열쇠풀기(값: str) -> str:
     """캡슐(KNU1:...)이면 푼다. 평문(sk-...)은 그대로.
 
-    표식·양념은 tools/열쇠캡슐.py 와 같아야 한다.
+    표식·양념은 제작/검증도구/배포본만들기.py 의 _캡슐() 과 같아야 한다.
     """
     if not 값.startswith("KNU1:"):
         return 값
@@ -93,7 +93,7 @@ class Settings:
         self.control_api_enabled: bool = _env_bool("CONTROL_API_ENABLED", False)
 
         # ── AI 창구 열쇠 ─────────────────────────────────────────────────────
-        #    .env 에는 평문(sk-...)이나 **캡슐**(KNU1:... — tools/열쇠캡슐.py)이 온다.
+        #    .env 에는 평문(sk-...)이나 **캡슐**(KNU1:... — 배포본만들기가 심는다)이 온다.
         #    캡슐이면 여기(메모리)에서만 풀어 쓴다 — 학생이 .env 를 열어 봐도
         #    문자 덩어리뿐이고, 화면·로그 어디에도 평문을 찍지 않는다.
         #    (난독화이지 암호화가 아니다 — 진짜 방어선은 예산 상한 + 당일 삭제다)

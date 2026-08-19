@@ -87,13 +87,16 @@ def main() -> int:
             더러움.append(f"폐루프 access_key={c.get('access_key')!r} (기대: local-lab-key)")
         if c.get("base_url") != 기대["주소"]:
             더러움.append(f"폐루프 base_url={c.get('base_url')!r} (기대: {기대['주소']})")
-    # 공장 .env 에 열쇠가 남아 나가면 안 된다 (3일차 아침에 따로 간다)
+    # 공장 .env — 열쇠는 **캡슐(KNU1:)로 실려 있어야** 하고, 평문(sk-)은 금지다
     공장env = 랩 / "공장" / ".env"
     if 공장env.is_file():
-        for line in 공장env.read_text(encoding="utf-8-sig").splitlines():
+        내용전체 = 공장env.read_text(encoding="utf-8-sig")
+        if "sk-" in 내용전체:
+            더러움.append("공장/.env 에 평문 열쇠(sk-)가 있음 — 캡슐로만 나가야 함")
+        for line in 내용전체.splitlines():
             k = line.strip()
-            if k.startswith("OPENAI_API_KEY=") and k != "OPENAI_API_KEY=":
-                더러움.append("공장/.env 에 OPENAI_API_KEY 값이 남아 있음")
+            if k.startswith("OPENAI_API_KEY=") and not k.startswith("OPENAI_API_KEY=KNU1:"):
+                더러움.append("공장/.env 의 열쇠가 캡슐(KNU1:)이 아님")
             if k.startswith("CONTROL_API_ENABLED=") and k != "CONTROL_API_ENABLED=false":
                 더러움.append("공장/.env 의 제어가 잠금(false)이 아님")
     if 더러움:

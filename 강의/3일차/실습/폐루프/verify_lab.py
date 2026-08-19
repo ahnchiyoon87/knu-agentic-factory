@@ -261,7 +261,7 @@ def actuator_module():
 
 def part_live(base: str, tenant: str, timeout_s: float) -> None:
     """공장이 3일차 상태(제어 개방)로 켜져 있어야 한다 —
-    강사 저장소라면  강의/시뮬레이터  에서  uv run 3일차준비.py sk-열쇠  한 줄이다.
+    열쇠는 .env 에 캡슐로 실려 있고, 제어는  uv run 제어열기.py  로 연다.
     깨끗한 상태에서 재려면 먼저  docker compose down -v && docker compose up -d.
     """
     print(f"\n3. 라이브 — {base} · {tenant}")
@@ -279,7 +279,7 @@ def part_live(base: str, tenant: str, timeout_s: float) -> None:
     info = api.preflight()
     if not info["제어_개방"]:
         check("제어 통로가 열렸다 (3일차 상태)", False,
-              "잠겨 있다 — 저장소 루트에서  uv run 3일차준비.py sk-열쇠  뒤  uv run 제어열기.py")
+              "잠겨 있다 — 저장소 루트에서  uv run 제어열기.py  를 먼저 돌리세요")
         return
     check("제어 통로가 열렸다 (어제까지 잠겨 있던 그 네 개)", info["제어_개방"])
 
