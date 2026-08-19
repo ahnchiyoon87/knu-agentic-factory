@@ -37,8 +37,6 @@ from ..sim.runner import runner
 
 router = APIRouter(prefix="/api/v1", tags=["diagnose"])
 
-# 동시에 OpenAI 로 나가는 요청 수 — 39명이 몰려도 여기서 줄을 선다
-_GATE: asyncio.Semaphore | None = None
 # 테넌트별 최근 호출 시각 (분당 한도용)
 _CALLS: dict[str, deque[float]] = defaultdict(deque)
 _USED: dict[str, int] = defaultdict(int)
@@ -53,13 +51,6 @@ def _keys() -> list[str]:
     live = [k for i, k in enumerate(all_keys)
             if now - _KEY_DEAD.get(i, -1e9) > 600]
     return live or all_keys        # 전부 죽었으면 그래도 한 번은 시도한다
-
-
-def _gate() -> asyncio.Semaphore:
-    global _GATE
-    if _GATE is None:
-        _GATE = asyncio.Semaphore(get_settings().diagnose_concurrency)
-    return _GATE
 
 
 class DiagnoseReq(BaseModel):
@@ -187,8 +178,7 @@ async def diagnose(tenant_id: str, req: DiagnoseReq,
         raise HTTPException(503, "서버에 OPENAI_API_KEY 가 없습니다. 강사에게 알리세요.")
 
     _rate_check(tenant_id)
-    async with _gate():
-        out = await _ask_openai(req)
+    out = await _ask_openai(req)
 
     _USED[tenant_id] += 1
     out["backend"] = "server"

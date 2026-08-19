@@ -108,7 +108,6 @@ class Settings:
         #    진짜 sk- 키는 그 서버에만 있고 학생은 통행증 토큰만 갖는다.
         #    비워 두면 OpenAI 를 직접 부른다 (그때는 OPENAI_API_KEY 가 캡슐/평문).
         self.openai_base_url: str = _env("OPENAI_BASE_URL", "").rstrip("/")
-        self.diagnose_concurrency: int = _env_int("DIAGNOSE_CONCURRENCY", 6)
         self.diagnose_per_min: int = _env_int("DIAGNOSE_PER_MIN", 12)
         # HITL: 승인 후에만 실행할 명령. 비우면 즉시 실행.
         # 교안 3일차 10~11장은 승인 관문을 학생 오케스트레이터(폐루프)에 두므로 기본은 비활성.

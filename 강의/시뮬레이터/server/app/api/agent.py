@@ -37,7 +37,6 @@ from ..sim.runner import runner
 
 router = APIRouter(prefix="/api/v1", tags=["agent"])
 
-_GATE: asyncio.Semaphore | None = None
 _CALLS: dict[str, deque[float]] = defaultdict(deque)
 _USED: dict[str, int] = defaultdict(int)
 _KEY_TURN = itertools.count()
@@ -54,13 +53,6 @@ def _keys() -> list[str]:
     now = time.monotonic()
     live = [k for i, k in enumerate(all_keys) if now - _KEY_DEAD.get(i, -1e9) > 600]
     return live or all_keys
-
-
-def _gate() -> asyncio.Semaphore:
-    global _GATE
-    if _GATE is None:
-        _GATE = asyncio.Semaphore(get_settings().diagnose_concurrency)
-    return _GATE
 
 
 class AgentReq(BaseModel):
@@ -173,8 +165,7 @@ async def agent(tenant_id: str, req: AgentReq,
         )
 
     _rate_check(tenant_id)
-    async with _gate():
-        out = await _ask(req)
+    out = await _ask(req)
 
     _USED[tenant_id] += 1
     return out

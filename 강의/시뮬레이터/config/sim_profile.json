@@ -75,57 +75,5 @@
       "x120": "실제 0.50초마다 1분치   — 가상 4시간이 실제 2분. 적재량이 2배(약 617행/초)가 되지만 39 네임스페이스로 실측 통과했다(실패 0건 · p95 41ms). 이번 특강의 실제 운용 조건이다 — 2일차 고장 주입과 3일차 오후가 이 배속으로 돈다. 근거: docs/부하테스트_결과.md 2-3절"
     },
     "_invariant": "배속과 무관하게 샘플당 드리프트 상승폭은 0.5℃/h x 1분 = 0.00833℃ 로 7일치 CSV 와 동일하다. 이상감지 알고리즘 검증 결과가 그대로 유효하다."
-  },
-  "presets": {
-    "_comment": "프리셋 기록. 이상 파라미터는 전부 서사·7일치 데이터셋 기준값 하나뿐이다. 라이브 시연은 파라미터가 아니라 배속으로 만든다.",
-    "온도 드리프트 — 새벽 3시 EQ-03 (0.5℃/h · 4시간 · 62→64℃)": {
-      "kind": "temp_drift",
-      "equipment_id": "EQ-03",
-      "params": {
-        "slope_c_per_hour": 0.5,
-        "duration_hours": 4.0,
-        "hold_hours": 1.0
-      },
-      "suggest_time_scale": 60,
-      "note": "2일차 슬라이드 서사·7일치 CSV 와 같은 기울기. 라이브로 보려면 배속을 올린다 — x60 에서 실제 4분, x80 에서 3분. 고정 임계값 80℃ 는 끝까지 넘지 않는다."
-    },
-    "진동 스파이크 — 시연용 (알람 발생)": {
-      "kind": "vibration_spike",
-      "equipment_id": "EQ-05",
-      "params": {
-        "magnitude_mm_s": 8.0,
-        "duration_seconds": 60.0,
-        "repeat_count": 3,
-        "repeat_interval_seconds": 300.0
-      },
-      "note": "가상 1분짜리 스파이크 3회(가상 5분 간격). 순간형 이상이라 배속과 무관하게 성질이 유지된다. 화면에서 확실히 보이고 VIB_HIGH 알람이 뜬다 — ack_alarm 시연은 이쪽을 쓴다."
-    },
-    "진동 스파이크 — 미세 (z-score 로만 탐지)": {
-      "kind": "vibration_spike",
-      "equipment_id": "EQ-05",
-      "params": {
-        "magnitude_sigma": 6.0,
-        "duration_seconds": 60.0,
-        "repeat_count": 1
-      },
-      "note": "노이즈 σ=0.12 의 6배라 절대값은 +0.72mm/s. 고정 임계값 8.0 은 못 넘고 이동 윈도 z-score 로만 잡힌다. 2일차 실습 용."
-    },
-    "센서 결측 — 2시간 (7일치 CSV 데이터셋과 동일 길이)": {
-      "kind": "sensor_dropout",
-      "equipment_id": "EQ-01",
-      "params": {
-        "duration_seconds": 7200.0
-      },
-      "suggest_time_scale": 60,
-      "note": "레거시 CSV 의 EQ-01 6일차 결측과 같은 길이. 가상 2시간 = 120개 샘플이 NULL 로 빠진다. x60 에서 실제 2분. 30초(가상) 뒤 SENSOR_LOSS 알람."
-    },
-    "센서 결측 — 짧게 (2분)": {
-      "kind": "sensor_dropout",
-      "equipment_id": "EQ-01",
-      "params": {
-        "duration_seconds": 120.0
-      },
-      "note": "배속 x1 에서 실제 2분. 결측 화면 표시만 빠르게 확인할 때."
-    }
   }
 }
