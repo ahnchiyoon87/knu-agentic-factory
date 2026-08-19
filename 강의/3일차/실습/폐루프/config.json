@@ -40,9 +40,9 @@
     "auto_approve": false
   },
   "diagnose": {
-    "_comment": "진단은 강사 서버를 거칩니다. 학생 PC 에 LLM 키를 두지 않습니다.",
+    "_comment": "진단은 공장을 거칩니다. 학생 코드에 LLM 키를 두지 않습니다.",
     "backend": "server",
-    "_backend": "server = 강사 서버 중계(기본, 반드시 이걸로). rules = AI 없이 규칙 — 강사 안내가 있을 때만. openai = 내 키로 직접(이번 특강에서는 안 씀)",
+    "_backend": "server = 공장 중계(기본, 반드시 이걸로). rules = AI 없이 규칙 — 강사 안내가 있을 때만. openai = 내 키로 직접(이번 특강에서는 안 씀)",
     "max_tokens": 1500,
     "openai_key_env": "OPENAI_API_KEY",
     "openai_model": "gpt-5.4-mini",

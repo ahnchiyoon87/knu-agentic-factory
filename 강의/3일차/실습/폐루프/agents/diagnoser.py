@@ -201,9 +201,9 @@ def build_prompt(evidence: dict, cfg: dict) -> tuple[str, str]:
 def credentials(dcfg: dict) -> tuple[str, str] | None:
     """내 키로 직접 부를 수 있는지 본다 — 이번 특강에서는 쓰지 않는 예비 경로다.
 
-    진단은 **강사 서버 중계**로 확정돼 있습니다(`config.json` 의 `diagnose.backend`
-    기본값이 `"server"`). 학생 PC 에는 LLM 키를 두지 않습니다.
-    이 함수는 강사가 서버 없이 확인할 때만 쓰입니다.
+    진단은 **공장 중계**로 확정돼 있습니다(`config.json` 의 `diagnose.backend`
+    기본값이 `"server"`). 학생 코드에는 LLM 키를 두지 않습니다.
+    이 함수는 강사가 공장 없이 확인할 때만 쓰입니다.
     키 이름은 config.json 의 openai_key_env 로 바꿀 수 있습니다.
     """
     load_env_file()
@@ -245,10 +245,10 @@ def _ask_openai(key: str, system: str, user: str, dcfg: dict) -> dict:
 
 
 def _ask_server(ctx, system: str, user: str, dcfg: dict) -> dict:
-    """강사 서버를 거쳐 진단한다 — 학생 PC 에 LLM 키를 두지 않기 위한 것.
+    """공장을 거쳐 진단한다 — 학생 코드에 LLM 키를 두지 않기 위한 것.
 
-    내 접속 키로 서버에 붙고, 서버가 자기 키로 모델을 부른다.
-    프롬프트는 **내가 만든 것이 그대로** 올라간다. 서버는 중계만 한다.
+    공장에 붙으면 공장이 자기 열쇠로 모델을 부른다.
+    프롬프트는 **내가 만든 것이 그대로** 올라간다. 공장은 중계만 한다.
     """
     import httpx
 
@@ -320,7 +320,7 @@ def run(ctx, finding: dict) -> dict:
 
     backend = dcfg.get("backend", "server")
 
-    # 기본 경로 — 강사 서버 중계. 학생 PC 에 키가 없어도 된다.
+    # 기본 경로 — 공장 중계. 학생 코드에 키가 없어도 된다.
     if backend == "server":
         try:
             out = _ask_server(ctx, system, user, dcfg)

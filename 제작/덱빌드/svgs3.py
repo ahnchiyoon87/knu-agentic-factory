@@ -277,7 +277,7 @@ MANYFALSE = _s(520, 400, "0 0 520 400", f"""
 <text x="270" y="356" font-size="26" font-weight="700" fill="{N}" text-anchor="middle">그중 진짜는 몇인가</text>
 """)
 
-# ── 값이 두 군데서 온다 — 7일치 CSV 와 강사 서버
+# ── 값이 두 군데서 온다 — 7일치 CSV 와 내 공장
 #    전에는 이 장에도 MCP 연결 그림(PLUG)을 붙여 뒀는데, 그건 네 장 앞에서 이미 쓴 그림이고
 #    「어디서 가져오는가」라는 이 장의 제목을 그리지 않았다.
 TWOSRC = _s(520, 400, "0 0 520 400", f"""
@@ -287,7 +287,7 @@ TWOSRC = _s(520, 400, "0 0 520 400", f"""
 <g stroke="{O}" stroke-width="7" fill="none">
 <ellipse cx="105" cy="254" rx="72" ry="22"/>
 <path d="M33 254v54c0 12 32 22 72 22s72-10 72-22v-54"/></g>
-<text x="105" y="374" font-size="25" font-weight="700" fill="{O}" text-anchor="middle">강사 서버</text>
+<text x="105" y="374" font-size="25" font-weight="700" fill="{O}" text-anchor="middle">내 공장</text>
 <g stroke="{G}" stroke-width="4" stroke-linecap="round">
 <path d="M196 176h92M288 176l-14-10M288 176l-14 10"/>
 <path d="M196 250h92M288 250l-14-10M288 250l-14 10"/></g>

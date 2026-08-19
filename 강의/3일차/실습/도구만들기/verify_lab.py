@@ -124,13 +124,13 @@ def main() -> int:
         # ------------------------------------------------- 2. MCP 로 실제 호출
         print("\n2. MCP 서버를 띄우고 클라이언트로 붙어 본다 (참고 답안)")
 
-        # 정비 이력·작업지시는 강사 서버에서 온다. 서버가 꺼져 있으면 뒤 3항목이
+        # 정비 이력·작업지시는 내 공장(docker)에서 온다. 공장이 꺼져 있으면 뒤 3항목이
         # 「실패」로 뜨는데, 그때 강사는 템플릿이 깨진 줄 안다. 먼저 짚어 준다.
         서버 = os.environ.get("SHARED_API", "http://127.0.0.1:8000").rstrip("/")
         try:
             httpx.get(f"{서버}/api/v1/health", timeout=3).raise_for_status()
         except Exception:                                              # noqa: BLE001
-            print(f"  ※ 강사 서버({서버})가 안 켜져 있습니다.")
+            print(f"  ※ 공장({서버})이 안 켜져 있습니다.")
             print("     정비 이력·작업지시를 못 읽어 아래 3항목이 실패로 나옵니다.")
             print("     템플릿 문제가 아닙니다 — 서버를 켜고 다시 돌리세요:")
             print("       cd 특강/시뮬레이터 && uv run python -m server.run")

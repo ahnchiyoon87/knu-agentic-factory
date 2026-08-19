@@ -13,9 +13,9 @@
 
     ③~⑤ 를 도는 것이 오늘 오전에 배운 **ReAct** 다.
 
-키는 내 컴퓨터에 없다
-    AI 호출은 강사 서버가 중계한다. 나는 내 접속 키로 서버에 붙을 뿐이다.
-    도구는 내 컴퓨터에서 돌고, 서버는 「어느 도구를 부를지」만 전달한다.
+키는 내 코드에 없다
+    AI 호출은 공장이 중계한다. 나는 공장에 붙을 뿐이다.
+    도구는 내 컴퓨터에서 돌고, 공장은 「어느 도구를 부를지」만 전달한다.
 """
 
 from __future__ import annotations
@@ -92,7 +92,7 @@ except SyntaxError as e:
 
 
 def _서버() -> str:
-    """강사 서버 주소. mcp_server.py 와 같은 규칙으로 찾는다(환경변수가 우선)."""
+    """공장 주소. mcp_server.py 와 같은 규칙으로 찾는다(환경변수가 우선)."""
     import os
     return str(os.environ.get("SHARED_API") or CFG["fallback"]["shared_api"]).rstrip("/")
 
