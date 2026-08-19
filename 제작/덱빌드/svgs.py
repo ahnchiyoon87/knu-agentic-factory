@@ -426,7 +426,7 @@ ALLRUN = _s(540, 380, "0 0 540 380", f"""
 <g fill="{O}">""" +
 "".join(f'<rect x="{58+ i%4*126}" y="{158+ i//4*130}" width="{40+ (i*7)%36}" height="9" rx="4"/>'
         for i in range(8)) + f"""</g>
-<text class="lbl-o" x="270" y="356" text-anchor="middle">39개 화면</text>
+<text class="lbl-o" x="270" y="356" text-anchor="middle">모두의 화면</text>
 """)
 
 # ── 열린 고리 (누가 판단하나)
@@ -465,6 +465,8 @@ ICO_SCREEN= _i('<rect x="8" y="14" width="60" height="40" rx="5"/><path d="M26 6
 ICO_CODE  = _i('<path d="M26 22L10 38l16 16"/><path d="M50 22l16 16-16 16"/><path d="M42 16L34 60" stroke="'+O+'"/>')
 ICO_BAL   = _i('<path d="M38 14v46M22 60h32"/><path d="M12 26h52"/>'
                '<path d="M12 26l-6 16h12z" stroke="'+O+'"/><path d="M64 26l-6 16h12z"/>')
+ICO_SHIELD= _i('<path d="M38 8l24 9v18c0 15-10 26-24 32C24 61 14 50 14 35V17z"/>'
+               '<path d="M28 38l7 7 14-15" stroke="'+O+'"/>')
 ICO_PICK  = _i('<path d="M14 20h34l14 14v22H14z"/><path d="M48 20v14h14" stroke="'+O+'"/>')
 ICO_WRITE = _i('<path d="M12 58h52"/><path d="M20 46l4-12 22-22 8 8-22 22z"/>')
 # 번호 하나로 내 공장을 되찾는다 — ICO_PIN 은 「그래프가 든 판」이라 이 뜻이 안 산다
