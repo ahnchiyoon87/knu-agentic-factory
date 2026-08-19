@@ -107,11 +107,12 @@ blockquote { border-left: 4px solid #f0a500; background: #fffaf0; margin: 16px 0
 blockquote p { margin: 5px 0; }
 
 /* 세로로 긴 캡처가 쪽에 안 들어가면 통째로 다음 쪽에 밀려 큰 공백이 남는다 —
-   높이를 눌러 밀림 자체를 줄이고, 설명 글귀는 그림과 같은 쪽에 붙인다. */
+   높이를 눌러 밀림 자체를 줄인다. 사진+설명은 figure 한 덩어리라
+   쪽 경계에서 서로 갈라지지 않는다. */
+figure { margin: 14px 0 18px; page-break-inside: avoid; break-inside: avoid; }
 img { max-width: 100%; max-height: 90mm; border: 1px solid #c9d2dc;
-      border-radius: 6px; margin: 14px 0 4px;
-      page-break-inside: avoid; page-break-after: avoid; }
-.cap { font-size: 9pt; color: #5a6672; margin: 0 0 18px; }
+      border-radius: 6px; margin: 0 0 4px; display: block; }
+.cap { font-size: 9pt; color: #5a6672; margin: 0; }
 
 /* 작은 단계 ①②③ — 상자를 없앤다. 숨 막히던 원인이 이것이다.
    왼쪽에 짧은 막대 하나만 두고 글씨로 승부한다. */
@@ -240,9 +241,10 @@ md: str, 제목: str, 기준폴더: Path | None = None) -> str:
             if not 경로.is_file():
                 raise SystemExit(f"안내문이 가리키는 그림이 없습니다: {경로}\n"
                                  f"  (원본 캡처를 제작/빌드도구/그림표시.py 로 만들어 두세요)")
-            out.append(f'<img src="{경로.as_uri()}" alt="{html.escape(설명)}">')
-            if 설명:
-                out.append(f'<div class="cap">{html.escape(설명)}</div>')
+            # 사진과 설명 글귀는 한 덩어리 — 쪽 경계에서 따로 갈라지면 안 된다.
+            꼬리 = f'<div class="cap">{html.escape(설명)}</div>' if 설명 else ""
+            out.append(f'<figure><img src="{경로.as_uri()}" '
+                       f'alt="{html.escape(설명)}">{꼬리}</figure>')
             i += 1
             continue
 
@@ -317,11 +319,15 @@ md: str, 제목: str, 기준폴더: Path | None = None) -> str:
             out.append("<ul>" + "".join(f"<li>{인라인(x)}</li>" for x in buf) + "</ul>")
             continue
         elif re.match(r"^\s*\d+\.\s+", line):
+            # 항목 사이에 사진이 끼면 목록이 여기서 끊겼다 다시 시작한다 —
+            # 원문의 숫자를 살려야 「2. 3. 4.」가 전부 「1.」로 리셋되지 않는다.
+            첫숫자 = int(re.match(r"^\s*(\d+)\.", line).group(1))
             buf = []
             while i < len(줄들) and re.match(r"^\s*\d+\.\s+", 줄들[i]):
                 buf.append(re.sub(r"^\s*\d+\.\s+", "", 줄들[i]))
                 i += 1
-            out.append("<ol>" + "".join(f"<li>{인라인(x)}</li>" for x in buf) + "</ol>")
+            시작 = f' start="{첫숫자}"' if 첫숫자 != 1 else ""
+            out.append(f"<ol{시작}>" + "".join(f"<li>{인라인(x)}</li>" for x in buf) + "</ol>")
             continue
         # ── 「안 되면」 카드 ──────────────────────────────────────────────
         #    **화면에 뜬 문구**

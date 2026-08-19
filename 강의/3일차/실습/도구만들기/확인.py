@@ -100,7 +100,7 @@ def 검사_설정() -> tuple[bool, list[str]]:
     # 둘 다 실습 저장소에 미리 채워져 옵니다. 학생이 손으로 적을 값이 아닙니다.
     if not api.strip() or not ten.strip():
         ok = False
-        msg.append("공장 주소와 번호가 비어 있습니다. 이 값은 미리 채워져 옵니다 —")
+        msg.append("공장 주소가 비어 있습니다. 이 값은 미리 채워져 옵니다 —")
         msg.append("    지웠거나 고쳤으면 실습 저장소를 다시 내려받으세요. 안 되면 손 드세요.")
     else:
         if not api.startswith("http"):
@@ -129,7 +129,7 @@ def 검사_설정() -> tuple[bool, list[str]]:
                            "공장 폴더에서  docker compose down -v  뒤  docker compose up -d  로 "
                            "초기화하세요 — 여기가 비면 원인 추정이 안 나옵니다.")
             else:
-                msg.append(f"공장 {api} · 번호 {ten} · 정비 이력 확인")
+                msg.append(f"내 공장 {api} · 정비 이력 확인")
         except Exception as exc:                                 # noqa: BLE001
             ok = False
             msg.append(f"공장에 못 닿습니다 — {type(exc).__name__}. "
