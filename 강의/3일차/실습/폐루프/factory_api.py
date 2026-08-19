@@ -23,7 +23,7 @@ CFG = json.loads((ROOT / "config.json").read_text(encoding="utf-8"))
 
 
 class ControlLocked(RuntimeError):
-    """제어 API 가 아직 잠겨 있습니다(403). 강사가 제어를 개방해야 합니다."""
+    """제어 API 가 아직 잠겨 있습니다(403). 열 차례가 되면 제어열기.py 로 엽니다."""
 
 
 class FactoryAPI:

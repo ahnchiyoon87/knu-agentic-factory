@@ -16,7 +16,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-기본서버 = "http://34.64.94.16:8000"
+기본서버 = "http://localhost:8000"
 나갈폴더 = Path(__file__).resolve().parents[2] / "강의" / "그림" / "실습"
 
 

@@ -107,7 +107,7 @@ def 장면_detect() -> None:
     강조 = next(i for i, l in enumerate(줄들) if l.strip().startswith("mean = ...")) + 1
     그리기("K-PRECISION-LAB",
           [(1, "2일차/", False), (2, "실습/", False), (3, "데이터/", False),
-           (3, "정답/", False), (3, "detect.py", True), (3, "내번호.py", False),
+           (3, "정답/", False), (3, "detect.py", True), (3, "돌려보기.py", False),
            (3, "돌려보기.py", False), (3, "확인.py", False), (1, "3일차/", False)],
           "detect.py", 조각, 시작 + 1, 강조, "실습_2_detect열기.png")
 
