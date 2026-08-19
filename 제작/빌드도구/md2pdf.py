@@ -56,7 +56,10 @@ h2 { font-size: 15.5pt; color: #14335e; letter-spacing: -.01em;
      margin: 40px 0 16px; padding: 15px 0 0;
      border-top: 2.5px solid #1b4b8f; }
 
-h3 { font-size: 12pt; margin: 26px 0 9px; color: #24405f; }
+h3 { font-size: 12pt; margin: 34px 0 10px; color: #24405f; }
+
+/* 소단계 문단 — `**1. …**` 시작. 위를 띄워 단계 경계가 지면에서 보인다. */
+p.nstep { margin-top: 30px; }
 
 p  { margin: 11px 0; }
 ul, ol { margin: 11px 0; padding-left: 25px; }
@@ -103,8 +106,11 @@ blockquote { border-left: 4px solid #f0a500; background: #fffaf0; margin: 16px 0
              padding: 11px 16px; page-break-inside: avoid; }
 blockquote p { margin: 5px 0; }
 
-img { max-width: 100%; border: 1px solid #c9d2dc; border-radius: 6px;
-      margin: 14px 0 4px; page-break-inside: avoid; }
+/* 세로로 긴 캡처가 쪽에 안 들어가면 통째로 다음 쪽에 밀려 큰 공백이 남는다 —
+   높이를 눌러 밀림 자체를 줄이고, 설명 글귀는 그림과 같은 쪽에 붙인다. */
+img { max-width: 100%; max-height: 90mm; border: 1px solid #c9d2dc;
+      border-radius: 6px; margin: 14px 0 4px;
+      page-break-inside: avoid; page-break-after: avoid; }
 .cap { font-size: 9pt; color: #5a6672; margin: 0 0 18px; }
 
 /* 작은 단계 ①②③ — 상자를 없앤다. 숨 막히던 원인이 이것이다.
@@ -284,8 +290,23 @@ md: str, 제목: str, 기준폴더: Path | None = None) -> str:
             while i < len(줄들) and 줄들[i].startswith(">"):
                 buf.append(줄들[i].lstrip(">").strip())
                 i += 1
+            # 원본에서 보기 좋게 줄바꿈한 자리가 문단 나눔이 되면 안 된다 —
+            # 빈 `>` 줄에서만 문단을 가르고, 이어지는 줄은 한 문단으로 붙인다.
+            문단들: list[str] = []
+            모음: list[str] = []
+            for x in buf:
+                if x and not x.startswith(("-", "→")):
+                    모음.append(x)
+                    continue
+                if 모음:
+                    문단들.append(" ".join(모음))
+                    모음 = []
+                if x:
+                    문단들.append(x)
+            if 모음:
+                문단들.append(" ".join(모음))
             out.append("<blockquote>"
-                       + "".join(f"<p>{인라인(x)}</p>" for x in buf if x)
+                       + "".join(f"<p>{인라인(x)}</p>" for x in 문단들)
                        + "</blockquote>")
             continue
         elif re.match(r"^\s*[-*]\s+", line):
@@ -342,7 +363,11 @@ md: str, 제목: str, 기준폴더: Path | None = None) -> str:
             while i < len(줄들) and 줄들[i].strip() and not 특수한줄(줄들[i]):
                 묶음.append(줄들[i].strip())
                 i += 1
-            out.append(f"<p>{인라인(' '.join(묶음))}</p>")
+            # `**1. …**` 로 시작하는 문단은 큰 단계의 소단계다 — 위를 띄워
+            # 어디서 새 단계가 시작되는지 지면에서 보이게 한다.
+            칸이름 = "nstep" if re.match(r"\*\*\d+\.", 묶음[0]) else ""
+            붙임 = f' class="{칸이름}"' if 칸이름 else ""
+            out.append(f"<p{붙임}>{인라인(' '.join(묶음))}</p>")
             continue
         elif line.strip():
             out.append(f"<p>{인라인(line)}</p>")
