@@ -1,10 +1,24 @@
-"""구글드라이브에 올릴 폴더를 통째로 만든다 — 강사는 드래그해서 올리기만 한다.
+"""최종본을 만든다 — 드라이브에 올릴 폴더 하나.
 
     python 드라이브폴더만들기.py
 
-왜 이 도구가 있나
-    학생이 보는 곳은 드라이브 폴더 **하나**다. 손으로 모으면 반드시 하나를 빠뜨리고,
-    자료를 고친 뒤 다시 올릴 때 옛 파일이 섞인다. 항상 여기서 다시 뽑는다.
+산출물은 이렇게 놓인다. **압축을 풀 일이 없다.**
+
+    제작/산출물/
+        경남대 AI 특강 (8월)/       ← 이게 최종본. 통째로 드라이브에 끌어다 놓는다
+        경남대 AI 특강 (8월).zip    ← 위 폴더를 압축한 것. 옮길 일이 있을 때만
+        k-precision-lab/            ← 학생 실습파일이 **풀린 채로**. 여기서 고치고 본다
+
+왜 이렇게 두나
+    전에는 zip 만 남기고 폴더를 지웠다. 그래서 한 줄 고칠 때마다 **확인하려고 zip 을
+    풀어야 했고**, 그 안에 실습 zip 이 또 들어 있어 두 번 풀어야 했다.
+    이제 풀린 것이 정본이고 zip 은 그 그림자다 — 이 스크립트를 돌리면 같이 바뀐다.
+
+    학생 실습파일을 최종본 **안**이 아니라 옆에 두는 이유 — 최종본은 통째로 올라간다.
+    풀린 폴더가 그 안에 있으면 학생이 zip 과 폴더 둘을 보고 어느 것을 받을지 헷갈린다.
+
+    강사가 볼 가이드 PDF 도 최종본 안의 것 하나뿐이다. 전에는 저장소 루트에도 따로 뽑아서
+    같은 문서가 두 곳에서 각각 만들어졌고, 어느 것이 최신인지가 매번 생겼다.
 
 무엇이 들어가나 — **학생이 읽을 것만**
     강사 문서(진행.md·핸드오프·운영.md)와 제작·검증 도구는 들어가지 않는다.
@@ -34,12 +48,15 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent          # 제작/빌드도구/
 REPO = ROOT.parents[1]                          # 경남대특강/ (저장소 루트)
-OUT = REPO / "제작" / "산출물" / "드라이브업로드" / "경남대 AI 특강 (8월)"
+산출물 = REPO / "제작" / "산출물"
+OUT = 산출물 / "경남대 AI 특강 (8월)"     # ← 이 폴더가 곧 최종본이다. 통째로 올린다
+실습원본 = 산출물 / "k-precision-lab"      # ← 풀린 채로 사는 학생 실습파일. 여기서 고친다
 
 
 def main() -> int:
-    if not (REPO / "제작" / "산출물" / "배포본" / "k-precision-lab").is_dir():
-        print("  배포본이 없습니다 — 먼저  python 배포본만들기.py --검증", file=sys.stderr)
+    if not 실습원본.is_dir():
+        print(f"  실습파일이 없습니다 — {실습원본}", file=sys.stderr)
+        print("  먼저  python 제작/검증도구/배포본만들기.py --검증", file=sys.stderr)
         return 1
 
     # ── 남의 번호·주소가 박힌 채 나가지 않는지 ─────────────────────────────
@@ -47,7 +64,7 @@ def main() -> int:
     #    그대로 39명에게 나가면 **안 돌린 학생이 조용히 그 값으로 진행한다.**
     #    (S01 은 실재하는 남의 번호다. 실제로 이 상태로 zip 이 한 번 나갔다.)
     import json as _json
-    랩 = REPO / "제작" / "산출물" / "배포본" / "k-precision-lab"
+    랩 = 실습원본
     더러움: list[str] = []
     도구 = 랩 / "3일차" / "실습" / "도구만들기" / "config.json"
     if 도구.is_file():
@@ -71,13 +88,12 @@ def main() -> int:
         shutil.rmtree(OUT)
     OUT.mkdir(parents=True)
 
-    # ── 실습 ZIP — 드라이브 폴더 안에 **직접** 만든다 ─────────────────────
-    #    전에는 산출물/ 루트에 만들어 복사했는데, 같은 ZIP 이 두 곳에 남아
-    #    「어느 것이 최신인가」가 생겼다. ZIP 은 여기 하나뿐이다.
+    # ── 실습 ZIP — 옆에 풀려 있는 그 폴더를 그대로 압축한다 ────────────────
+    #    학생은 zip 을 받아 풀어서 VS Code 로 연다(준비안내 ③). 그래서 zip 은 없앨 수 없다.
+    #    대신 **풀린 것이 정본**이고 이 zip 은 그 그림자라, 고친 것이 반드시 따라온다.
     zip_dst = OUT / "2. 실습 파일 (k-precision-lab)"
     shutil.make_archive(str(zip_dst), "zip",
-                        root_dir=str(REPO / "제작" / "산출물" / "배포본"),
-                        base_dir="k-precision-lab")
+                        root_dir=str(산출물), base_dir=실습원본.name)
     print("  담음  2. 실습 파일 (k-precision-lab).zip  (배포본에서 새로 압축)")
 
     # ── 학생이 읽는 것 — 문서는 PDF 로 낸다 ──────────────────────────────
@@ -118,8 +134,10 @@ def main() -> int:
         if not deck.is_file():
             deck = 자료 / "슬라이드.pptx"
         if not deck.is_file():
+            # 옛 이름(`pptx편집본만들기.py`)을 안내하던 자리다. 그 파일은 없어졌고
+            # 지금 pptx 를 만드는 것은 `편집pptx.py` 하나뿐이다.
             print(f"  [빠짐] {자료} 에 슬라이드가 없습니다 — "
-                  f"먼저  python pptx편집본만들기.py", file=sys.stderr)
+                  f"먼저  python 편집pptx.py {일차}", file=sys.stderr)
             return 1
         shutil.copyfile(deck, 강의자료 / f"{일차} 슬라이드.pptx")
         print(f"  담음  5. 강의 자료/{일차} 슬라이드.pptx")
@@ -144,16 +162,22 @@ def main() -> int:
     개수 = sum(1 for p in OUT.rglob("*") if p.is_file())
     print(f"\n  강사 것·정답은 섞이지 않았습니다 (검사 통과)")
 
-    # ── ZIP 하나만 남긴다 — 폴더는 지운다 (강사가 풀어서 통째로 업로드) ────
-    zip_path = REPO / "제작" / "산출물" / "드라이브업로드"
-    shutil.make_archive(str(zip_path), "zip",
-                        root_dir=str(OUT.parent), base_dir=OUT.name)
-    shutil.rmtree(OUT.parent)
-    print("=" * 66)
-    print(f"  {zip_path}.zip")
-    print("=" * 66)
-    print(f"  안에 파일 {개수}개 · {총 / 1024 / 1024:.1f}MB")
-    print("\n  이 ZIP 을 풀어 나온 폴더를 **통째로** 구글드라이브에 끌어다 놓으세요.")
+    # ── 폴더는 남긴다. 옮길 일이 있을 때만 쓰라고 zip 도 하나 만들어 둔다 ──
+    #    전에는 zip 만 남기고 폴더를 지워서, 한 줄 고칠 때마다 zip 을 풀어야 했다.
+    zip_path = OUT.with_suffix(".zip")
+    shutil.make_archive(str(OUT), "zip", root_dir=str(산출물), base_dir=OUT.name)
+    print("=" * 70)
+    print("  최종본")
+    print("=" * 70)
+    print(f"  올릴 폴더   {OUT}")
+    print(f"              파일 {개수}개 · {총 / 1024 / 1024:.1f}MB")
+    print(f"  통째로 옮길 때만   {zip_path.name}")
+    print()
+    print(f"  실습파일 고칠 곳   {실습원본}")
+    print("              풀린 채로 있습니다. 여기서 고치고 이 스크립트를 다시 돌리면")
+    print("              위 폴더의 실습 ZIP 이 그대로 다시 만들어집니다.")
+    print()
+    print("  드라이브에는 **올릴 폴더**를 통째로 끌어다 놓으세요.")
     print("  공유는 「링크가 있는 모든 사용자 — 뷰어」로 둡니다.")
     print("\n  ※ 실습 ZIP 안에는 정답(`정답/`)이 일부러 들어 있습니다 — `--정답` 가 읽습니다.")
     return 0

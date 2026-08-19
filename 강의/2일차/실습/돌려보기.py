@@ -155,11 +155,11 @@ def main() -> int:
                     if f:
                         hits[(eid, ts)] = True
     except ZeroDivisionError:
-        print("\n  0 으로 나눴습니다. 표준편차가 0 인 구간을 어떻게 다룰지 정하세요 (빈칸 2).")
+        print("\n  0 으로 나눴습니다. 표준편차가 0 인 구간을 어떻게 다룰지 정하세요 (빈칸 3).")
         return 1
     except TypeError as e:
         print(f"\n  값이 없는 자리(None)를 계산에 넣은 것 같습니다 — {e}")
-        print("  결측 처리를 먼저 정하세요 (빈칸 3).")
+        print("  결측 처리를 먼저 정하세요 (빈칸 5).")
         return 1
     elapsed = time.time() - t0
 

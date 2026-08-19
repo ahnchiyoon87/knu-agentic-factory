@@ -1,0 +1,447 @@
+<title>VM 한 대와 240명</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@600;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+
+<style>
+  /* ── 색 — 저장소가 이미 쓰는 남색·주황을 그대로 이어받는다 ───────────────
+        슬라이드(_기준판.css)와 학생 PDF(md2pdf.py)가 쓰는 값이라,
+        보고서만 다른 색을 쓰면 같은 프로젝트로 안 보인다.                   */
+  :root{
+    --ground:#f6f7f9;
+    --panel:#ffffff;
+    --panel-2:#eef1f5;
+    --line:#dde3ea;
+    --line-soft:#e9edf2;
+    --ink:#16202c;
+    --ink-2:#4a5765;
+    --ink-3:#77828f;
+    --navy:#14335e;
+    --navy-2:#1b4b8f;
+    --amber:#c9821a;
+    --amber-soft:#fdf6e9;
+    --good:#2f7d4f;
+    --shadow:0 1px 2px rgba(20,51,94,.05), 0 8px 24px rgba(20,51,94,.05);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#0e1319;
+      --panel:#151c25;
+      --panel-2:#1b242f;
+      --line:#27323e;
+      --line-soft:#212b36;
+      --ink:#e5ebf2;
+      --ink-2:#a9b5c2;
+      --ink-3:#7c8896;
+      --navy:#9fc2f0;
+      --navy-2:#7fb0ee;
+      --amber:#e5a94b;
+      --amber-soft:#241d10;
+      --good:#5fbe86;
+      --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.28);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#0e1319;
+    --panel:#151c25;
+    --panel-2:#1b242f;
+    --line:#27323e;
+    --line-soft:#212b36;
+    --ink:#e5ebf2;
+    --ink-2:#a9b5c2;
+    --ink-3:#7c8896;
+    --navy:#9fc2f0;
+    --navy-2:#7fb0ee;
+    --amber:#e5a94b;
+    --amber-soft:#241d10;
+    --good:#5fbe86;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.28);
+  }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    background:var(--ground);
+    color:var(--ink);
+    font-family:"Noto Sans KR","Malgun Gothic","맑은 고딕",system-ui,sans-serif;
+    font-size:16.5px;
+    line-height:1.85;
+    word-break:keep-all;
+    overflow-wrap:break-word;
+  }
+
+  .wrap{max-width:980px;margin:0 auto;padding:0 24px 96px}
+
+  /* ── 표제 ─────────────────────────────────────────────────────────── */
+  header{
+    padding:64px 0 40px;
+    border-bottom:3px solid var(--navy);
+    margin-bottom:44px;
+  }
+  .eyebrow{
+    font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--ink-3);margin:0 0 14px;
+  }
+  h1{
+    font-family:"Noto Serif KR","Noto Sans KR",serif;
+    font-weight:700;font-size:clamp(30px,4.4vw,46px);line-height:1.28;
+    letter-spacing:-.02em;margin:0 0 18px;color:var(--navy);
+    text-wrap:balance;
+  }
+  .lede{font-size:18px;color:var(--ink-2);margin:0;max-width:64ch}
+
+  /* ── 결정 세 줄 ────────────────────────────────────────────────────── */
+  .decisions{
+    display:grid;gap:1px;background:var(--line);
+    border:1px solid var(--line);border-radius:12px;overflow:hidden;
+    margin:0 0 52px;
+  }
+  @media(min-width:760px){ .decisions{grid-template-columns:repeat(3,1fr)} }
+  .decision{background:var(--panel);padding:22px 24px}
+  .decision .k{
+    font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-size:11.5px;letter-spacing:.12em;color:var(--ink-3);
+    text-transform:uppercase;margin:0 0 8px;
+  }
+  .decision .v{font-size:20px;font-weight:700;color:var(--ink);margin:0 0 6px;line-height:1.4}
+  .decision .n{font-size:14px;color:var(--ink-2);margin:0;line-height:1.7}
+
+  /* ── 절 ───────────────────────────────────────────────────────────── */
+  section{margin:0 0 56px}
+  h2{
+    font-family:"Noto Serif KR","Noto Sans KR",serif;
+    font-size:25px;font-weight:700;color:var(--navy);
+    letter-spacing:-.015em;margin:0 0 6px;padding-top:26px;
+    border-top:2px solid var(--navy-2);text-wrap:balance;
+  }
+  .sub{color:var(--ink-3);font-size:15px;margin:0 0 26px}
+  p{margin:0 0 16px;max-width:68ch}
+  /* 색은 토큰만 참조한다 — 미디어쿼리 안에서 색을 직접 정하면
+     테마가 안 찍힌 기본 상태에서 한쪽 색이 통째로 빠진다. */
+  strong{color:var(--navy);font-weight:700}
+
+  /* ── 계기판 ───────────────────────────────────────────────────────── */
+  .gauges{
+    display:grid;gap:14px;margin:0 0 26px;
+    grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+  }
+  .gauge{
+    background:var(--panel);border:1px solid var(--line);
+    border-radius:12px;padding:20px 22px;box-shadow:var(--shadow);
+  }
+  .gauge .num{
+    font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-variant-numeric:tabular-nums;
+    font-size:32px;font-weight:600;color:var(--navy-2);
+    line-height:1.15;margin:0 0 4px;letter-spacing:-.02em;
+  }
+  .gauge .num small{font-size:16px;font-weight:400;color:var(--ink-3);margin-left:2px}
+  .gauge .lab{font-size:14px;color:var(--ink-2);margin:0;line-height:1.6}
+
+  /* ── 표 ───────────────────────────────────────────────────────────── */
+  .scroll{overflow-x:auto;margin:0 0 22px;
+          border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+  table{border-collapse:collapse;width:100%;font-size:15px;min-width:520px}
+  th{
+    background:var(--panel-2);color:var(--navy);text-align:left;
+    font-weight:700;font-size:13.5px;letter-spacing:.02em;
+    padding:12px 18px;border-bottom:1px solid var(--line);white-space:nowrap;
+  }
+  td{padding:12px 18px;border-bottom:1px solid var(--line-soft);vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  td.n{font-family:"IBM Plex Mono",ui-monospace,monospace;
+       font-variant-numeric:tabular-nums;white-space:nowrap}
+  .ok{color:var(--good);font-weight:700}
+
+  /* ── 목록 ─────────────────────────────────────────────────────────── */
+  ul{margin:0 0 18px;padding:0;list-style:none;max-width:68ch}
+  li{position:relative;padding-left:20px;margin:0 0 11px}
+  li::before{
+    content:"";position:absolute;left:2px;top:.72em;
+    width:6px;height:6px;border-radius:1px;background:var(--amber);
+  }
+  li b{color:var(--ink);font-weight:700}
+
+  /* ── 짚고 넘어갈 칸 ───────────────────────────────────────────────── */
+  .note{
+    background:var(--amber-soft);border-left:4px solid var(--amber);
+    border-radius:0 8px 8px 0;padding:16px 20px;margin:0 0 22px;
+  }
+  .note p{margin:0;max-width:64ch}
+  .note p + p{margin-top:10px}
+
+  /* ── 남은 일 ──────────────────────────────────────────────────────── */
+  .todo{display:grid;gap:12px;margin:0 0 8px}
+  .todo .row{
+    display:flex;gap:16px;align-items:flex-start;
+    background:var(--panel);border:1px solid var(--line);
+    border-radius:10px;padding:16px 20px;
+  }
+  .todo .who{
+    flex:none;font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-size:11.5px;letter-spacing:.08em;color:var(--ink-3);
+    border:1px solid var(--line);border-radius:999px;padding:3px 11px;
+    margin-top:3px;white-space:nowrap;
+  }
+  .todo .what{margin:0;font-size:15px;line-height:1.7}
+  .todo .what b{display:block;color:var(--ink);margin-bottom:2px}
+
+  code{
+    font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-size:.88em;background:var(--panel-2);
+    padding:1.5px 6px;border-radius:4px;color:var(--navy);
+  }
+
+  footer{
+    margin-top:64px;padding-top:22px;border-top:1px solid var(--line);
+    color:var(--ink-3);font-size:13.5px;
+  }
+  footer p{margin:0 0 6px;max-width:none}
+</style>
+
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">경남대 RISE 피지컬AI 사관학교 · 8월 특강 · 2·3일차</p>
+  <h1>서버를 쿠버네티스에서<br>가상 서버 한 대로 바꿨습니다</h1>
+  <p class="lede">클러스터는 켜 두는 것만으로 돈이 나갑니다. 이 수업에 그만한 것이 필요한지
+     실제로 재 봤고, <strong>한 대로 충분하다는 답</strong>이 나왔습니다. 구글 클라우드는 그대로 씁니다 —
+     그 위에 올리는 것을 바꾼 것뿐입니다.</p>
+</header>
+
+<div class="decisions">
+  <div class="decision">
+    <p class="k">무엇을 바꿨나</p>
+    <p class="v">클러스터 → 서버 한 대</p>
+    <p class="n">구글 클라우드의 가상 서버(VM) 하나에 수업 서버를 올렸습니다.</p>
+  </div>
+  <div class="decision">
+    <p class="k">감당이 되나</p>
+    <p class="v">240명까지 여유</p>
+    <p class="n">수업 인원은 40명입니다. 그 <strong>여섯 배</strong>를 걸어도 실패가 없었습니다.</p>
+  </div>
+  <div class="decision">
+    <p class="k">AI 쪽은</p>
+    <p class="v">39명 전원 성공</p>
+    <p class="n">몰릴 때를 대비한 장치가 이미 들어가 있고, 실제로 걸어서 확인했습니다.</p>
+  </div>
+</div>
+
+<section>
+  <h2>왜 클러스터를 접었나</h2>
+  <p class="sub">기술이 부족해서가 아니라, 이 수업에 필요한 물건이 아니어서입니다.</p>
+
+  <p>처음에는 쿠버네티스 클러스터로 올리려 했습니다. 접은 이유는 셋입니다.</p>
+
+  <ul>
+    <li><b>클러스터는 쓰지 않아도 돈이 나갑니다.</b> 수업은 이틀이고, 그 이틀 말고는 서버를 꺼 둡니다.
+        가상 서버는 꺼 두면 과금이 멈추지만 클러스터는 그렇지 않습니다.</li>
+    <li><b>요청 하나하나가 가볍습니다.</b> 학생 화면이 받아 가는 것은 서버가 기억하고 있는
+        공장 상태를 그대로 내주는 것이고, 센서 이력 조회도 최근 12분치를 긁는 정도입니다.
+        무거운 계산이 없어서 나눠 돌릴 이유가 없습니다.</li>
+    <li><b>오히려 나눠 돌리면 깨집니다.</b> 이 시뮬레이터는 공장 40개의 상태와 시계를
+        <strong>한 프로그램의 기억 속</strong>에 들고 돕니다. 서버를 여러 개로 늘리면
+        학생마다 서로 다른 공장을 보게 됩니다.</li>
+  </ul>
+
+  <div class="note">
+    <p><b>구글 클라우드를 안 쓰는 것이 아닙니다.</b> 지금 서버는 구글 클라우드 서울 리전의
+       가상 서버 <code>knu-factory</code> 한 대이고, 켜면 1분 뒤 자동으로 수업 서버가 뜹니다.
+       바뀐 것은 <em>클라우드 회사</em>가 아니라 <em>그 위에 올리는 형태</em>입니다.</p>
+  </div>
+</section>
+
+<section>
+  <h2>얼마나 견디는지 실제로 걸어 봤습니다</h2>
+  <p class="sub">2026년 8월 19일 · 연습용이 아니라 <strong>수업 당일 쓸 그 서버</strong>에 그대로 걸었습니다.</p>
+
+  <p>평균값으로 보면 한 명이 실패해도 티가 안 납니다. 그래서 판정은 평균이 아니라
+     <strong>한 사람씩 따로</strong> 봤습니다 — 40명 각자가 자기 몫을 받았는지 장부처럼 대조했습니다.</p>
+
+  <div class="gauges">
+    <div class="gauge">
+      <p class="num">40<small>명</small></p>
+      <p class="lab">강사와 학생 39명이 <b>같은 순간에</b> 수업 전 과정을 진행</p>
+    </div>
+    <div class="gauge">
+      <p class="num">0<small>건</small></p>
+      <p class="lab">6분 동안 화면 <b>7,314장</b>을 받아 가며 개인별 실패</p>
+    </div>
+    <div class="gauge">
+      <p class="num">39<small>/39</small></p>
+      <p class="lab">AI 진단을 동시에 요청 — <b>전원 성공</b>, 전체 12초</p>
+    </div>
+    <div class="gauge">
+      <p class="num">240<small>명</small></p>
+      <p class="lab">인원을 계속 늘려 본 한계 — 여기서도 <b>실패 0</b></p>
+    </div>
+  </div>
+
+  <div class="scroll">
+    <table>
+      <thead>
+        <tr><th>무엇을 걸었나</th><th>결과</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>40명이 동시에 자기 공장 받기</td>
+          <td><span class="ok">전원 성공</span> · 겹친 사람 0</td>
+        </tr>
+        <tr>
+          <td>39명이 센서·정비 이력 조회</td>
+          <td><span class="ok">39 / 39</span> · 전원이 같은 작업지시를 받아 봄</td>
+        </tr>
+        <tr>
+          <td>39명이 동시에 AI 진단 요청</td>
+          <td><span class="ok">39 / 39</span> · 전체 12초에 마무리</td>
+        </tr>
+        <tr>
+          <td>39명이 설비 감속 + 로봇 파견</td>
+          <td><span class="ok">전원 접수</span> · 남의 공장에 새어 나간 명령 0건</td>
+        </tr>
+        <tr>
+          <td>40명이 6분 내내 화면 갱신</td>
+          <td><span class="ok">실패 0</span> · 화면 7,314장 · 응답 대부분 0.02초 안</td>
+        </tr>
+        <tr>
+          <td class="n">여유 탐사 — 80명</td>
+          <td><span class="ok">실패 0</span> · 응답 대부분 0.02초 안</td>
+        </tr>
+        <tr>
+          <td class="n">여유 탐사 — 160명</td>
+          <td><span class="ok">실패 0</span> · 응답 대부분 0.022초 안</td>
+        </tr>
+        <tr>
+          <td class="n">여유 탐사 — 240명</td>
+          <td><span class="ok">실패 0</span> · 응답 대부분 0.023초 안</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>인원을 여섯 배로 늘려도 응답 시간이 거의 그대로였습니다.
+     <strong>서버를 늘릴 이유가 없다</strong>는 뜻이고, 그래서 한 대로 확정했습니다.</p>
+</section>
+
+<section>
+  <h2>몰릴 때 위험한 곳은 한 곳뿐입니다</h2>
+  <p class="sub">우리 서버 안에서 끝나는 일은 줄만 서면 됩니다. 바깥에 물어보는 일이 다릅니다.</p>
+
+  <p>화면 갱신이나 설비 조작은 전부 우리 서버 안에서 끝납니다. 사람이 몰려도 순서대로 처리하면 그만입니다.
+     그런데 <strong>AI 진단은 바깥 회사(OpenAI)에 물어보는 일</strong>이라 그쪽 한도에 걸립니다.
+     그리고 그 한도는 열쇠를 여러 개 만든다고 늘어나지 않습니다 — 계정 단위로 걸리기 때문입니다.</p>
+
+  <p>그래서 서버가 할 수 있는 일은 <strong>열쇠를 늘리는 것이 아니라 줄을 세우는 것</strong>이고,
+     이미 그렇게 만들어져 있습니다. 확인한 장치는 이렇습니다.</p>
+
+  <ul>
+    <li><b>동시에 나가는 요청을 12건으로 묶습니다.</b> 39명이 한꺼번에 눌러도 12명씩 세 묶음으로
+        나가고, 나머지는 서버 안에서 기다립니다. 그래서 12초에 전원이 끝났습니다.</li>
+    <li><b>한 사람이 1분에 12번까지만</b> 부를 수 있습니다. 실수로 같은 요청을 반복하는 코드가
+        돌아도 다른 사람 몫을 잡아먹지 않습니다.</li>
+    <li><b>리포트 한 건에 AI 호출 6번이 상한</b>입니다. 학생 코드가 무한 반복에 빠져도
+        비용이 새어 나가지 않습니다.</li>
+    <li><b>일시적인 실패는 자동으로 다시 겁니다.</b> 1초 · 2초 · 4초로 간격을 벌려 가며 네 번까지
+        재시도하고, 매번 조금씩 흔들어 요청이 같은 순간에 다시 몰리지 않게 합니다.</li>
+    <li><b>같은 설비는 한 번만 진단하고 재사용합니다.</b> 회차마다 다시 물어보던 것이
+        호출이 폭증하던 가장 큰 원인이었습니다.</li>
+    <li><b>고장 주입을 2초씩 벌려 넣습니다.</b> 동시에 넣으면 감지도 동시에 몰려
+        진단 요청이 한꺼번에 나갑니다.</li>
+  </ul>
+
+  <div class="note">
+    <p><b>그래도 AI가 안 될 때가 있습니다.</b> 실제로 한 번, 39명 전원이 진단을 못 받은 순간이
+       있었습니다. 같은 서버에 같은 조건으로 다시 걸었을 때는 39명 전원이 성공했고,
+       <strong>원인은 확정하지 못했습니다.</strong> 모르는 것을 안다고 적지 않겠습니다.</p>
+    <p>다만 <b>그때도 수업은 멈추지 않습니다.</b> 학생 쪽 코드가 AI 진단이 실패하면
+       규칙 기반 판단으로 내려가 폐루프를 끝까지 돌리게 되어 있습니다.
+       강사는 화면에서 상태만 확인하면 됩니다.</p>
+  </div>
+</section>
+
+<section>
+  <h2>강의 자료도 손수정본에 맞춰 동기화했습니다</h2>
+  <p class="sub">고쳐 주신 문구를 <strong>자료의 원본 쪽에</strong> 옮겨 심었습니다.</p>
+
+  <p>슬라이드는 파워포인트 파일이 최종본이 아니라, 그것을 만들어 내는 원본 코드가 따로 있습니다.
+     파워포인트에서만 고치면 <strong>다음에 자료를 다시 뽑는 순간 그 수정이 전부 사라집니다.</strong>
+     그래서 고쳐 주신 문구를 한 곳도 빠짐없이 원본에 옮겨 적고, 다시 뽑은 결과가
+     손수정본과 <strong>글자 단위로 같은지</strong> 대조했습니다.</p>
+
+  <div class="scroll">
+    <table>
+      <thead>
+        <tr><th>무엇</th><th>고친 곳</th><th>확인</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>2일차 슬라이드</td>
+          <td class="n">38곳</td>
+          <td>다시 뽑은 것과 손수정본이 <span class="ok">같음</span></td>
+        </tr>
+        <tr>
+          <td>3일차 슬라이드</td>
+          <td class="n">31곳</td>
+          <td>다시 뽑은 것과 손수정본이 <span class="ok">같음</span></td>
+        </tr>
+        <tr>
+          <td>실습 가이드 두 권</td>
+          <td class="n">2일차 13곳 · 3일차 7곳</td>
+          <td>학생용 PDF <span class="ok">다시 뽑음</span></td>
+        </tr>
+        <tr>
+          <td>사전 준비 안내</td>
+          <td class="n">1곳</td>
+          <td>실제 화면과 <span class="ok">일치시킴</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>그리고 자료를 훑다가 <strong>학생 화면이 거짓말을 하던 곳 세 군데</strong>를 찾아 같이 고쳤습니다.
+     전부 학생이 막혔을 때 엉뚱한 곳을 뒤지게 만드는 안내였습니다.</p>
+
+  <ul>
+    <li><b>사전 안내문의 화면 예시가 옛것</b>이었습니다. 실제로 돌려 보니 화면에 나오는 글자가
+        달라서, 학생이 전날 밤에 「내 화면이 이상한가」 하게 되는 자리였습니다.</li>
+    <li><b>에러가 났을 때 엉뚱한 빈칸을 가리키고</b> 있었습니다. 채울 자리를 다시 매기면서
+        번호가 밀렸는데 안내만 옛 번호로 남아 있었습니다.</li>
+    <li><b>주소를 제대로 채운 학생에게 「아직 안 채웠습니다」</b>라고 답하고 있었습니다.
+        예시로 쓰던 주소가 지금은 진짜 수업 서버 주소가 되어, 맞게 한 사람을 틀렸다고 하던 자리입니다.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>남은 것</h2>
+  <p class="sub">서버와 자료는 닫혔습니다. 남은 셋은 사람이 해야 하는 것입니다.</p>
+
+  <div class="todo">
+    <div class="row">
+      <span class="who">지금</span>
+      <p class="what"><b>서버 자리 39개 풀어 주기</b>
+        오늘 부하 시험이 자리를 전부 잡은 채로 남았습니다. 이대로 두면 수업 당일
+        학생 39명이 첫 명령에서 「남은 공장이 없습니다」를 봅니다. 명령 한 줄로 되돌립니다.</p>
+    </div>
+    <div class="row">
+      <span class="who">강사</span>
+      <p class="what"><b>슬라이드 넘기며 시간 재기</b>
+        2일차 230분 · 3일차 220분으로 짜여 있습니다. 실제로 말해 보면서 구간별로 재야
+        당일에 쫓기지 않습니다. 이건 기계가 대신할 수 없습니다.</p>
+    </div>
+    <div class="row">
+      <span class="who">당일</span>
+      <p class="what"><b>강의장 와이파이에서 서버가 열리는지</b>
+        학교 방화벽이 우리 서버를 막는지는 <strong>그 자리에서만</strong> 알 수 있습니다.
+        수업 시작 전에 휴대폰으로 주소를 한 번 열어 보면 됩니다.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>수치는 전부 실제로 재서 넣었습니다. 재지 않은 것은 적지 않았습니다.</p>
+  <p>원본 기록 — 부하·동시성 실측은 <code>강의/시뮬레이터/docs/부하테스트_결과.md</code>,
+     규칙과 이력은 <code>핸드오프.md</code>에 있습니다.</p>
+</footer>
+
+</div>

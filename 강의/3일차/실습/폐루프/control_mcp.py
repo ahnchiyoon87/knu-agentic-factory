@@ -154,9 +154,8 @@ def main() -> int:
         except Exception as exc:                                   # noqa: BLE001
             print(f"공장에 닿지 못했습니다 — {type(exc).__name__}: {exc}", file=sys.stderr)
             print(f"  주소 {CFG['base_url']} · 네임스페이스 {CFG['tenant']}", file=sys.stderr)
-            if "34.64.94.16" in str(CFG["base_url"]):
-                print("  ★ 주소가 예시(34.64.94.16) 그대로입니다 — 아직 안 채워졌습니다.",
-                      file=sys.stderr)
+            # loop.py 와 같은 이유로 「예시 그대로입니다」 안내를 뺐다 —
+            # 그 주소가 진짜 수업 서버라 제대로 채운 학생에게 거짓말이 된다.
             print("  2일차/실습 에서 uv run 내번호.py 를 돌리면 자동으로 채워집니다.",
                   file=sys.stderr)
             print("      cd ../../../2일차/실습  →  uv run 내번호.py", file=sys.stderr)
