@@ -59,25 +59,45 @@ def main() -> int:
         print("  먼저  python 제작/검증도구/배포본만들기.py --검증", file=sys.stderr)
         return 1
 
-    # ── 남의 번호·주소가 박힌 채 나가지 않는지 ─────────────────────────────
-    #    `내번호.py` 가 채우는 자리다. 강사가 검증하며 돌리면 강사 값이 남는데,
-    #    그대로 39명에게 나가면 **안 돌린 학생이 조용히 그 값으로 진행한다.**
-    #    (S01 은 실재하는 남의 번호다. 실제로 이 상태로 zip 이 한 번 나갔다.)
+    # ── config 가 정확히 고정값인지 ────────────────────────────────────────
+    #    공장이 학생 PC 에서 돌게 되면서 설정은 전원 공통 고정값으로 **미리 채워서**
+    #    나간다 (S01 · local-lab-key · localhost:8000 — 비밀 아님). 여기서 막을 것은
+    #    빈 칸도, 채워진 칸도 아니고 **고정값과 다른 값**이다 — 옛 클라우드 주소나
+    #    진짜 키가 박혀 나가는 사고를 잡는다.
     import json as _json
     랩 = 실습원본
+    기대 = {"tenant": "S01", "access_key": "local-lab-key",
+            "주소": "http://localhost:8000"}
     더러움: list[str] = []
     도구 = 랩 / "3일차" / "실습" / "도구만들기" / "config.json"
     if 도구.is_file():
         fb = _json.loads(도구.read_text(encoding="utf-8")).get("fallback", {})
-        더러움 += [f"도구만들기 {k}={fb[k]!r}" for k in ("shared_api", "tenant")
-                  if fb.get(k)]
+        if fb.get("shared_api") != 기대["주소"]:
+            더러움.append(f"도구만들기 shared_api={fb.get('shared_api')!r} (기대: {기대['주소']})")
+        if fb.get("tenant") != 기대["tenant"]:
+            더러움.append(f"도구만들기 tenant={fb.get('tenant')!r} (기대: S01)")
+        if fb.get("access_key") != 기대["access_key"]:
+            더러움.append(f"도구만들기 access_key={fb.get('access_key')!r} (기대: local-lab-key)")
     폐루프 = 랩 / "3일차" / "실습" / "폐루프" / "config.json"
     if 폐루프.is_file():
         c = _json.loads(폐루프.read_text(encoding="utf-8"))
-        더러움 += [f"폐루프 {k}={c[k]!r}" for k in ("tenant", "access_key", "base_url")
-                  if c.get(k)]
+        if c.get("tenant") != 기대["tenant"]:
+            더러움.append(f"폐루프 tenant={c.get('tenant')!r} (기대: S01)")
+        if c.get("access_key") != 기대["access_key"]:
+            더러움.append(f"폐루프 access_key={c.get('access_key')!r} (기대: local-lab-key)")
+        if c.get("base_url") != 기대["주소"]:
+            더러움.append(f"폐루프 base_url={c.get('base_url')!r} (기대: {기대['주소']})")
+    # 공장 .env 에 열쇠가 남아 나가면 안 된다 (3일차 아침에 따로 간다)
+    공장env = 랩 / "공장" / ".env"
+    if 공장env.is_file():
+        for line in 공장env.read_text(encoding="utf-8-sig").splitlines():
+            k = line.strip()
+            if k.startswith("OPENAI_API_KEY=") and k != "OPENAI_API_KEY=":
+                더러움.append("공장/.env 에 OPENAI_API_KEY 값이 남아 있음")
+            if k.startswith("CONTROL_API_ENABLED=") and k != "CONTROL_API_ENABLED=false":
+                더러움.append("공장/.env 의 제어가 잠금(false)이 아님")
     if 더러움:
-        print("\n  ★ 배포본 config 에 강사 값이 남아 있습니다 — 올리지 마세요",
+        print("\n  ★ 배포본 config 가 고정값과 다릅니다 — 올리지 마세요",
               file=sys.stderr)
         for d in 더러움:
             print(f"      {d}", file=sys.stderr)
