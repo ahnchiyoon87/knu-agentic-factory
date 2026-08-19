@@ -1,11 +1,14 @@
-"""진단 중계 창구 — 학생 PC 에 LLM 키를 두지 않기 위한 것.
+"""진단 창구 — 내 공장(컨테이너)이 OpenAI 를 대신 불러 준다.
 
-    학생 PC ──(내 접속 키)──> 이 서버 ──(OPENAI_API_KEY 1개)──> OpenAI
+    학생 코드 ──(내 접속 키)──> 내 공장 ──(OPENAI_API_KEY)──> OpenAI
 
-왜 이렇게 하는가
-    39명에게 키를 나눠 주면 **회수가 안 된다.** 종이로 나간 키는 사진으로 남는다.
-    여기서 중계하면 키는 서버 `.env` 에만 있고, 특강이 끝나면 서버만 내리면 된다.
-    한도 초과도 한 곳에서 줄을 세워 막는다.
+키는 3일차 아침에 단톡방으로 받아 `3일차준비.py` 가 공장 설정에 넣고,
+수업이 끝나면 강사가 OpenAI 대시보드에서 그 키를 지운다 — 그 순간 죽는다.
+
+★ 다 같이 쓰는 것은 이 키 하나뿐이다. 39명이 같은 순간에 부르면 OpenAI 가
+  「잠깐 기다려라」(429)를 돌려주는데, 줄 세워 줄 서버가 따로 없으므로
+  **여기(각자의 공장)가 스스로 기다렸다 다시 넣는다** — 지수 백오프 + 흔들기,
+  OpenAI 가 알려 준 대기 시간(Retry-After)이 있으면 그걸 따른다.
 
 프롬프트는 서버가 만들지 않는다
     학생이 `diagnoser.py` 에서 고친 프롬프트가 그대로 쓰여야 실습이 성립한다.
@@ -13,7 +16,7 @@
     대신 ① 응답을 진단 스키마로 강제하고 ② 분당 한도를 걸고 ③ 토큰 상한을 둔다.
 
 떨어질 때
-    키가 없거나 OpenAI 가 막히면 **503 을 돌려준다.** 학생 쪽 diagnoser 가
+    키가 없거나 재시도가 다 떨어지면 **503 을 돌려준다.** 학생 쪽 diagnoser 가
     그것을 받아 규칙 기반으로 내려가고, 폐루프 일곱 걸음은 끝까지 간다.
 """
 
@@ -92,17 +95,36 @@ def _rate_check(tenant_id: str) -> None:
     q.append(now)
 
 
+def _잠깐대기(exc: Exception, attempt: int) -> float:
+    """얼마나 기다렸다 다시 넣을지.
+
+    OpenAI 가 Retry-After 로 알려 줬으면 그대로 따른다. 아니면 지수 백오프에
+    무작위 흔들기를 더한다 — 39개 공장이 같은 박자로 재시도하면 또 같이 부딪힌다.
+    """
+    try:
+        h = getattr(getattr(exc, "response", None), "headers", None) or {}
+        ra = float(h.get("retry-after", 0))
+        if 0 < ra <= 90:
+            return ra + random.random()
+    except (TypeError, ValueError):
+        pass
+    return min(2 ** attempt, 30) + random.random() * 2   # 1·2·4·8·16·30초 + 흔들기
+
+
 async def _ask_openai(req: DiagnoseReq) -> dict:
-    """재시도 포함. 한도 초과는 기다렸다 다시 넣는다."""
+    """재시도 포함. 혼잡(429)은 기다렸다 다시 넣는다 — 학생 손이 갈 일 없이."""
     from openai import AsyncOpenAI
 
     s = get_settings()
     keys = _keys()
     last: Exception | None = None
+    시도 = 6                       # 백오프 합계 최대 약 1분 — 39명 동시 혼잡을 넘긴다
 
-    for attempt in range(4):
+    for attempt in range(시도):
         key = keys[next(_KEY_TURN) % len(keys)]      # 돌아가며 쓴다
-        client = AsyncOpenAI(api_key=key, timeout=60)
+        # max_retries=0 — 재시도는 여기서만 한다. 라이브러리까지 겹치면
+        # 39개 공장 × 이중 재시도로 혼잡이 오히려 길어진다.
+        client = AsyncOpenAI(api_key=key, timeout=60, max_retries=0)
         try:
             res = await client.chat.completions.create(
                 model=s.diagnose_model,
@@ -127,13 +149,29 @@ async def _ask_openai(req: DiagnoseReq) -> dict:
                 except ValueError:
                     pass
                 continue
+            # 크레딧 소진은 기다려도 안 풀린다 — 재시도하지 않고 바로 알린다
+            if "insufficient_quota" in str(exc) or "credit" in str(exc).lower():
+                break
             일시적 = ("RateLimit" in name or "APIConnection" in name
                     or "APITimeout" in name or "InternalServer" in name
                     or "429" in str(exc) or "503" in str(exc))
-            if not 일시적 or attempt == 3:
+            if not 일시적 or attempt == 시도 - 1:
                 break
-            await asyncio.sleep((2 ** attempt) + random.random())    # 1·2·4초 + 흔들기
-    raise HTTPException(503, f"진단 모델 호출 실패 — {type(last).__name__}: {last}")
+            await asyncio.sleep(_잠깐대기(exc, attempt))
+
+    raise _실패안내(last)
+
+
+def _실패안내(last: Exception | None) -> HTTPException:
+    """왜 안 되는지 학생이 읽을 수 있는 말로. 거짓 안내가 제일 나쁘다."""
+    s = str(last)
+    if "insufficient_quota" in s or "credit" in s.lower():
+        return HTTPException(503, "AI 열쇠의 잔액이 없습니다. 기다려도 안 풀립니다 — "
+                                  "강사에게 알리세요.")
+    if "RateLimit" in type(last).__name__ or "429" in s:
+        return HTTPException(503, "지금 여러 명이 한꺼번에 AI 를 부르고 있습니다. "
+                                  "1분쯤 뒤에 한 번 더 실행하세요 — 코드 문제가 아닙니다.")
+    return HTTPException(503, f"진단 모델 호출 실패 — {type(last).__name__}: {last}")
 
 
 @router.post("/{tenant_id}/diagnose", summary="진단 중계 (서버가 LLM 키를 쥔다)")
@@ -156,15 +194,3 @@ async def diagnose(tenant_id: str, req: DiagnoseReq,
     return out
 
 
-@router.get("/diagnose/usage", summary="누가 얼마나 썼나 (강사 확인용)")
-async def usage(
-    x_instructor_token: str | None = Header(None, alias="X-Instructor-Token"),
-) -> dict:
-    # 강사 토큰을 받는다. 안 걸어 두면 학생 누구나 39명 전원의 호출 횟수를
-    # 들여다볼 수 있고, 「쟤는 몇 번 돌렸네」가 되는 순간 실습이 비교가 된다.
-    if not x_instructor_token or x_instructor_token != get_settings().instructor_token:
-        raise HTTPException(401, "X-Instructor-Token 이 없거나 틀립니다.")
-    now = time.monotonic()
-    return {"calls": dict(sorted(_USED.items())), "total": sum(_USED.values()),
-            "키": len(get_settings().openai_api_keys),
-            "쉬는키": sum(1 for t in _KEY_DEAD.values() if now - t <= 600)}

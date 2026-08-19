@@ -154,11 +154,9 @@ def main() -> int:
         except Exception as exc:                                   # noqa: BLE001
             print(f"공장에 닿지 못했습니다 — {type(exc).__name__}: {exc}", file=sys.stderr)
             print(f"  주소 {CFG['base_url']} · 네임스페이스 {CFG['tenant']}", file=sys.stderr)
-            # loop.py 와 같은 이유로 「예시 그대로입니다」 안내를 뺐다 —
-            # 그 주소가 진짜 수업 서버라 제대로 채운 학생에게 거짓말이 된다.
-            print("  2일차/실습 에서 uv run 내번호.py 를 돌리면 자동으로 채워집니다.",
-                  file=sys.stderr)
-            print("      cd ../../../2일차/실습  →  uv run 내번호.py", file=sys.stderr)
+            print("  공장이 켜져 있나요?  공장 폴더에서 —", file=sys.stderr)
+            print("      docker compose up -d", file=sys.stderr)
+            print("  그래도 안 되면 손 드세요.", file=sys.stderr)
             return 1
         print(json.dumps({
             "연결": info, "도구": ["set_equipment_speed", "stop_equipment",

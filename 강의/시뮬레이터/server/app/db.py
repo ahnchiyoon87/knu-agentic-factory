@@ -1,9 +1,7 @@
-"""Supabase(Postgres) 접근 계층.
+"""Postgres 접근 계층 — DB 는 compose 안의 db 컨테이너다.
 
-적재는 asyncpg 로 직접 한다 — 초당 312행 배치 INSERT 에는 PostgREST 보다
-copy_records_to_table 이 훨씬 유리하다(리서치 확정안 4: 배치 INSERT).
-학생이 Supabase 를 직접 폴링하는 경로는 PostgREST 가 그대로 열려 있으므로
-이 서버가 관여하지 않는다.
+적재는 asyncpg 의 copy_records_to_table 로 한다 — 배치 INSERT 가
+행 단위 INSERT 보다 훨씬 유리하다.
 """
 
 from __future__ import annotations
@@ -63,20 +61,20 @@ def _안내(exc: Exception, dsn: str) -> str:
     ]
     if 시간초과:
         줄 += [
-            "  이럴 때 가장 흔한 원인은 **강의장 네트워크가 5432 포트를 막은 것**입니다.",
+            "  DB 컨테이너가 아직 안 떴거나 죽었습니다.",
             "",
-            "  바로 해 볼 것",
-            "    1. 휴대폰 핫스팟으로 바꿔서 다시 켜 보세요. 되면 학교망이 막은 것입니다.",
-            "    2. 그래도 안 되면 클라우드 서버로 수업하세요 (docs/운영.md 3절).",
+            "  바로 해 볼 것 — 공장 폴더에서",
+            "    docker compose up -d",
+            "  그래도 안 되면 데이터를 지우고 처음부터 —",
+            "    docker compose down -v && docker compose up -d",
             "",
         ]
     else:
         줄 += [
-            "  .env 의 SUPABASE_DB_URL 을 확인하세요. 비밀번호가 바뀌었을 수 있습니다.",
+            "  docker compose down -v 로 초기화한 뒤 다시 켜 보세요.",
             "",
         ]
-    줄 += ["  ※ 이 서버 없이는 학생 39명이 아무것도 볼 수 없습니다. 먼저 해결하세요.",
-           "=" * 66, ""]
+    줄 += ["  그래도 안 되면 손 드세요.", "=" * 66, ""]
     return "\n".join(줄)
 
 
@@ -196,13 +194,9 @@ async def list_tenants(mode: str, tenant_filter: list[str]) -> list[dict]:
     if tenant_filter:
         args.append(tenant_filter)
         where.append(f"tenant_id = any(${len(args)})")
-    elif mode in ("individual", "team"):
-        # 강사 공장(S00, tenant_type='instructor')은 개인 모드에 **같이 싣는다**.
-        # 배정에서는 `claim._개인공장()` 이 individual 만 고르므로 저절로 빠지고,
-        # 여기서 안 실으면 강사 공장이 만들어지기만 하고 돌지 않는다 (008 마이그레이션).
-        종류 = [mode, "instructor"] if mode == "individual" else [mode]
-        args.append(종류)
-        where.append(f"tenant_type = any(${len(args)})")
+    elif mode:
+        args.append(mode)
+        where.append(f"tenant_type = ${len(args)}")
     sql = (
         "select tenant_id, tenant_type, display_name, access_key, control_unlocked "
         f"from tenant where {' and '.join(where)} order by tenant_id"

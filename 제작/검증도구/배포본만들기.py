@@ -7,8 +7,15 @@
 
 무엇이 들어가는가 — **코드와 데이터뿐**
   2일차/실습/ · 3일차/실습/   학생이 열고 고칠 코드
+  공장/                       시뮬레이터 + DB. 학생 PC 에서 docker compose 로 돈다
   데이터/                     7일치 센서 CSV. 실습이 이걸 읽는다
+  3일차준비.py                열쇠 넣기 + 제어 열기 + 재기동을 한 명령으로
   pyproject.toml · .python-version   uv 가 보고 실습 환경을 갖춘다
+
+배포본에 비밀이 하나도 없다.
+  DB 는 각자 PC 의 컨테이너라 접속줄이 비밀이 아니고, 번호는 전원이 S01 이며,
+  AI 열쇠는 3일차 아침에 단톡방으로 따로 간다. 그래도 아래 검증 게이트는
+  그대로 돌린다 — 실수로 섞이는 것을 잡는 그물이다.
 
   문서(.md)는 **하나도 안 들어간다.** 읽을 것은 드라이브의 실습가이드 PDF 하나다.
   코드 옆에 문서를 같이 두면 학생이 어느 것을 봐야 하는지부터 헷갈린다.
@@ -74,8 +81,7 @@ DATA = ROOT / "센서데이터" / "데이터"
 #   .gitignore — 압축을 푼 폴더에서는 아무 뜻이 없다
 제외_확장 = {".pyc", ".pyo", ".log", ".jsonl", ".md"}
 # 학생이 실습 중에 만드는 것 — 배포본에 들어 있으면 안 된다.
-# `.내번호` 는 **실제 접속 키**가 들어 있다. 검증이 만들고 그대로 두면
-# 39명에게 남의 키가 배포된다. 실제로 한 번 그렇게 만들어졌다.
+# `.내번호` 는 옛 자리배정 시절의 흔적이다 — 남아 있으면 지운다.
 찌꺼기 = {"detect_내가짠것.py", "mcp_server_내가짠것.py", "실행기록.jsonl", ".내번호"}
 
 # 학생 배포본에는 문서를 두지 않는다 — 읽을 것은 실습가이드 PDF 하나다.
@@ -121,17 +127,18 @@ def 비우기(out: Path) -> None:
 
 
 def 설정되돌리기(out: Path) -> None:
-    """검증이 채운 번호·키를 빈 칸으로 되돌린다.
+    """설정 파일을 학생이 처음 여는 상태로 맞춘다.
 
-    `내번호.py` 검증이 config.json 에 **진짜 접속 키**를 써 넣는다.
-    그대로 두면 39명에게 남의 키가 배포된다. 학생이 처음 여는 상태로 되돌린다.
+    번호·주소는 전원이 같은 고정값이라 **미리 채워서** 나간다 — 학생이 옮겨 적을
+    것이 없다. 비워야 하는 것은 검증이 넣었을 수 있는 AI 열쇠와 제어 개방뿐이다.
     """
     import json as _json
 
     폐루프 = out / "3일차" / "실습" / "폐루프" / "config.json"
     if 폐루프.is_file():
         c = _json.loads(폐루프.read_text(encoding="utf-8"))
-        c["tenant"], c["access_key"], c["base_url"] = "", "", ""
+        c["tenant"], c["access_key"] = "S01", "local-lab-key"
+        c["base_url"] = "http://localhost:8000"
         폐루프.write_text(_json.dumps(c, ensure_ascii=False, indent=2) + "\n",
                           encoding="utf-8")
 
@@ -139,12 +146,24 @@ def 설정되돌리기(out: Path) -> None:
     if 도구.is_file():
         c = _json.loads(도구.read_text(encoding="utf-8"))
         c.setdefault("fallback", {})
-        # 셋 다 `내번호.py` 가 채운다. 예시 주소·남의 번호를 남기면
-        # 안 돌린 학생이 조용히 그 값으로 진행한다 (S01 은 실재하는 남의 번호다).
-        c["fallback"]["tenant"] = ""
-        c["fallback"]["shared_api"] = ""
+        c["fallback"]["tenant"] = "S01"
+        c["fallback"]["shared_api"] = "http://localhost:8000"
         도구.write_text(_json.dumps(c, ensure_ascii=False, indent=2) + "\n",
                         encoding="utf-8")
+
+    # 공장/.env — 검증이 넣은 열쇠를 비우고 제어를 잠근다 (2일차 상태로).
+    env = out / "공장" / ".env"
+    if env.is_file():
+        줄들 = []
+        for line in env.read_text(encoding="utf-8-sig").splitlines():
+            k = line.strip()
+            if k.startswith("OPENAI_API_KEY="):
+                줄들.append("OPENAI_API_KEY=")
+            elif k.startswith("CONTROL_API_ENABLED="):
+                줄들.append("CONTROL_API_ENABLED=false")
+            else:
+                줄들.append(line)
+        env.write_text("\n".join(줄들) + "\n", encoding="utf-8")
 
 
 def 청소(out: Path) -> None:
@@ -163,27 +182,12 @@ def 청소(out: Path) -> None:
             p.unlink(missing_ok=True)
 
 
-def _토큰() -> str:
-    """강사 토큰은 시뮬레이터 .env 에만 있다."""
-    env = REPO / "강의" / "시뮬레이터" / ".env"
-    if env.is_file():
-        for line in env.read_text(encoding="utf-8").splitlines():
-            if line.strip().startswith("INSTRUCTOR_TOKEN="):
-                return line.split("=", 1)[1].strip()
-    return os.environ.get("INSTRUCTOR_TOKEN", "")
-
-
 def 학생환경() -> dict[str, str]:
     """UTF-8 강제 환경변수를 벗긴다 — 학생 PC 에는 없다."""
     return {k: v for k, v in os.environ.items()
             if k not in ("PYTHONUTF8", "PYTHONIOENCODING")}
 
 
-def _서버주소() -> str:
-    """검증에서 학생 스크립트에 넘길 강사 서버 주소."""
-    return (os.environ.get("SHARED_API")
-            or _설정("BASE_URL")
-            or "http://127.0.0.1:8000").rstrip("/")
 
 
 def _설정(이름: str) -> str:
@@ -230,25 +234,65 @@ def 검증(out: Path) -> int:
         print(f"  [통과] {이름}")
         return txt
 
-    SHARED = _서버주소()
     lab1 = out / "2일차" / "실습"
     lab2 = out / "3일차" / "실습" / "도구만들기"
     lab3 = out / "3일차" / "실습" / "폐루프"
+    공장 = out / "공장"
 
-    # ★ 학생 여정의 맨 처음 — 여기서 막히면 나머지가 전부 의미 없다
-    out_내번호 = 돌린다(lab1, ["내번호.py", "--서버", SHARED],
-                       "★ uv run 내번호.py — 내 공장을 받는다", "당신의 공장은")
-    받은번호 = ""
-    for 줄 in out_내번호.splitlines():
-        if "당신의 공장은" in 줄:
-            부분 = [x for x in 줄.split() if x.startswith("S") and len(x) == 3]
-            받은번호 = 부분[0] if 부분 else ""
-    돌린다(lab1, ["내번호.py", "--서버", SHARED],
-           "다시 쳐도 같은 번호다 (수시로 확인 가능)",
-           f"★ {받은번호} ★" if 받은번호 else "당신의 공장은")
-    if 받은번호:
-        돌린다(lab1, ["내번호.py", 받은번호, "--서버", SHARED],
-               "★ 번호로 되찾는다 (자리를 옮겼을 때)", "되찾았습니다")
+    강사열쇠 = _설정("OPENAI_API_KEY")     # AI 검증용 — 3일차준비.py 로 넣는다
+
+    # ★ 학생 여정의 맨 처음 — 공장을 켠다. 여기서 막히면 나머지가 전부 의미 없다.
+    #   학생이 치는 그 명령 그대로 (첫 실행은 빌드+DB 초기화까지라 몇 분 걸린다).
+    import time as _time
+    import urllib.request as _url
+    print("  공장을 켭니다 — docker compose up -d --build (첫 실행은 몇 분 걸립니다)")
+    p = subprocess.run(["docker", "compose", "up", "-d", "--build"],
+                       cwd=str(공장), capture_output=True, timeout=900)
+    if p.returncode != 0:
+        print("  [실패] ★ 공장이 안 켜진다 —")
+        print("        " + p.stderr.decode("utf-8", errors="replace").strip().splitlines()[-1][:100])
+        실패.append("공장 기동")
+    else:
+        print("  [통과] ★ docker compose up — 학생이 치는 그 명령으로 켜진다")
+
+    def 공장확인(이름: str) -> None:
+        for _ in range(30):                     # 마이그레이션 포함 최대 60초 기다린다
+            try:
+                with _url.urlopen("http://localhost:8000/api/v1/health", timeout=5) as r:
+                    if b'"status"' in r.read():
+                        print(f"  [통과] {이름}")
+                        return
+            except Exception:                                      # noqa: BLE001
+                _time.sleep(2)
+        print(f"  [실패] {이름} — 60초 안에 안 답한다")
+        실패.append(이름)
+    공장확인("★ 공장이 localhost:8000 에서 답한다 (스키마 자동 적용 포함)")
+
+    # 2일차 「이상 시작」 버튼 — 눌리고, 두 번 눌러도 무해하고, 원래대로 돌아온다
+    try:
+        r1 = _url.urlopen(_url.Request("http://localhost:8000/api/v1/S01/drill",
+                                       method="POST"), timeout=15).read()
+        r2 = _url.urlopen(_url.Request("http://localhost:8000/api/v1/S01/drill",
+                                       method="POST"), timeout=15).read()
+        if "시작".encode() in r1 and "이미 진행 중".encode() in r2:
+            print("  [통과] ★ 「이상 시작」 버튼 — 두 번 눌러도 하나만 걸린다")
+        else:
+            print("  [실패] 「이상 시작」 응답이 예상과 다르다")
+            실패.append("이상 시작")
+        _url.urlopen(_url.Request("http://localhost:8000/api/v1/S01/drill/stop",
+                                  method="POST"), timeout=15).read()
+    except Exception as exc:                                       # noqa: BLE001
+        print(f"  [실패] 「이상 시작」이 안 된다 — {type(exc).__name__}")
+        실패.append("이상 시작")
+
+    # 3일차 아침의 한 명령(열쇠) + 오후 31장의 한 명령(제어).
+    # 뒤의 AI 검증(agent.py·loop)이 이 열쇠를 쓰므로 여기서 미리 돌린다.
+    if 강사열쇠:
+        돌린다(out, ["3일차준비.py", 강사열쇠], "★ uv run 3일차준비.py — 아침 한 명령(열쇠)",
+               "3일차 준비 끝")
+        공장확인("3일차 전환 뒤에도 공장이 답한다")
+        돌린다(out, ["제어열기.py"], "★ uv run 제어열기.py — 31장 한 명령(제어 개방)",
+               "제어가 열렸습니다")
 
     돌린다(lab1, ["돌려보기.py"], "빈 뼈대로 돌려보기.py — 무엇을 채울지 알려 준다", "빈칸")
     돌린다(lab1, ["확인.py"], "확인.py — 어디가 막혔는지 짚어 준다", "다음에 볼 곳")
@@ -295,14 +339,13 @@ def 검증(out: Path) -> int:
         (lab1 / "detect_내가짠것.py").unlink(missing_ok=True)
         (lab2 / "mcp_server_내가짠것.py").unlink(missing_ok=True)
 
-    # 3일차 오후 — 내번호.py 가 이미 채워 놨으므로 바로 붙어야 한다.
-    # (제어는 아직 안 열렸을 수 있으니 「연결」 줄만 본다)
-    돌린다(lab3, ["loop.py", "--check"], "폐루프 — 내번호.py 가 채운 설정으로 바로 붙는다",
+    # 3일차 오후 — 설정은 미리 채워져 나가므로 바로 붙어야 한다.
+    돌린다(lab3, ["loop.py", "--check"], "폐루프 — 미리 채워 온 설정으로 바로 붙는다",
            "연결")
     돌린다(lab3, ["control_mcp.py", "--check"], "제어 도구도 같은 설정으로 붙는다",
            "set_equipment_speed")
 
-    # 설정을 비워 보고, 안 채운 학생에게 무엇을 하라고 하는지 본다
+    # 설정을 비워 보고, 지운 학생에게 무엇을 하라고 하는지 본다
     폐루프cfg = lab3 / "config.json"
     원래cfg = 폐루프cfg.read_bytes()
     try:
@@ -312,12 +355,11 @@ def 검증(out: Path) -> int:
         폐루프cfg.write_text(_json.dumps(c, ensure_ascii=False, indent=2) + "\n",
                              encoding="utf-8")
         # 빈 칸을 짚는 데서 그치면 안 된다 — 「무엇을 하라」까지 나와야 한다.
-        # 예전에는 「쪽지 보고 채우세요」였는데 쪽지는 없어졌다. 그 자리를 못 빠져나온다.
         돌린다(lab3, ["loop.py", "--check"], "설정이 비면 어느 줄이 비었는지 짚어 준다",
-               "uv run 내번호.py")
+               "실습 저장소를")
         돌린다(lab3, ["control_mcp.py", "--check"],
                "제어 도구도 같은 안내를 낸다 (cp949 포함)",
-               "uv run 내번호.py")
+               "실습 저장소를")
     finally:
         폐루프cfg.write_bytes(원래cfg)
 
@@ -342,17 +384,24 @@ def 검증(out: Path) -> int:
     finally:
         치운곳.rename(어제)
 
-    # 검증이 쓴 배정을 되돌린다 — 당일 번호를 미리 소모하면 안 된다
-    if 받은번호:
+    # ── 3일차 오후의 심장 — 「이상 시작」을 누르고 폐루프가 실제로 잡는가 ──
+    #    학생 여정 그대로: 버튼(여기서는 같은 API) → 감지 소요(배속 x120 에서
+    #    약 100초 실측) 기다림 → loop 한 바퀴. AI 진단까지 실제 모델이 돈다.
+    if 강사열쇠:
         try:
-            import httpx
-            httpx.post(f"{SHARED}/api/instructor/unclaim",
-                       params={"tenant_id": 받은번호},
-                       headers={"X-Instructor-Token": _토큰()}, timeout=15)
-            print(f"  (검증이 쓴 배정 {받은번호} 을 되돌렸습니다)")
-        except Exception:                                          # noqa: BLE001
-            print(f"  ※ 배정 {받은번호} 을 못 되돌렸습니다 — "
-                  f"python tools/자리배정.py --풀기 {받은번호}")
+            _url.urlopen(_url.Request("http://localhost:8000/api/v1/S01/drill",
+                                      method="POST"), timeout=15).read()
+        except Exception as exc:                                   # noqa: BLE001
+            print(f"  [실패] 3일차용 「이상 시작」이 안 된다 — {type(exc).__name__}")
+            실패.append("3일차 이상 시작")
+        _time.sleep(110)             # 드리프트가 감지선을 넘을 때까지
+        돌린다(lab3, ["loop.py", "--정답", "전부", "--한바퀴"],
+               "★ 폐루프 한 바퀴 — 걸어 둔 이상을 실제로 감지한다", "감지  이상")
+
+    # 검증이 켠 공장을 내리고 데이터까지 지운다 — 학생은 자기 PC 에서 새로 만든다
+    subprocess.run(["docker", "compose", "down", "-v"], cwd=str(공장),
+                   capture_output=True, timeout=300)
+    print("  (검증이 켠 공장 컨테이너·데이터를 내렸습니다)")
 
     # 검증이 남긴 것을 치운다 — 배포본에 __pycache__ 가 섞여 나가면 안 된다
     청소(out)
@@ -376,23 +425,43 @@ def 검증(out: Path) -> int:
     #   결과만 보면 학생에게 이미 열어 둔 `--정답 전부` 와 같은 자리까지 간다
     #   (막힌 학생을 위한 의도된 탈출구). 그래서 소스에 이름이 남는 것은 허용한다.
     #   강사본과 배포본을 두 벌로 나누면 반드시 어긋나므로 파일을 쪼개지 않는다.
-    허용 = {("3일차/실습/폐루프/loop.py", "정답 일괄 실행법")}
+    #
+    #   공장의 DB 접속줄은 compose 파일에 박힌 **로컬 값**(db 컨테이너)이다 —
+    #   비밀이 아니라서 의도된 배포물이다. .env 에는 접속줄이 있으면 안 된다
+    #   (있다면 어딘가의 진짜 DB 가 새는 것이다).
+    허용 = {("3일차/실습/폐루프/loop.py", "정답 일괄 실행법"),
+           ("공장/docker-compose.yml", "DB 접속 문자열")}
+
+    # ── 공장/.env — 열쇠도 접속줄도 없어야 한다 (열쇠는 3일차 아침에 따로 간다)
+    공장env = out / "공장" / ".env"
+    if not 공장env.is_file():
+        print("  [실패] ★ 공장/.env 가 없다 — 3일차준비.py 가 열쇠를 넣을 곳이 없다")
+        실패.append("공장/.env 없음")
+    else:
+        내용 = 공장env.read_text(encoding="utf-8-sig")
+        if "postgres" in 내용:
+            print("  [실패] ★ 공장/.env 에 DB 접속줄이 들어 있다 — 로컬 모델에서는 있을 이유가 없다")
+            실패.append("접속줄 유출")
+        if not _re.search(r"^OPENAI_API_KEY=\s*$", 내용, _re.M):
+            print("  [실패] ★ 공장/.env 의 OPENAI_API_KEY 가 빈 칸이 아니다")
+            실패.append("열쇠 유출")
 
     샌것 = []
     for p in out.rglob("*"):
         # .venv 는 uv 가 검증 중에 만든 작업대다. 학생 저장소에 안 들어간다(.gitignore).
         if not p.is_file() or ".git" in p.parts or ".venv" in p.parts:
             continue
-        if any(g in p.name for g in 금지파일) or "강의자료" in str(p):
+        rel = p.relative_to(out).as_posix()
+        if rel != "공장/.env" and (any(g in p.name for g in 금지파일) or "강의자료" in str(p)):
             샌것.append(f"파일 {p.relative_to(out)}")
         # ★ 예전에는 .md/.json/.txt 만 봤다. 그러면 **.py 에 박힌 진짜 키를 못 잡는다.**
-        #    학생이 여는 것은 대부분 .py 다. 읽히는 것은 전부 본다.
-        if p.suffix in (".md", ".json", ".txt", ".py", ".html", ".bat", ".cfg", ".ini"):
+        #    학생이 여는 것은 대부분 .py 다. 읽히는 것은 전부 본다. (.env 도 본다)
+        if p.suffix in (".md", ".json", ".txt", ".py", ".html", ".bat", ".cfg",
+                        ".ini", ".yml", ".yaml") or p.name.startswith(".env"):
             try:
                 내용 = p.read_text(encoding="utf-8")
             except Exception:                                      # noqa: BLE001
                 continue
-            rel = p.relative_to(out).as_posix()
             for 패턴, 이름 in 비밀값:
                 if 패턴.search(내용) and (rel, 이름) not in 허용:
                     샌것.append(f"{rel} 안에 {이름}")
@@ -468,6 +537,35 @@ def main() -> int:
         shutil.copy2(DATA / name, out / "데이터" / name)
         n3 += 1
 
+    # ── 공장(시뮬레이터+DB) — 학생 PC 에서 docker compose 로 돈다 ─────────────
+    #    컨테이너가 실제로 읽는 것만 담는다. Dockerfile 이 COPY 하는 것과
+    #    정확히 같아야 한다 — db/ 를 빠뜨렸더니 빌드가 그 줄에서 죽었다.
+    sim = 특강 / "시뮬레이터"
+    n4 = 0
+    for 폴더 in ("server", "web", "config", "db"):
+        n4 += 복사(sim / 폴더, out / "공장" / 폴더)
+    (out / "공장" / "tools").mkdir(parents=True, exist_ok=True)
+    shutil.copy2(sim / "tools" / "migrate.py", out / "공장" / "tools" / "migrate.py")
+    n4 += 1
+    for 파일 in ("Dockerfile", "docker-compose.yml", "requirements.txt", ".dockerignore"):
+        shutil.copy2(sim / 파일, out / "공장" / 파일)
+        n4 += 1
+
+    # 학생 .env — 비밀이 없다. 3일차 열쇠는 3일차준비.py 가 채운다.
+    (out / "공장" / ".env").write_text(
+        "# 공장 설정 — 손으로 고칠 일이 없습니다. 3일차 아침에\n"
+        "#   uv run 3일차준비.py sk-열쇠   한 줄이 여기를 채웁니다.\n"
+        "OPENAI_API_KEY=\n"
+        "DIAGNOSE_MODEL=gpt-5.4-mini\n"
+        "CONTROL_API_ENABLED=false\n"
+        "RETENTION_HOURS=1\n",
+        encoding="utf-8")
+    n4 += 1
+
+    # 3일차의 두 명령 — 아침(열쇠 넣기 + 재기동) · 오후 31장(제어 열기)
+    shutil.copy2(특강 / "3일차준비.py", out / "3일차준비.py")
+    shutil.copy2(특강 / "제어열기.py", out / "제어열기.py")
+
     # 실습 환경 정의 — uv 가 이 둘을 보고 파이썬 3.12 와 패키지를 스스로 갖춘다.
     # 학생이 파이썬을 깔거나 pip install 을 할 일이 없다.
     for name in ("pyproject.toml", ".python-version"):
@@ -522,10 +620,10 @@ def main() -> int:
     크기 = sum(p.stat().st_size for p in out.rglob("*") if p.is_file())
     print(f"만들었습니다 — {out}")
     # 이 폴더는 돌릴 때마다 통째로 지워지고 새로 만들어진다. 여기서 실습하던 중이면
-    # 채운 코드와 `.내번호` 가 그때 사라진다 — 실제로 그 자리에서 `확인.py` 를 치다가
+    # 채운 코드가 그때 사라진다 — 실제로 그 자리에서 `확인.py` 를 치다가
     # 「program not found」를 만났다. 다시 뽑으면 그만이라 막지는 않고, 말만 해 둔다.
     print("  (이 폴더는 다시 뽑을 때마다 새로 만들어집니다 — 여기서 실습 중이었으면 다시 받으세요)")
-    print(f"  2일차 {n1}개 · 3일차 {n2}개 · 데이터 {n3}개 · 합계 {크기 / 1e6:.1f}MB")
+    print(f"  2일차 {n1}개 · 3일차 {n2}개 · 데이터 {n3}개 · 공장 {n4}개 · 합계 {크기 / 1e6:.1f}MB")
     print("  정답/ 포함 (확인.py --정답 이 이걸 읽습니다)")
 
     # ★ 어느 경로로 만들든 **학생이 처음 여는 상태**로 끝난다.

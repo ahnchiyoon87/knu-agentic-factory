@@ -19,32 +19,23 @@ create schema if not exists public;
 -- -----------------------------------------------------------------------------
 -- 1. 테넌트 (네임스페이스)
 --
--- 격리 단위는 개인(individual) 기본 + 팀(team) 전환 겸용이다.
--- Day 1~3 : S01~S39 개인 39개
--- Day 4   : T1~T8 팀 8개 (tenant_member 로 학생↔팀 매핑)
--- 두 종류가 같은 테이블에 공존하므로 Day 4 전환 시 스키마 변경이 없다.
+-- 공장은 학생 PC 에서 하나씩 돌고 DB 도 각자 것이다. 테넌트는 003 이 심는
+-- 「내 공장」 하나뿐이지만, 모든 테이블이 이 키로 격리되는 구조는 그대로 둔다 —
+-- 실제 멀티테넌트 서비스와 같은 모양을 학생이 그대로 보는 것이 교안의 일부다.
 -- -----------------------------------------------------------------------------
 create table if not exists tenant (
     tenant_id     text primary key,
-    tenant_type   text        not null check (tenant_type in ('individual', 'team')),
+    tenant_type   text        not null check (tenant_type in ('individual')),
     display_name  text        not null,
-    access_key    text        not null,          -- 제어 API(Day 4) 호출용. 읽기 API는 불필요
-    control_unlocked boolean  not null default false,  -- Day 4에 강사가 개방
+    access_key    text        not null,          -- 제어 API(3일차) 호출용. 읽기 API는 불필요
+    control_unlocked boolean  not null default false,  -- 3일차에 개방
     active        boolean     not null default true,   -- 시뮬레이션 대상 여부
     created_at    timestamptz not null default now()
 );
 
-comment on table  tenant is '학생/팀 네임스페이스. 모든 상태·이력 테이블이 이 키로 격리된다.';
-comment on column tenant.access_key       is '제어 API 인증 키. 읽기 API는 키 없이 tenant_id 만으로 접근(Day 1 진입장벽 최소화).';
-comment on column tenant.control_unlocked is '제어 API 4종은 교안상 Day 4에 최초 개방. 기본 false.';
-
-create table if not exists tenant_member (
-    student_tenant_id text not null references tenant(tenant_id) on delete cascade,
-    team_tenant_id    text not null references tenant(tenant_id) on delete cascade,
-    primary key (student_tenant_id, team_tenant_id)
-);
-
-comment on table tenant_member is 'Day 4 팀 편성(4~5명 x 8팀). 학생이 자기 팀 네임스페이스로 전환할 때 사용.';
+comment on table  tenant is '네임스페이스. 모든 상태·이력 테이블이 이 키로 격리된다.';
+comment on column tenant.access_key       is '제어 API 인증 키. 읽기 API는 키 없이 tenant_id 만으로 접근(첫 실습 진입장벽 최소화).';
+comment on column tenant.control_unlocked is '제어 API 4종은 교안상 3일차에 최초 개방. 기본 false.';
 
 -- -----------------------------------------------------------------------------
 -- 2. 설비 현재 상태 — CNC 6대 x 테넌트

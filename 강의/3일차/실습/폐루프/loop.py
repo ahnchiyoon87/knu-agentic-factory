@@ -248,12 +248,9 @@ def main() -> int:
     except Exception as exc:                                       # noqa: BLE001
         print(f"공장에 닿지 못했습니다 — {type(exc).__name__}: {exc}", file=sys.stderr)
         print(f"  주소 {api.base} · 네임스페이스 {api.tenant}", file=sys.stderr)
-        # 주소가 맞아도 서버가 안 켜졌거나 이 네트워크가 막으면 여기로 온다.
-        # 전에는 수업 서버 주소를 「예시 그대로입니다」라고 찍었는데, 그 주소가
-        # 바로 진짜 수업 서버라서 제대로 채운 학생에게 거짓말을 하고 있었다.
-        print("  2일차/실습 에서 uv run 내번호.py 를 돌리면 이 설정이 자동으로 채워집니다.",
-              file=sys.stderr)
-        print("      cd ../../../2일차/실습  →  uv run 내번호.py", file=sys.stderr)
+        # 공장이 안 켜져 있으면 여기로 온다 — 켜는 명령을 그 자리에서 준다.
+        print("  공장이 켜져 있나요?  공장 폴더에서 —", file=sys.stderr)
+        print("      docker compose up -d", file=sys.stderr)
         print("  그래도 안 되면 손 드세요.", file=sys.stderr)
         return 1
 

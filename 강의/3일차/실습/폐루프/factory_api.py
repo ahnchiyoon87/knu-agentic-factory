@@ -53,26 +53,24 @@ class FactoryAPI:
         """
         빈칸 = []
         if not str(self.base).strip():
-            빈칸.append('"base_url"    ← 강사 서버 주소')
+            빈칸.append('"base_url"    ← 내 공장 주소 (http://localhost:8000)')
         if not str(self.tenant).strip():
-            빈칸.append('"tenant"      ← 내 공장 번호 (예: "S07")')
+            빈칸.append('"tenant"      ← 공장 번호 (S01)')
         if not str(self.key).strip():
-            빈칸.append('"access_key"  ← 내 접속 키 (긴 문자열)')
+            빈칸.append('"access_key"  ← 접속 키 (local-lab-key)')
         if 빈칸:
             raise ValueError(
-                "config.json 이 아직 비어 있습니다 —\n    "
+                "config.json 이 비어 있습니다 —\n    "
                 + "\n    ".join(빈칸)
-                + "\n\n    손으로 적지 마세요. 아래 한 줄이면 자동으로 채워집니다.\n"
-                "        cd ../../../2일차/실습\n"
-                "        uv run 내번호.py\n"
-                "    (2일차에 이미 돌렸으면 그냥 다시 치면 됩니다 — 같은 번호가 나옵니다)"
+                + "\n\n    이 값들은 실습 저장소에 미리 채워져 옵니다. 지웠거나 고쳤으면\n"
+                "    실습 저장소를 다시 내려받으세요. 안 되면 손 드세요."
             )
         try:
             self.key.encode("ascii")
         except (UnicodeEncodeError, AttributeError):
             raise ValueError(
-                f'config.json 의 access_key 가 예시 그대로입니다 (현재: {self.key!r}).\n'
-                "    2일차/실습 에서 uv run 내번호.py 를 돌리면 자동으로 채워집니다."
+                f'config.json 의 access_key 가 이상합니다 (현재: {self.key!r}).\n'
+                "    원래 값은 local-lab-key 입니다 — 실습 저장소를 다시 내려받으세요."
             ) from None
 
     # ------------------------------------------------------------------ 읽기

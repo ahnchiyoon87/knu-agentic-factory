@@ -1,22 +1,23 @@
-"""도구 호출 중계 창구 — 3일차 오전 「AI 가 내 도구를 스스로 부른다」
+"""도구 호출 창구 — 3일차 오전 「AI 가 내 도구를 스스로 부른다」
 
-    학생 PC ──(내 접속 키 + 내 도구 목록)──> 이 서버 ──(OPENAI_API_KEY)──> OpenAI
-    학생 PC <──(어느 도구를 어떤 인자로 부를지)──┘
-    학생 PC ──(도구를 직접 실행한 결과)────────> 이 서버 ──> OpenAI ──> 리포트
+    학생 코드 ──(내 접속 키 + 내 도구 목록)──> 내 공장 ──(OPENAI_API_KEY)──> OpenAI
+    학생 코드 <──(어느 도구를 어떤 인자로 부를지)──┘
+    학생 코드 ──(도구를 직접 실행한 결과)────────> 내 공장 ──> OpenAI ──> 리포트
 
-왜 진단 창구(`diagnose.py`)를 안 쓰고 새로 만드는가
+왜 진단 창구(`diagnose.py`)를 안 쓰고 따로 두는가
     진단 창구는 **단발**이다 — 프롬프트를 주면 JSON 하나를 돌려준다.
-    오후 폐루프가 그 경로로 이미 39/39 검증을 통과했으므로 건드리지 않는다.
     오전은 성격이 다르다. AI 가 도구를 **고르고**, 결과를 보고 **또 고른다**.
-    그래서 창구를 따로 둔다. 여기가 잘못돼도 오후는 영향이 없다.
+    여기가 잘못돼도 오후는 영향이 없다.
 
-키는 학생에게 가지 않는다
-    도구는 학생 컴퓨터에서 실행된다. 서버는 「어느 도구를 부를지」만 중계한다.
-    학생 PC 에 OPENAI_API_KEY 가 없다는 원칙(절대규칙 7)이 그대로 유지된다.
+키는 공장 설정에 있다
+    3일차 아침 `3일차준비.py` 가 넣고, 수업 뒤 강사가 대시보드에서 지운다.
+    도구는 학생 코드에서 실행된다. 공장은 「어느 도구를 부를지」만 중계한다.
+
+★ 재시도는 여기서 한다 — 진단 창구와 같은 이유(39명 동시 혼잡, 줄 세울
+  서버 없음). 백오프 규칙도 같은 것을 쓴다.
 
 상태를 서버가 들고 있지 않다
     대화(messages)는 학생 러너가 들고 다닌다. 서버는 매번 받은 것을 그대로 넘긴다.
-    그래야 39명이 몰려도 서버에 쌓이는 것이 없고, 학생이 자기 루프를 눈으로 본다.
 """
 
 from __future__ import annotations
@@ -101,13 +102,16 @@ async def _ask(req: AgentReq) -> dict:
     """도구 목록을 함께 넘기고, 모델이 낸 답 한 통을 그대로 돌려준다."""
     from openai import AsyncOpenAI
 
+    from .diagnose import _잠깐대기          # 백오프 규칙은 한 벌만 둔다
+
     s = get_settings()
     keys = _keys()
     last: Exception | None = None
+    시도 = 6
 
-    for attempt in range(4):
+    for attempt in range(시도):
         key = keys[next(_KEY_TURN) % len(keys)]
-        client = AsyncOpenAI(api_key=key, timeout=60)
+        client = AsyncOpenAI(api_key=key, timeout=60, max_retries=0)
         try:
             res = await client.chat.completions.create(
                 model=s.diagnose_model,
@@ -134,13 +138,18 @@ async def _ask(req: AgentReq) -> dict:
                 except ValueError:
                     pass
                 continue
+            # 크레딧 소진은 기다려도 안 풀린다 — 재시도하지 않고 바로 알린다
+            if "insufficient_quota" in str(exc) or "credit" in str(exc).lower():
+                break
             일시적 = ("RateLimit" in name or "APIConnection" in name
                     or "APITimeout" in name or "InternalServer" in name
                     or "429" in str(exc) or "503" in str(exc))
-            if not 일시적 or attempt == 3:
+            if not 일시적 or attempt == 시도 - 1:
                 break
-            await asyncio.sleep((2 ** attempt) + random.random())
-    raise HTTPException(503, f"모델 호출 실패 — {type(last).__name__}: {last}")
+            await asyncio.sleep(_잠깐대기(exc, attempt))
+
+    from .diagnose import _실패안내          # 안내 문구도 한 벌만 둔다
+    raise _실패안내(last)
 
 
 @router.post("/{tenant_id}/agent", summary="도구 호출 중계 (서버가 LLM 키를 쥔다)")
@@ -170,11 +179,3 @@ async def agent(tenant_id: str, req: AgentReq,
     return out
 
 
-@router.get("/agent/usage", summary="누가 얼마나 썼나 (강사 확인용)")
-async def usage(
-    x_instructor_token: str | None = Header(None, alias="X-Instructor-Token"),
-) -> dict:
-    # 진단 창구와 같은 이유로 강사 토큰을 건다 — 학생끼리 호출 횟수를 비교하게 두지 않는다.
-    if not x_instructor_token or x_instructor_token != get_settings().instructor_token:
-        raise HTTPException(401, "X-Instructor-Token 이 없거나 틀립니다.")
-    return {"calls": dict(sorted(_USED.items())), "total": sum(_USED.values())}

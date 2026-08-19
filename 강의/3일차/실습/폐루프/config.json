@@ -1,7 +1,7 @@
 {
-  "tenant": "",
-  "access_key": "",
-  "base_url": "",
+  "tenant": "S01",
+  "access_key": "local-lab-key",
+  "base_url": "http://localhost:8000",
   "control_transport": "mcp",
   "watch": {
     "equipment": [

@@ -259,15 +259,12 @@ def actuator_module():
     return actuator
 
 
-def instructor(base: str, token: str, method: str, path: str, **params) -> dict:
-    r = httpx.request(method, f"{base.rstrip('/')}/api/instructor{path}",
-                      params=params, headers={"X-Instructor-Token": token}, timeout=30)
-    r.raise_for_status()
-    return r.json()
-
-
-def part_live(base: str, tenant: str, token: str, timeout_s: float, scale: float) -> None:
-    print(f"\n3. 라이브 — {base} · {tenant} · 배속 x{scale:.0f}")
+def part_live(base: str, tenant: str, timeout_s: float) -> None:
+    """공장이 3일차 상태(제어 개방)로 켜져 있어야 한다 —
+    강사 저장소라면  강의/시뮬레이터  에서  uv run 3일차준비.py sk-열쇠  한 줄이다.
+    깨끗한 상태에서 재려면 먼저  docker compose down -v && docker compose up -d.
+    """
+    print(f"\n3. 라이브 — {base} · {tenant}")
 
     import agent_bodies
     import hitl
@@ -276,33 +273,14 @@ def part_live(base: str, tenant: str, token: str, timeout_s: float, scale: float
 
     agent_bodies.install()
 
-    # 검증이 끝나면 들어올 때의 배속으로 돌려놓는다.
-    # 1 로 떨궈 두고 나가면 학생 화면이 멈춰 보인다 — 강사가 수업 직전에 이걸 돌렸다면 최악이다.
-    처음배속 = float(httpx.get(f"{base.rstrip('/')}/api/v1/health",
-                               timeout=30).json()["clock"]["time_scale"])
-
-    # 강사 콘솔이 하는 일을 그대로 한다 (교안 12~14장 시연 준비)
-    key = next(t["access_key"] for t in
-               instructor(base, token, "GET", "/tenants")["tenants"]
-               if t["tenant_id"] == tenant)
-    instructor(base, token, "POST", "/reset", tenant_id=tenant)
-    instructor(base, token, "POST", "/control-lock", unlocked=True, tenant_id=tenant)
-    instructor(base, token, "POST", "/time-scale", scale=scale)
-
-    # 배속은 교안에 없는 항목이라 강사가 잊기 쉽다. 잊으면 학생 화면이 조용하다.
-    instructor(base, token, "POST", "/time-scale", scale=1)
-    slow = api_preflight = FactoryAPI(base_url=base, tenant=tenant, access_key=key).preflight()
-    check("배속이 1이면 학생 쪽이 경고한다 (사람 기억에 안 맡긴다)", slow["배속_경고"] is True,
-          f"배속 x{slow['배속']:g}")
-    warn = instructor(base, token, "GET", "/status")["warnings"]
-    check("강사 콘솔도 같은 것을 경고한다 (고칠 수 있는 사람에게)",
-          any(w["code"] == "DAY2_SCALE_IS_1" for w in warn),
-          "; ".join(w["code"] for w in warn) or "경고 없음")
-    instructor(base, token, "POST", "/time-scale", scale=scale)
+    key = "local-lab-key"          # 003 시드의 고정값 — 비밀이 아니다
 
     api = FactoryAPI(base_url=base, tenant=tenant, access_key=key)
     info = api.preflight()
-    check("배속을 올리면 경고가 사라진다", info["배속_경고"] is False, f"배속 x{info['배속']:g}")
+    if not info["제어_개방"]:
+        check("제어 통로가 열렸다 (3일차 상태)", False,
+              "잠겨 있다 — 저장소 루트에서  uv run 3일차준비.py sk-열쇠  뒤  uv run 제어열기.py")
+        return
     check("제어 통로가 열렸다 (어제까지 잠겨 있던 그 네 개)", info["제어_개방"])
 
     # 교안 3절·8~9장 — 제어 4종은 MCP 도구 형태로 열린다
@@ -327,10 +305,9 @@ def part_live(base: str, tenant: str, token: str, timeout_s: float, scale: float
     before = {e["equipment_id"]: e for e in api.state()["equipment"]}
 
     time.sleep(12)   # 드리프트 전 평탄 구간을 확보한다
-    inj = httpx.post(f"{base.rstrip('/')}/api/instructor/inject",
-                     json={"tenant_id": tenant, "equipment_id": "EQ-03", "kind": "temp_drift"},
-                     headers={"X-Instructor-Token": token}, timeout=30).json()
-    print(f"  주입  EQ-03 temp_drift {inj['params']}")
+    # 학생 화면의 「이상 시작」 버튼과 같은 창구다 — 배속 x120 까지 스스로 건다
+    inj = httpx.post(f"{base.rstrip('/')}/api/v1/{tenant}/drill", timeout=30).json()
+    print(f"  이상 시작  {inj.get('안내', '')}")
 
     cfg = json.loads((ROOT / "config.json").read_text(encoding="utf-8"))
     ctx = looper.Context(api=api, cfg=cfg, control=mcp_ctl)
@@ -498,12 +475,10 @@ def part_live(base: str, tenant: str, token: str, timeout_s: float, scale: float
         reg.EXTRA = []
 
     # ---------------------------------------------------- 정리
-    httpx.delete(f"{base.rstrip('/')}/api/instructor/inject",
-                 headers={"X-Instructor-Token": token}, timeout=30)
-    instructor(base, token, "POST", "/time-scale", scale=처음배속)
-    instructor(base, token, "POST", "/control-lock", unlocked=False, tenant_id=tenant)
-    instructor(base, token, "POST", "/reset", tenant_id=tenant)
-    print(f"  (배속을 들어올 때 값 x{처음배속:g} 로 돌려놨습니다)")
+    # 「이상 시작」을 멈추면 배속도 기본(x60)으로 돌아온다. 상태를 완전히 비우려면
+    # 공장 폴더에서  docker compose down -v  한 줄이다 — 여기서 대신 눌러 주지 않는다.
+    httpx.post(f"{base.rstrip('/')}/api/v1/{tenant}/drill/stop", timeout=30)
+    print("  (이상을 멈추고 배속을 기본으로 돌려놨습니다)")
     mcp_ctl.close()
     api.close()
 
@@ -511,11 +486,10 @@ def part_live(base: str, tenant: str, token: str, timeout_s: float, scale: float
 # =============================================================================
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--live", action="store_true", help="시뮬레이터에 실제로 붙어 검증한다")
+    ap.add_argument("--live", action="store_true",
+                    help="공장에 실제로 붙어 검증한다 (3일차 상태로 켜 두고)")
     ap.add_argument("--base-url", default="http://127.0.0.1:8000")
-    ap.add_argument("--tenant", default="S01", help="개인 네임스페이스 (팀은 쓰지 않는다)")
-    ap.add_argument("--token", default=None, help="X-Instructor-Token")
-    ap.add_argument("--scale", type=float, default=120.0)
+    ap.add_argument("--tenant", default="S01")
     ap.add_argument("--timeout", type=float, default=300.0)
     args = ap.parse_args()
 
@@ -531,14 +505,11 @@ def main() -> int:
         part_detect()
         part_prompt()
         if args.live:
-            if not args.token:
-                print("\n--live 에는 --token 이 필요합니다.", file=sys.stderr)
-                return 2
             set_cfg(tenant=args.tenant, base_url=args.base_url,
                     hitl={"auto_approve": False})
-            part_live(args.base_url, args.tenant, args.token, args.timeout, args.scale)
+            part_live(args.base_url, args.tenant, args.timeout)
         else:
-            print("\n(라이브 검증 생략 — --live --token 으로 실행하면 실제 공장까지 확인합니다)")
+            print("\n(라이브 검증 생략 — --live 로 실행하면 실제 공장까지 확인합니다)")
     finally:
         (ROOT / "config.json").write_text(original, encoding="utf-8")
         if not had_log:

@@ -5,7 +5,7 @@
     dispatch_robot(robot_id, target)  로봇 파견
     ack_alarm(id)                  알람 확인 처리
 
-교안상 2일차 에는 노출하지 않는다. 기본 잠금이며 강사 콘솔에서 개방한다.
+교안상 2일차 에는 잠겨 있고, 3일차 아침 3일차준비.py 가 연다.
 
 격리: 경로의 tenant_id 와 X-Access-Key 헤더가 일치해야만 실행된다.
       키가 맞아도 다른 테넌트의 공장은 건드릴 수 없다(경로가 곧 대상).
@@ -249,7 +249,7 @@ async def commands(
 @router.post("/{tenant_id}/control/commands/{command_id}/approve",
              summary="HITL 승인 — PENDING 명령을 실제로 실행")
 async def approve(
-    tenant_id: str, command_id: int, decided_by: str = Query("instructor"),
+    tenant_id: str, command_id: int, decided_by: str = Query("operator"),
     x_access_key: str | None = Header(None, alias="X-Access-Key"),
 ) -> dict:
     _authorize(tenant_id, x_access_key)

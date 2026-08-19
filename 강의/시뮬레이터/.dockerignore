@@ -1,0 +1,14 @@
+# 열쇠가 든 파일 — 이미지에 절대 넣지 않는다. compose 가 기동 때 넣는다.
+.env
+.env.*
+!.env.example
+
+# 이미지에 필요 없는 것
+docs/
+tools/isolation_test.py
+tools/selftest_engine.py
+tools/check_grants.py
+__pycache__/
+**/__pycache__/
+.gitignore
+*.md

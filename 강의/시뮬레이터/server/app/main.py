@@ -19,7 +19,7 @@ from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 from . import db
-from .api import agent, claim, control, instructor, read, diagnose
+from .api import agent, control, drill, read, diagnose
 from .config import ROOT, get_settings
 from .sim.runner import runner
 
@@ -44,14 +44,6 @@ async def lifespan(app: FastAPI):
         print(str(exc), flush=True)
         raise SystemExit(1) from None
     await runner.start()
-
-    # 학생이 아예 못 붙는 설정이면 기동 직후에 크게 말한다 — 나중에 알면 늦다.
-    if s.host in ("127.0.0.1", "localhost", "::1"):
-        print("\n" + "!" * 66, flush=True)
-        print(f"  서버가 {s.host} 에만 열렸습니다 — 강사 PC 에서만 보입니다.", flush=True)
-        print("  학생 39명은 전부 「연결 실패」가 납니다.", flush=True)
-        print("  .env 의 HOST 를 0.0.0.0 으로 바꾸고 다시 켜세요.", flush=True)
-        print("!" * 66 + "\n", flush=True)
     try:
         yield
     finally:
@@ -62,11 +54,11 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="K-정밀 팩토리 시뮬레이터",
-    version="1.0.0",
+    version="2.0.0",
     description=(
-        "경남대 RISE 피지컬AI 사관학교 8월 Agentic AI 특강 · 시뮬레이터 산출물\n\n"
+        "경남대 RISE 피지컬AI 사관학교 8월 Agentic AI 특강 · 내 공장\n\n"
         "CNC 설비 6대(EQ-01~EQ-06)와 AMR 2대의 상태가 1초 주기로 변동하며 "
-        "Supabase 에 적재됩니다. 학생은 자기 네임스페이스의 읽기 API 로 대시보드를 만듭니다.\n\n"
+        "옆의 DB 컨테이너에 적재됩니다. 전부 이 컴퓨터 안에서 돕니다.\n\n"
         "제어 API 4종은 교안상 3일차에 개방됩니다."
     ),
     lifespan=lifespan,
@@ -82,13 +74,14 @@ app.add_middleware(
 )
 
 app.include_router(read.router)
-app.include_router(claim.router)
 app.include_router(control.router)
 app.include_router(diagnose.router)
 app.include_router(agent.router)
-app.include_router(instructor.router)
+app.include_router(drill.router)
 
-# 2D 공장 뷰 · 강사 콘솔 · 폴백 대시보드
+# 2D 공장 뷰
+#   강사 콘솔·자리 배정 API 는 지웠다 — 공장이 학생 PC 에서 하나씩 도는 구조라
+#   원격으로 조종할 대상도, 나눠 줄 자리도 없다. 이상 주입은 화면의 버튼이 한다.
 app.mount("/static", StaticFiles(directory=str(WEB_DIR)), name="static")
 
 
@@ -102,26 +95,3 @@ async def view() -> FileResponse:
     return FileResponse(WEB_DIR / "view" / "index.html")
 
 
-# 강사 화면은 **여기 하나뿐이다.**
-#   전에는 시뮬레이터를 시험하려고 만든 개발자 판이 있었다. 버튼이 스무 개인데
-#   수업 중 누를 것은 셋뿐이라 강사가 그 셋을 못 찾았다. 그래서 **오늘 할 일만**
-#   순서대로 큰 카드로 두고, 나머지(스파이크·결측·배속·리셋)는 접어 두었다.
-#
-#   주소는 `/console` 을 그대로 쓴다 — 진행 문서·운영 문서·절차서에 이미
-#   이 주소로 적혀 있고, 한글 경로는 주소창에서 %EC%88%98%EC%97%85 로 깨져
-#   손으로 칠 수도 없다.
-@app.get("/console", include_in_schema=False)
-async def console() -> FileResponse:
-    return FileResponse(WEB_DIR / "console" / "index.html")
-
-
-# 한동안 `/수업` 으로 안내한 적이 있어 별칭만 남긴다.
-@app.get("/수업", include_in_schema=False)
-@app.get("/class", include_in_schema=False)
-async def 수업() -> RedirectResponse:
-    return RedirectResponse("/console")
-
-
-@app.get("/fallback", include_in_schema=False)
-async def fallback() -> FileResponse:
-    return FileResponse(WEB_DIR / "fallback" / "index.html")

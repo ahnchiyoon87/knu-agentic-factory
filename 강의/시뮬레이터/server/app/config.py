@@ -49,9 +49,6 @@ class Settings:
     def __init__(self) -> None:
         # --- 접속 정보 (환경변수 전용) ---------------------------------------
         self.database_url: str = _env("SUPABASE_DB_URL", required=True)
-        self.supabase_url: str = _env("SUPABASE_URL")
-        self.supabase_publishable_key: str = _env("SUPABASE_PUBLISHABLE_KEY")
-        self.instructor_token: str = _env("INSTRUCTOR_TOKEN", required=True)
 
         # --- 시뮬레이션 주기 --------------------------------------------------
         # 교안 3절: 상태값은 1초 주기로 변동한다. 기본 1.0 을 바꾸지 말 것.
@@ -111,8 +108,6 @@ class Settings:
 
         return {
             "database_url": mask(self.database_url),
-            "supabase_url": self.supabase_url or "없음",
-            "instructor_token": mask(self.instructor_token),
             "tick_seconds": self.tick_seconds,
             "flush_seconds": self.flush_seconds,
             "retention_hours": self.retention_hours,

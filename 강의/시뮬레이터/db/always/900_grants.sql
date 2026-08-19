@@ -30,6 +30,21 @@
 -- =============================================================================
 
 -- -----------------------------------------------------------------------------
+-- 0. 공개 역할이 없으면 만든다
+--    Supabase 에는 anon·authenticated 가 원래 있지만, 학생 PC 의 로컬 Postgres
+--    (docker compose 의 db 서비스)에는 없다 — 없으면 아래 grant 가 전부 터진다.
+-- -----------------------------------------------------------------------------
+do $$
+begin
+    if not exists (select 1 from pg_roles where rolname = 'anon') then
+        create role anon nologin;
+    end if;
+    if not exists (select 1 from pg_roles where rolname = 'authenticated') then
+        create role authenticated nologin;
+    end if;
+end $$;
+
+-- -----------------------------------------------------------------------------
 -- 1. 모든 뷰를 security_invoker 로 (tenant_public 만 예외)
 --    tenant_public 은 access_key 컬럼을 감추는 것이 목적이라 소유자 권한이어야 한다.
 --    켜면 기반 테이블 tenant 의 SELECT 를 요구해 감추려던 것을 다시 열게 된다.

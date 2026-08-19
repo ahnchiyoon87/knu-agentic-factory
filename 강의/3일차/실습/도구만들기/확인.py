@@ -97,20 +97,19 @@ def 검사_설정() -> tuple[bool, list[str]]:
     api = str(os.environ.get("SHARED_API") or fb.get("shared_api", ""))
     ten = str(os.environ.get("W6_TENANT") or fb.get("tenant", ""))
 
-    # 둘 다 `내번호.py` 가 채웁니다. 학생이 손으로 적을 값이 아닙니다.
+    # 둘 다 실습 저장소에 미리 채워져 옵니다. 학생이 손으로 적을 값이 아닙니다.
     if not api.strip() or not ten.strip():
         ok = False
-        msg.append("서버 주소와 내 번호가 아직 비어 있습니다. 손으로 적지 마세요 —")
-        msg.append("    cd ../../../2일차/실습  →  uv run 내번호.py")
-        msg.append("    (2일차에 이미 돌렸으면 그냥 다시 치면 됩니다. 같은 번호가 나옵니다)")
+        msg.append("공장 주소와 번호가 비어 있습니다. 이 값은 미리 채워져 옵니다 —")
+        msg.append("    지웠거나 고쳤으면 실습 저장소를 다시 내려받으세요. 안 되면 손 드세요.")
     else:
         if not api.startswith("http"):
             ok = False
             msg.append(f"fallback.shared_api 가 이상합니다 ({api!r}). http:// 로 시작해야 합니다.")
         if not re.fullmatch(r"S\d{2}", ten):
             ok = False
-            msg.append(f"fallback.tenant 가 {ten!r} 입니다. "
-                       "2일차/실습 에서 uv run 내번호.py 를 돌리면 자동으로 채워집니다.")
+            msg.append(f"fallback.tenant 가 {ten!r} 입니다. 원래 값은 S01 입니다 — "
+                       "실습 저장소를 다시 내려받으세요.")
     # csv_path 는 기본이 "auto" 다 — mcp_server.py 와 똑같이 찾아야 판정이 어긋나지 않는다
     csv = _csv_경로(fb)
     if not csv.is_file():
@@ -126,16 +125,16 @@ def 검사_설정() -> tuple[bool, list[str]]:
             건수 = len(r.json().get("maintenance", r.json() if isinstance(r.json(), list) else []))
             if r.status_code != 200 or 건수 == 0:
                 ok = False
-                msg.append(f"서버에 닿았지만 정비 이력이 안 옵니다 (HTTP {r.status_code}). "
-                           "2일차/실습 에서 uv run 내번호.py 를 다시 돌려 주소와 번호를 "
-                           "새로 채우세요 — 여기가 비면 원인 추정이 안 나옵니다.")
+                msg.append(f"공장에 닿았지만 정비 이력이 안 옵니다 (HTTP {r.status_code}). "
+                           "공장 폴더에서  docker compose down -v  뒤  docker compose up -d  로 "
+                           "초기화하세요 — 여기가 비면 원인 추정이 안 나옵니다.")
             else:
-                msg.append(f"서버 {api} · 내 번호 {ten} · 정비 이력 확인")
+                msg.append(f"공장 {api} · 번호 {ten} · 정비 이력 확인")
         except Exception as exc:                                 # noqa: BLE001
             ok = False
-            msg.append(f"서버에 못 닿습니다 — {type(exc).__name__}. "
-                       "2일차/실습 에서 uv run 내번호.py 를 다시 돌려 주소를 새로 "
-                       "채우세요. 그래도 안 되면 손 드세요.")
+            msg.append(f"공장에 못 닿습니다 — {type(exc).__name__}. "
+                       "공장이 켜져 있나요?  공장 폴더에서  docker compose up -d  를 "
+                       "치세요. 그래도 안 되면 손 드세요.")
     return ok, msg
 
 

@@ -103,7 +103,7 @@ def _번호() -> str:
 
 
 def 부르기(messages: list[dict], 왕복: int) -> dict:
-    """강사 서버를 거쳐 AI 에게 한 번 묻는다."""
+    """내 공장(컨테이너)을 거쳐 AI 에게 한 번 묻는다."""
     r = httpx.post(
         f"{_서버()}/api/v1/{_번호()}/agent",
         headers={"X-Access-Key": _접속키()},
@@ -114,23 +114,19 @@ def 부르기(messages: list[dict], 왕복: int) -> dict:
         raise RuntimeError("1분 호출 한도를 넘었습니다 — 잠시 뒤 다시 돌리세요.")
     if r.status_code == 400:
         raise RuntimeError(r.json().get("detail", r.text))
+    if r.status_code == 503:
+        # 39명이 같은 열쇠를 쓴다 — 혼잡이면 공장이 이미 1분 가까이 기다렸다 온 것이다
+        raise RuntimeError(r.json().get("detail", "AI 창구가 잠시 막혔습니다 — "
+                                                  "1분쯤 뒤에 한 번 더 실행하세요."))
     r.raise_for_status()
     return r.json()
 
 
 def _접속키() -> str:
-    """`내번호.py` 가 저장소 루트에 남긴 `.내번호` 에서 읽는다."""
+    """config.json 에 미리 채워져 온다 — 전원이 같은 값이라 비밀이 아니다."""
     import os
-    if os.environ.get("W6_ACCESS_KEY"):
-        return os.environ["W6_ACCESS_KEY"]
-    for base in (ROOT, *list(ROOT.parents)[:4]):
-        p = base / ".내번호"
-        if p.is_file():
-            try:
-                return json.loads(p.read_text(encoding="utf-8")).get("키", "")
-            except Exception:                                       # noqa: BLE001
-                pass
-    return ""
+    return (os.environ.get("W6_ACCESS_KEY")
+            or str(CFG.get("fallback", {}).get("access_key", "")).strip())
 
 
 def 도구확인() -> None:
@@ -147,12 +143,12 @@ def 도구확인() -> None:
 
 
 def 설정확인() -> None:
-    안내 = ("    cd ../../../2일차/실습  →  uv run 내번호.py\n"
-            "    (2일차에 이미 돌렸으면 그냥 다시 치면 됩니다. 같은 번호가 나옵니다)")
+    안내 = ("    이 값들은 실습 저장소에 미리 채워져 옵니다. 지웠거나 고쳤으면\n"
+            "    실습 저장소를 다시 내려받으세요. 안 되면 손 드세요.")
     if not _서버() or not _번호():
-        sys.exit("config.json 이 아직 비어 있습니다 — 서버 주소와 내 번호가 없습니다.\n" + 안내)
+        sys.exit("config.json 이 비어 있습니다 — 공장 주소와 번호가 없습니다.\n" + 안내)
     if not _접속키():
-        sys.exit("접속 키를 못 찾았습니다.\n" + 안내)
+        sys.exit("config.json 의 접속 키가 비어 있습니다.\n" + 안내)
 
 
 def main() -> int:

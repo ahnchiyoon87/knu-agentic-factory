@@ -142,18 +142,12 @@
 <header>
   <h1>K-정밀 팩토리 시뮬레이터<small>경남대 RISE 피지컬AI 사관학교 · 8월 Agentic AI 특강</small></h1>
   <div class="spacer"></div>
-  <!-- 「네임스페이스」 고르는 칸과 「폴링」 칸은 **강사만** 본다.
-       학생 화면에 두면 ① 남의 공장을 골라 볼 수 있고(바로 아래 패널의 「자기 몫의 공장입니다」와
-       모순된다) ② 「네임스페이스」는 학생이 배우는 말이 아니며(학생은 「내 번호」로 배운다)
-       ③ 폴링을 1초로 당기면 39명이 그만큼 서버를 두드린다.
-       주소에 ?강사=1 을 붙였을 때만 나타난다. -->
+  <!-- 공장은 이 컴퓨터에서 하나만 돈다 — 고를 것이 없어 고르는 칸도 없다.
+       (select 둘은 코드가 목록·주기를 읽는 자리로만 남긴다) -->
   <span id="강사칸" hidden>
     <label>공장 <select id="tenant"></select></label>
     <label>폴링 <select id="interval">
-        <option value="1000">1초</option>
         <option value="2000" selected>2초</option>
-        <option value="3000">3초</option>
-        <option value="5000">5초</option>
     </select></label>
   </span>
   <span class="pill"><span class="dot" id="dot"></span><span id="status">연결 중</span></span>
@@ -190,24 +184,16 @@
   <div class="stagecol">
     <div id="stageWrap"><div id="stage"></div></div>
     <div class="under">
-      <!-- 강사 시연용. /view?demo=1 로 열었을 때만 나타난다.
-         2일차 「이 공장은 일부러 고장 낼 수 있습니다」 장의 주입을
-         다른 탭으로 넘어가지 않고 하기 위한 것이다. -->
+      <!-- 「이상 시작」 — 2일차 「이 공장은 일부러 고장 낼 수 있습니다」 장에서
+         강사의 "다 같이 누르세요" 신호에 맞춰 학생이 직접 누른다.
+         어느 설비가 어떻게 되는지는 화면 어디에도 적지 않는다 —
+         다음 장 「무엇이 달라졌습니까」가 학생이 스스로 찾는 자리다. -->
 
-      <div class="card" id="demoCard">
-        <h2>시연 — 이상 주입</h2>
-        <input id="demoToken" type="password" placeholder="INSTRUCTOR_TOKEN" autocomplete="off">
+      <div class="card on" id="demoCard">
+        <h2>고장 연습</h2>
         <div class="row">
-          <button data-kind="temp_drift">온도 드리프트</button>
-          <button data-kind="vibration_spike">진동 스파이크</button>
-        </div>
-        <div class="row">
-          <button data-kind="sensor_dropout">센서 결측</button>
-          <button id="demoStop" class="warn">전체 중단</button>
-        </div>
-        <div class="row">
-          <button data-scale="1">배속 ×1</button>
-          <button data-scale="60">배속 ×60</button>
+          <button id="drillStart">이상 시작</button>
+          <button id="drillStop" class="warn">멈추고 원래대로</button>
         </div>
         <div id="demoLog"></div>
       </div>
@@ -308,11 +294,6 @@ async function boot(){
   const want = 물음.get('tenant');
   if (want && list.tenants.some(t => t.tenant_id === want)) sel.value = want;
 
-  // 공장 고르는 칸·폴링 칸은 **강사만** 본다 —  /view?tenant=S00&강사=1
-  //   학생 화면에 두면 남의 공장을 골라 볼 수 있고, 바로 아래 「자기 몫의 공장입니다」와 모순된다.
-  if (물음.has('강사') || 물음.has('instructor')) {
-    document.getElementById('강사칸').hidden = false;
-  }
   tenant = sel.value;
   document.getElementById('apiHint').textContent = `GET /api/v1/${tenant}/state`;
   showNamespace(sel);
@@ -621,55 +602,28 @@ function renderTables(s){
     : '<div class="empty">없음</div>';
 }
 
-// --------------------------------------------- 시연 패널 (?demo=1)
-(function initDemo(){
-  if (new URLSearchParams(location.search).get('demo') !== '1') return;
-  const card = document.getElementById('demoCard');
-  card.classList.add('on');
-  document.body.classList.add('demo');
-
-  const tok = () => document.getElementById('demoToken').value.trim();
+// --------------------------------------------- 「이상 시작」 버튼
+(function initDrill(){
   const log = m => document.getElementById('demoLog').textContent = m;
-  const saved = sessionStorage.getItem('instructorToken');
-  if (saved) document.getElementById('demoToken').value = saved;
 
-  async function call(path, method){
-    const r = await fetch(API + path, {
-      method, headers: { 'X-Instructor-Token': tok(), 'Content-Type': 'application/json' },
-      body: method === 'POST' && path.includes('/inject')
-        ? JSON.stringify({ tenant_id: tenant, kind: path.split('kind=')[1] }) : undefined,
-    });
+  async function call(path){
+    const r = await fetch(`${API}/api/v1/${tenant}${path}`, { method: 'POST' });
     const b = await r.json().catch(() => ({}));
     if (!r.ok) throw new Error(b.detail || `HTTP ${r.status}`);
     return b;
   }
 
-  card.querySelectorAll('button[data-kind]').forEach(b => b.onclick = async () => {
-    if (!tok()) return log('토큰을 입력하세요.');
-    sessionStorage.setItem('instructorToken', tok());
+  document.getElementById('drillStart').onclick = async () => {
     try{
-      const r = await fetch(API + '/api/instructor/inject', {
-        method: 'POST',
-        headers: { 'X-Instructor-Token': tok(), 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tenant_id: tenant, kind: b.dataset.kind }),
-      });
-      const j = await r.json();
-      if (!r.ok) throw new Error(j.detail || r.status);
-      log(`주입 #${j.id} — ${j.equipment_id} / ${j.kind}`);
+      const j = await call('/drill');
+      log(j.안내 + (j.실제_소요_분 ? ` (약 ${j.실제_소요_분}분 걸립니다)` : ''));
     }catch(e){ log('실패 — ' + e.message); }
-  });
-
-  document.getElementById('demoStop').onclick = async () => {
-    try{ const j = await call('/api/instructor/inject', 'DELETE'); log(`주입 ${j.stopped}건 중단`); }
-    catch(e){ log('실패 — ' + e.message); }
   };
 
-  card.querySelectorAll('button[data-scale]').forEach(b => b.onclick = async () => {
-    try{
-      const j = await call('/api/instructor/time-scale?scale=' + b.dataset.scale, 'POST');
-      log(`배속 ×${j.time_scale} — 공장 4시간이 실제 ${j.four_hours_takes_real_minutes}분`);
-    }catch(e){ log('실패 — ' + e.message); }
-  });
+  document.getElementById('drillStop').onclick = async () => {
+    try{ const j = await call('/drill/stop'); log(`중단했습니다. 배속 ×${j.배속} 으로 돌아왔습니다.`); }
+    catch(e){ log('실패 — ' + e.message); }
+  };
 })();
 
 boot().catch(err => setStatus(false, '초기화 실패 — ' + err.message));
