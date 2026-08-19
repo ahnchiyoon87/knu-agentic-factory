@@ -38,6 +38,23 @@ def _env_int(key: str, default: int) -> int:
     return int(raw) if raw not in (None, "") else default
 
 
+def _열쇠풀기(값: str) -> str:
+    """캡슐(KNU1:...)이면 푼다. 평문(sk-...)은 그대로.
+
+    표식·양념은 tools/열쇠캡슐.py 와 같아야 한다.
+    """
+    if not 값.startswith("KNU1:"):
+        return 값
+    import base64
+    from itertools import cycle
+    양념 = b"K-precision-2026-knu"
+    try:
+        엮음 = base64.urlsafe_b64decode(값[5:].encode("ascii"))
+        return bytes(a ^ b for a, b in zip(엮음, cycle(양념))).decode("utf-8")
+    except Exception:                                              # noqa: BLE001
+        return 값        # 깨진 캡슐 — 인증 단계에서 잡혀 사람 말로 안내된다
+
+
 def _env_bool(key: str, default: bool) -> bool:
     raw = os.getenv(key)
     if raw in (None, ""):
@@ -75,15 +92,22 @@ class Settings:
         # --- 제어 API 개방 (교안: 3일차 최초 개방) ---------------------------
         self.control_api_enabled: bool = _env_bool("CONTROL_API_ENABLED", False)
 
-        # ── 진단 중계 — 학생 PC 에 LLM 키를 두지 않기 위한 것 ──────────────
-        #    키는 여기(.env)에만 있다. 학생은 자기 접속 키로 서버에 붙는다.
-        #  키를 여러 개 넣으면 돌아가며 쓴다. 하나가 막혀도 수업이 안 멈춘다.
-        #    OPENAI_API_KEY=sk-...,sk-...,sk-...
+        # ── AI 창구 열쇠 ─────────────────────────────────────────────────────
+        #    .env 에는 평문(sk-...)이나 **캡슐**(KNU1:... — tools/열쇠캡슐.py)이 온다.
+        #    캡슐이면 여기(메모리)에서만 풀어 쓴다 — 학생이 .env 를 열어 봐도
+        #    문자 덩어리뿐이고, 화면·로그 어디에도 평문을 찍지 않는다.
+        #    (난독화이지 암호화가 아니다 — 진짜 방어선은 예산 상한 + 당일 삭제다)
         self.openai_api_keys: list[str] = [
-            k.strip() for k in _env("OPENAI_API_KEY", "").split(",") if k.strip()
+            _열쇠풀기(k.strip())
+            for k in _env("OPENAI_API_KEY", "").split(",") if k.strip()
         ]
         self.diagnose_enabled: bool = _env_bool("DIAGNOSE_ENABLED", True)
         self.diagnose_model: str = _env("DIAGNOSE_MODEL", "gpt-5.4-mini")
+        # ── 중계문 주소 (선택) ────────────────────────────────────────────────
+        #    강사의 GPU 서버에 OpenAI 호환 중계문(LiteLLM 등)을 세워 두면,
+        #    진짜 sk- 키는 그 서버에만 있고 학생은 통행증 토큰만 갖는다.
+        #    비워 두면 OpenAI 를 직접 부른다 (그때는 OPENAI_API_KEY 가 캡슐/평문).
+        self.openai_base_url: str = _env("OPENAI_BASE_URL", "").rstrip("/")
         self.diagnose_concurrency: int = _env_int("DIAGNOSE_CONCURRENCY", 6)
         self.diagnose_per_min: int = _env_int("DIAGNOSE_PER_MIN", 12)
         # HITL: 승인 후에만 실행할 명령. 비우면 즉시 실행.

@@ -2,8 +2,9 @@
 
     학생 코드 ──(내 접속 키)──> 내 공장 ──(OPENAI_API_KEY)──> OpenAI
 
-키는 3일차 아침에 단톡방으로 받아 `3일차준비.py` 가 공장 설정에 넣고,
-수업이 끝나면 강사가 OpenAI 대시보드에서 그 키를 지운다 — 그 순간 죽는다.
+키는 3일차 아침 드라이브의 캡슐 파일(오늘의열쇠.txt)로 받아 `3일차준비.py` 가
+공장 설정에 넣고(캡슐 그대로 — 평문은 메모리에서만 풀린다), 수업이 끝나면
+강사가 파일과 키를 같이 지운다 — 그 순간 죽는다.
 
 ★ 다 같이 쓰는 것은 이 키 하나뿐이다. 39명이 같은 순간에 부르면 OpenAI 가
   「잠깐 기다려라」(429)를 돌려주는데, 줄 세워 줄 서버가 따로 없으므로
@@ -124,7 +125,8 @@ async def _ask_openai(req: DiagnoseReq) -> dict:
         key = keys[next(_KEY_TURN) % len(keys)]      # 돌아가며 쓴다
         # max_retries=0 — 재시도는 여기서만 한다. 라이브러리까지 겹치면
         # 39개 공장 × 이중 재시도로 혼잡이 오히려 길어진다.
-        client = AsyncOpenAI(api_key=key, timeout=60, max_retries=0)
+        client = AsyncOpenAI(api_key=key, timeout=60, max_retries=0,
+                             base_url=s.openai_base_url or None)
         try:
             res = await client.chat.completions.create(
                 model=s.diagnose_model,

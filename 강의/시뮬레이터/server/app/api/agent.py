@@ -111,7 +111,8 @@ async def _ask(req: AgentReq) -> dict:
 
     for attempt in range(시도):
         key = keys[next(_KEY_TURN) % len(keys)]
-        client = AsyncOpenAI(api_key=key, timeout=60, max_retries=0)
+        client = AsyncOpenAI(api_key=key, timeout=60, max_retries=0,
+                             base_url=s.openai_base_url or None)
         try:
             res = await client.chat.completions.create(
                 model=s.diagnose_model,
