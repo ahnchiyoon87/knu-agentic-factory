@@ -209,8 +209,7 @@ def 코드칸(줄: list[str], 말: str) -> str:
 
     쓸것 = [x for x in 줄 if x.strip()]
     if 쓸것 and all(x.lstrip().startswith(명령시작) for x in 쓸것):
-        몸 = "\n".join(f'<span class="g">&gt;</span> {html.escape(x.strip())}'
-                      for x in 쓸것)
+        몸 = "\n".join(html.escape(x.strip()) for x in 쓸것)
         return ('<div class="term"><div class="h">터미널에 칩니다</div>'
                 f'<pre><code>{몸}</code></pre></div>')
 
