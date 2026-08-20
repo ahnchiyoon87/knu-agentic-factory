@@ -312,9 +312,17 @@ md: str, 제목: str, 기준폴더: Path | None = None) -> str:
                        + "</blockquote>")
             continue
         elif re.match(r"^\s*[-*]\s+", line):
-            buf = []
-            while i < len(줄들) and re.match(r"^\s*[-*]\s+", 줄들[i]):
-                buf.append(re.sub(r"^\s*[-*]\s+", "", 줄들[i]))
+            # 들여쓴 이어짐 줄은 그 항목의 뒷문장이다 — 따로 내보내면
+            # 항목 밖으로 떨어져 나가 문장이 끊긴다.
+            buf: list[str] = []
+            while i < len(줄들):
+                if re.match(r"^\s*[-*]\s+", 줄들[i]):
+                    buf.append(re.sub(r"^\s*[-*]\s+", "", 줄들[i]))
+                elif (buf and 줄들[i].startswith((" ", "\t")) and 줄들[i].strip()
+                      and not 줄들[i].lstrip().startswith(("![", "```", "|", ">"))):
+                    buf[-1] += " " + 줄들[i].strip()
+                else:
+                    break
                 i += 1
             out.append("<ul>" + "".join(f"<li>{인라인(x)}</li>" for x in buf) + "</ul>")
             continue
@@ -323,8 +331,14 @@ md: str, 제목: str, 기준폴더: Path | None = None) -> str:
             # 원문의 숫자를 살려야 「2. 3. 4.」가 전부 「1.」로 리셋되지 않는다.
             첫숫자 = int(re.match(r"^\s*(\d+)\.", line).group(1))
             buf = []
-            while i < len(줄들) and re.match(r"^\s*\d+\.\s+", 줄들[i]):
-                buf.append(re.sub(r"^\s*\d+\.\s+", "", 줄들[i]))
+            while i < len(줄들):
+                if re.match(r"^\s*\d+\.\s+", 줄들[i]):
+                    buf.append(re.sub(r"^\s*\d+\.\s+", "", 줄들[i]))
+                elif (buf and 줄들[i].startswith((" ", "\t")) and 줄들[i].strip()
+                      and not 줄들[i].lstrip().startswith(("![", "```", "|", ">"))):
+                    buf[-1] += " " + 줄들[i].strip()
+                else:
+                    break
                 i += 1
             시작 = f' start="{첫숫자}"' if 첫숫자 != 1 else ""
             out.append(f"<ol{시작}>" + "".join(f"<li>{인라인(x)}</li>" for x in buf) + "</ol>")
