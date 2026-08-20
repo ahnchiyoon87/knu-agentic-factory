@@ -39,12 +39,7 @@ mcp.tool()(query_equipment)
 
 
 def main() -> None:
-    if CFG["transport"] == "http":
-        mcp.settings.host = CFG["http"]["host"]
-        mcp.settings.port = int(CFG["http"]["port"])
-        mcp.run(transport="streamable-http")
-    else:
-        mcp.run(transport="stdio")
+    mcp.run(transport="stdio")
 
 
 if __name__ == "__main__":

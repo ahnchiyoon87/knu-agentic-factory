@@ -20,13 +20,10 @@ MCP 가 무엇인가
   '움직이는 손'(설비 제어)은 오늘 오후에 열립니다.
 ────────────────────────────────────────────────────────────────────
 
-바꿔 끼우기 — config.json 한 곳만 고칩니다
+설정은 미리 채워져 있습니다 — config.json 을 손댈 일이 없습니다.
 
-  transport            stdio(내 컴퓨터 — 기본) ↔ http(강사 공용 서버로 우회)
-  data_source          fallback(이번 특강의 정상 경로 — 기본) ↔ student(개인 DB — 이번엔 안 씀)
-
-  어느 쪽으로 두든 **도구 이름과 응답 형태는 같습니다.**
-  그래서 강사가 우회시켜도 내가 만든 에이전트 쪽은 고칠 게 없습니다.
+  transport      stdio — 도구가 내 컴퓨터에서 돈다
+  data_source    fallback — 센서값은 어제 받은 7일치 CSV 를 그대로 읽는다
 """
 
 from __future__ import annotations
@@ -102,72 +99,42 @@ def _csv_경로() -> Path:
 def _fetch_readings(equipment_id: str, hours: int) -> list[dict]:
     """최근 hours 시간의 센서값. 오래된 것부터 정렬해서 돌려준다.
 
-    student  → 개인 DB (이번 특강에서는 쓰지 않습니다)
-    fallback → 나눠받은 7일치 CSV 를 파일에서 직접 읽는다
+    어제 받은 7일치 CSV 를 파일에서 직접 읽는다.
 
-    강사 시뮬레이터에서 가져오지 않는 이유 — 시뮬레이터는 최근 1시간만 보관한다.
+    공장에서 가져오지 않는 이유 — 공장은 최근 1시간만 보관한다.
     "지난 주"를 물으려면 7일치가 있는 쪽을 봐야 한다.
     """
-    if CFG["data_source"] == "fallback":
-        import csv
-        path = _csv_경로()
-        cutoff = None
-        rows = []
-        with open(path, encoding="utf-8", newline="") as f:
-            for r in csv.DictReader(f):
-                if r["equipment_id"] != equipment_id:
-                    continue
-                rows.append({
-                    "equipment_id": r["equipment_id"],
-                    "timestamp": r["timestamp"],
-                    "temperature": float(r["temperature"]) if r["temperature"] else None,
-                    "vibration": float(r["vibration"]) if r["vibration"] else None,
-                    "rpm": float(r["rpm"]) if r["rpm"] else None,
-                    "run_state": r["run_state"],
-                })
-        rows.sort(key=lambda x: x["timestamp"])
-        if hours and rows:
-            last = datetime.fromisoformat(rows[-1]["timestamp"])
-            cutoff = (last - timedelta(hours=hours)).isoformat()
-            rows = [r for r in rows if r["timestamp"] >= cutoff]
-        return rows
-
-    db = CFG["student_db"]
-    r = httpx.get(f"{db['url'].rstrip('/')}/rest/v1/{db['readings_table']}",
-                  params={"select": "equipment_id,timestamp,temperature,vibration,rpm,run_state",
-                          "equipment_id": f"eq.{equipment_id}",
-                          "order": "timestamp.desc", "limit": 20000},
-                  headers={"apikey": db["key"], "Authorization": f"Bearer {db['key']}"},
-                  timeout=30)
-    r.raise_for_status()
-    return sorted(r.json(), key=lambda x: x["timestamp"])
+    import csv
+    path = _csv_경로()
+    rows = []
+    with open(path, encoding="utf-8", newline="") as f:
+        for r in csv.DictReader(f):
+            if r["equipment_id"] != equipment_id:
+                continue
+            rows.append({
+                "equipment_id": r["equipment_id"],
+                "timestamp": r["timestamp"],
+                "temperature": float(r["temperature"]) if r["temperature"] else None,
+                "vibration": float(r["vibration"]) if r["vibration"] else None,
+                "rpm": float(r["rpm"]) if r["rpm"] else None,
+                "run_state": r["run_state"],
+            })
+    rows.sort(key=lambda x: x["timestamp"])
+    if hours and rows:
+        last = datetime.fromisoformat(rows[-1]["timestamp"])
+        cutoff = (last - timedelta(hours=hours)).isoformat()
+        rows = [r for r in rows if r["timestamp"] >= cutoff]
+    return rows
 
 
 def _fetch_maintenance(equipment_id: str) -> list[dict]:
-    """정비 이력.
-
-    student  → 개인 DB (이번 특강에서는 쓰지 않습니다)
-    fallback → 강사 시뮬레이터의 공용 정비 이력
-
-    어느 쪽이든 이 함수가 같은 모양으로 돌려주므로 도구 쪽은 신경 쓰지 않아도 된다.
-    """
-    if CFG["data_source"] == "fallback":
-        fb = CFG["fallback"]
-        # 강사 시뮬레이터 주소 — 환경변수가 있으면 그것을 쓴다(리허설·클라우드 전환용)
-        shared = (os.environ.get("SHARED_API") or fb["shared_api"]).rstrip("/")
-        r = httpx.get(f"{shared}/api/v1/{fb['tenant']}/maintenance",
-                      params={"equipment_id": equipment_id}, timeout=30)
-        r.raise_for_status()
-        return r.json()["maintenance"]
-
-    db = CFG["student_db"]
-    r = httpx.get(f"{db['url'].rstrip('/')}/rest/v1/{db['maintenance_table']}",
-                  params={"select": "*", "equipment_id": f"eq.{equipment_id}",
-                          "order": "issued_at.desc", "limit": 50},
-                  headers={"apikey": db["key"], "Authorization": f"Bearer {db['key']}"},
-                  timeout=30)
+    """정비 이력 — 어제 켠 내 공장에서 가져온다."""
+    fb = CFG["fallback"]
+    공장 = (os.environ.get("SHARED_API") or fb["shared_api"]).rstrip("/")
+    r = httpx.get(f"{공장}/api/v1/{fb['tenant']}/maintenance",
+                  params={"equipment_id": equipment_id}, timeout=30)
     r.raise_for_status()
-    return r.json()
+    return r.json()["maintenance"]
 
 
 # =============================================================================
@@ -361,15 +328,8 @@ def main() -> None:
                 print(f"\n[{name}] 오류 — {type(e).__name__}: {e}")
         return
 
-    transport = CFG["transport"]
-    if transport == "http":
-        mcp.settings.host = CFG["http"]["host"]
-        mcp.settings.port = int(CFG["http"]["port"])
-        print(f"MCP 서버 (http) — {CFG['http']['host']}:{CFG['http']['port']}", file=sys.stderr)
-        mcp.run(transport="streamable-http")
-    else:
-        print("MCP 서버 (stdio)", file=sys.stderr)
-        mcp.run(transport="stdio")
+    print("MCP 서버 (stdio)", file=sys.stderr)
+    mcp.run(transport="stdio")
 
 
 if __name__ == "__main__":

@@ -1,25 +1,12 @@
 {
-  "_comment": "여기 한 곳만 고치면 전부 바뀝니다 — 다만 이번 실습에서는 고칠 일이 없습니다.",
+  "_comment": "미리 채워져 있습니다. 이번 실습에서 고칠 일이 없습니다.",
   "transport": "stdio",
-  "_transport": "stdio = 내 컴퓨터에서만 (기본, 네트워크를 안 타므로 방화벽과 무관) | http = 강사가 띄운 공용 서버로 우회",
-  "http": {
-    "_comment": "transport 를 http 로 바꿨을 때만 씁니다. 이 값은 **서버를 띄우는 쪽(강사)이 쓰는 바인드 주소**라 학생은 손대지 않습니다 — 우회가 필요하면 강사가 절차를 안내합니다.",
-    "host": "127.0.0.1",
-    "port": 8765
-  },
+  "_transport": "stdio = 도구가 내 컴퓨터에서 돕니다. 네트워크를 안 타므로 방화벽과 무관합니다.",
   "data_source": "fallback",
-  "_data_source": "fallback = 이번 특강의 정상 경로(기본). 센서값은 나눠받은 CSV, 정비 이력은 내 공장(localhost)에서 옵니다. | student = 개인 DB 를 따로 만든 경우에만. 이번 특강에서는 쓰지 않습니다.",
-  "student_db": {
-    "_comment": "이번 특강에서는 쓰지 않습니다. data_source 가 student 일 때만 필요합니다.",
-    "url": "",
-    "key": "",
-    "readings_table": "sensor_readings",
-    "maintenance_table": "work_order"
-  },
+  "_data_source": "센서값은 어제 받은 7일치 CSV 에서, 정비 이력은 내 공장(localhost)에서 옵니다.",
   "fallback": {
-    "_comment": "data_source 가 fallback 일 때만 씁니다.",
     "csv_path": "auto",
-    "_csv_path": "auto = 2일차에 쓴 그 CSV 를 스스로 찾습니다(기본). 그대로 두세요.",
+    "_csv_path": "auto = 2일차에 쓴 그 CSV 를 스스로 찾습니다. 그대로 두세요.",
     "shared_api": "http://localhost:8000",
     "_shared_api": "내 공장 주소. 공장은 내 컴퓨터의 docker compose 로 돕니다 — 전원이 같은 값이라 손댈 일이 없습니다.",
     "tenant": "S01",
