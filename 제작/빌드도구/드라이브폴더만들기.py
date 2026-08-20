@@ -44,6 +44,7 @@ for _s in (_sys.stdout, _sys.stderr):
 import shutil
 import subprocess
 import sys
+import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent          # 제작/빌드도구/
@@ -111,13 +112,26 @@ def main() -> int:
         shutil.rmtree(OUT)
     OUT.mkdir(parents=True)
 
-    # ── 실습 ZIP — 옆에 풀려 있는 그 폴더를 그대로 압축한다 ────────────────
+    # ── 실습 ZIP — 옆에 풀려 있는 그 폴더를 압축한다 ──────────────────────
     #    학생은 zip 을 받아 풀어서 VS Code 로 연다(준비안내 ③). 그래서 zip 은 없앨 수 없다.
     #    대신 **풀린 것이 정본**이고 이 zip 은 그 그림자라, 고친 것이 반드시 따라온다.
-    zip_dst = OUT / "2. 실습 파일 (k-precision-lab)"
-    shutil.make_archive(str(zip_dst), "zip",
-                        root_dir=str(산출물), base_dir=실습원본.name)
-    print("  담음  2. 실습 파일 (k-precision-lab).zip  (배포본에서 새로 압축)")
+    #
+    #    ★ 통째로 담으면 안 된다. 이 폴더에서 `uv run` 을 한 번이라도 돌리면
+    #      `.venv` 가 생기고, make_archive 는 그것까지 담는다. 실제로 1MB 짜리
+    #      실습 zip 이 파일 6천 개로 불어난 적이 있다. 학생 PC 에서는 경로가
+    #      달라 쓰지도 못하는 짐이다.
+    찌꺼기폴더 = {".venv", "__pycache__", ".git", ".pytest_cache", ".ruff_cache"}
+    zip_dst = OUT / "2. 실습 파일 (k-precision-lab).zip"
+    담은수 = 0
+    with zipfile.ZipFile(zip_dst, "w", zipfile.ZIP_DEFLATED) as z:
+        for p in sorted(실습원본.rglob("*")):
+            rel = p.relative_to(실습원본.parent)
+            if 찌꺼기폴더 & set(rel.parts) or p.suffix in {".pyc", ".pyo"}:
+                continue
+            if p.is_file():
+                z.write(p, str(rel))
+                담은수 += 1
+    print(f"  담음  {zip_dst.name}  (배포본에서 새로 압축 · 파일 {담은수}개)")
 
     # ── 학생이 읽는 것 — 문서는 PDF 로 낸다 ──────────────────────────────
     #    `.md` 를 드라이브에 올리면 미리보기가 안 되고, 받아도 메모장에서
@@ -179,6 +193,17 @@ def main() -> int:
         print("\n  ★ 강사 것이 섞였습니다 — 올리지 마세요", file=sys.stderr)
         for p in 샌것:
             print(f"      {p.relative_to(OUT)}", file=sys.stderr)
+        return 1
+
+    # 실습 zip 에 작업 찌꺼기가 들어갔는지 — 눈으로는 안 보이고 크기로만 드러난다
+    with zipfile.ZipFile(zip_dst) as z:
+        샌것 = [n for n in z.namelist()
+               if 찌꺼기폴더 & set(Path(n).parts) or n.endswith((".pyc", ".pyo"))]
+    if 샌것:
+        print(f"\n  ★ 실습 zip 에 작업 찌꺼기가 {len(샌것)}개 들어갔습니다 — 올리지 마세요",
+              file=sys.stderr)
+        for n in 샌것[:5]:
+            print(f"      {n}", file=sys.stderr)
         return 1
 
     총 = sum(p.stat().st_size for p in OUT.rglob("*") if p.is_file())
