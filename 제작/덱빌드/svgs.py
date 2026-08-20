@@ -99,19 +99,27 @@ CLOCK16 = _s(560, 480, "0 0 560 480", f"""
 
 # ── 숫자 쏟아짐 — 설비 6대
 FLOOD = _s(560, 420, "0 0 560 420", f"""
-<g stroke="{N}" stroke-width="6" fill="none">""" +
-"".join(f'<rect x="{40+ i%3*170}" y="{40 + i//3*120}" width="120" height="80" rx="8"/>'
-        for i in range(6)) + f"""</g>
-<g stroke="{O}" stroke-width="3" stroke-linecap="round" opacity=".8">""" +
-"".join(f'<path d="M{72+ i%3*170 + (i//3)*0} {124 + i//3*120}v{34 if i%2 else 26}"/>'
-        f'<path d="M{100+ i%3*170} {124 + i//3*120}v{22 if i%2 else 34}"/>'
-        f'<path d="M{128+ i%3*170} {124 + i//3*120}v{30}"/>' for i in range(6)) + f"""</g>
-<path d="M40 330h480" stroke="{G}" stroke-width="2"/>
-<text class="lbl-o" x="280" y="374" text-anchor="middle">쉬지 않고 흐른다</text>
+<path d="M30 300h500" stroke="{G}" stroke-width="2"/>""" +
+# 지나간 한 시간 — 오른쪽으로 갈수록 진해진다(왼쪽일수록 흐릿 = 이미 사라진 값)
+"".join(f'<circle cx="{40 + i*46}" cy="{262 - i*9}" r="7" fill="{G}" '
+        f'opacity="{0.18 + i*0.09:.2f}"/>' for i in range(7)) +
+f"""
+<path d="M40 262 L{40+6*46} {262-6*9}" stroke="{G}" stroke-width="3"
+      stroke-dasharray="6 8" opacity=".55"/>
+<text class="lbl-g" x="34" y="168">앞 한 시간 — 화면에 없다</text>
+
+<rect x="360" y="120" width="170" height="140" rx="12" stroke="{N}" stroke-width="8" fill="none"/>
+<path d="M445 260v26M406 286h78" stroke="{N}" stroke-width="8" stroke-linecap="round"/>
+<circle cx="445" cy="190" r="15" fill="{O}"/>
+<text class="lbl-o" x="445" y="342" text-anchor="middle">지금 값 하나</text>
 """)
-# ↑ 전에는 「1분마다 24개」였다. 24개는 사람이 볼 수 있는 양이라 이 장의 근거가 못 된다
-#   (미국 잡숍 조사 업체당 CNC 중앙값 16대 — 우리 6대와 같은 급이다).
-#   이 그림이 말할 것은 개수가 아니라 **여섯 줄기가 쉬지 않고 흐른다**는 것이다.
+# ↑ 두 번 갈아엎었다.
+#   ① 「1분마다 24개」 — 24개는 사람이 볼 수 있는 양이라 근거가 못 된다
+#      (미국 잡숍 조사 업체당 CNC 중앙값 16대 — 우리 6대와 같은 급이다).
+#   ② 「여섯 줄기가 쉬지 않고 흐른다」 — 그것도 **양**의 이야기였다.
+#   이 장이 말할 것은 양이 아니라 **흐름은 화면에 없다**는 것이다 —
+#   모니터 안에는 점 하나(지금 값)뿐이고, 판단에 필요한 앞 한 시간은
+#   화면 밖에서 이미 흐려져 사라졌다.
 
 # ── 고정 임계선 (구간 표지용) — **선을 넘으면 울린다**는 아이디어를 그린다.
 #    전에는 선 아래로 지나가는 곡선에 「넘지 않는다」를 달아 뒀는데, 그건 **다음 장의 반전**이다.
