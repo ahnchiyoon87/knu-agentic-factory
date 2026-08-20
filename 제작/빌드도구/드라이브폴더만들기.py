@@ -108,9 +108,21 @@ def main() -> int:
         print("    고치기 —  python 제작/검증도구/배포본만들기.py", file=sys.stderr)
         return 1
 
+    # 폴더를 통째로 지웠다 다시 만든다. 다만 **강사가 pptx 를 열어 둔 채로**
+    # 이걸 돌리면 그 파일 하나에 걸려 전부 멈춘다(WinError 32) — 실제로 그랬다.
+    # 열린 파일은 건너뛰고 나머지를 갱신한 뒤, 무엇이 안 바뀌었는지 끝에 알린다.
+    못지운것: list[Path] = []
     if OUT.exists():
-        shutil.rmtree(OUT)
-    OUT.mkdir(parents=True)
+        for p in sorted(OUT.rglob("*"), key=lambda q: -len(q.parts)):
+            try:
+                if p.is_file():
+                    p.unlink()
+                elif p.is_dir():
+                    p.rmdir()
+            except OSError:
+                if p.is_file():
+                    못지운것.append(p)
+    OUT.mkdir(parents=True, exist_ok=True)
 
     # ── 실습 ZIP — 옆에 풀려 있는 그 폴더를 압축한다 ──────────────────────
     #    학생은 zip 을 받아 풀어서 VS Code 로 연다(준비안내 ③). 그래서 zip 은 없앨 수 없다.
@@ -162,7 +174,7 @@ def main() -> int:
 
     # ── 슬라이드는 pptx 로 준다 (PNG 낱장 73개를 뿌리면 학생이 못 찾는다) ──
     강의자료 = OUT / "5. 강의 자료"
-    강의자료.mkdir()
+    강의자료.mkdir(exist_ok=True)      # 잠긴 pptx 가 남으면 이 폴더도 남는다
     # **편집본을 먼저 쓴다.** 강사가 강의 직전에 파워포인트에서 문구를 고칠 수 있어야 한다.
     # (그림 한 장짜리 `슬라이드.pptx` 는 글자를 한 자도 못 고친다)
     for 일차 in ("2일차", "3일차"):
@@ -176,13 +188,21 @@ def main() -> int:
             print(f"  [빠짐] {자료} 에 슬라이드가 없습니다 — "
                   f"먼저  python 편집pptx.py {일차}", file=sys.stderr)
             return 1
-        shutil.copyfile(deck, 강의자료 / f"{일차} 슬라이드.pptx")
-        print(f"  담음  5. 강의 자료/{일차} 슬라이드.pptx")
+        나갈곳 = 강의자료 / f"{일차} 슬라이드.pptx"
+        try:
+            shutil.copyfile(deck, 나갈곳)
+            print(f"  담음  5. 강의 자료/{일차} 슬라이드.pptx")
+        except OSError:                       # 강사가 그 파일을 열어 두었다
+            못지운것.append(나갈곳)
 
     노션 = REPO / "강의" / "2일차" / "강의자료" / "노션_자산화.pptx"
     if 노션.is_file():
-        shutil.copyfile(노션, 강의자료 / "노션 자산화 (2일차 1교시).pptx")
-        print("  담음  5. 강의 자료/노션 자산화 (2일차 1교시).pptx")
+        나갈곳 = 강의자료 / "노션 자산화 (2일차 1교시).pptx"
+        try:
+            shutil.copyfile(노션, 나갈곳)
+            print("  담음  5. 강의 자료/노션 자산화 (2일차 1교시).pptx")
+        except OSError:
+            못지운것.append(나갈곳)
 
     # ── 강사 것이 섞이지 않았는지 ────────────────────────────────────────
     금지 = ("진행", "핸드오프", "서버운영", "운영.md", "일차별안내", "강사", "정답",
@@ -212,14 +232,26 @@ def main() -> int:
 
     # ── 폴더는 남긴다. 옮길 일이 있을 때만 쓰라고 zip 도 하나 만들어 둔다 ──
     #    전에는 zip 만 남기고 폴더를 지워서, 한 줄 고칠 때마다 zip 을 풀어야 했다.
+    # 파워포인트를 열어 두면 `~$이름.pptx` 잠금 파일이 옆에 생긴다 — 담기지도 않고
+    # 담을 것도 아니다. 통째 압축(make_archive)은 그걸 만나면 그대로 죽는다.
     zip_path = OUT.with_suffix(".zip")
-    shutil.make_archive(str(OUT), "zip", root_dir=str(산출물), base_dir=OUT.name)
+    with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as z:
+        for p in sorted(OUT.rglob("*")):
+            if p.is_file() and not p.name.startswith("~$"):
+                z.write(p, str(p.relative_to(산출물)))
     print("=" * 70)
     print("  최종본")
     print("=" * 70)
     print(f"  올릴 폴더   {OUT}")
     print(f"              파일 {개수}개 · {총 / 1024 / 1024:.1f}MB")
     print(f"  통째로 옮길 때만   {zip_path.name}")
+    남은 = sorted({str(p.relative_to(OUT)) for p in 못지운것
+                  if not p.name.startswith("~$")})
+    if 남은:
+        print()
+        print("  ※ 열려 있어 갱신하지 못한 파일 — 닫고 다시 돌리면 따라옵니다")
+        for 이름 in 남은:
+            print(f"      {이름}")
     print()
     print(f"  실습파일 고칠 곳   {실습원본}")
     print("              풀린 채로 있습니다. 여기서 고치고 이 스크립트를 다시 돌리면")
